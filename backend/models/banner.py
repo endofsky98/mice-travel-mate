@@ -40,5 +40,8 @@ class RollingBanner(Base):
     # Rolling interval in seconds (3-5)
     rolling_interval = Column(Integer, default=4)
 
+    # Transition type: slide, fade, zoom, flip
+    transition_type = Column(String(20), default="slide")
+
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

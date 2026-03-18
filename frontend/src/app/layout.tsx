@@ -57,7 +57,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             )}
             <main className="flex-1">{children}</main>
             {!hideMainNav && <Footer t={t} />}
-            {!hideMainNav && <BottomNav t={t} />}
+            {!hideMainNav && <BottomNav t={t} isLoggedIn={isLoggedIn} />}
           </>
         )}
       </body>

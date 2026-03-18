@@ -43,6 +43,7 @@ export default function AdminBannersPage() {
       image_url: '',
       link_url: '',
       rolling_interval: '5000',
+      transition_type: 'slide',
       event_id: '',
       is_active: 'true',
     };
@@ -61,6 +62,7 @@ export default function AdminBannersPage() {
       image_url: item.image_url || '',
       link_url: item.link_url || '',
       rolling_interval: String(item.rolling_interval || 5000),
+      transition_type: item.transition_type || 'slide',
       event_id: '',
       is_active: String(item.is_active),
     };
@@ -88,6 +90,7 @@ export default function AdminBannersPage() {
         image_url: formData.image_url,
         link_url: formData.link_url || undefined,
         rolling_interval: parseInt(formData.rolling_interval) || 5000,
+        transition_type: formData.transition_type || 'slide',
         is_active: formData.is_active === 'true',
         display_order: editingItem ? editingItem.display_order : items.length + 1,
       };
@@ -157,6 +160,7 @@ export default function AdminBannersPage() {
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase w-12">순서</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase w-20">미리보기</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">제목</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">전환</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">간격</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">활성</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">작업</th>
@@ -188,6 +192,7 @@ export default function AdminBannersPage() {
                       )}
                     </td>
                     <td className="px-4 py-3 text-sm font-medium text-gray-900 dark:text-gray-100">{lt(item.title)}</td>
+                    <td className="px-4 py-3"><Badge>{item.transition_type || 'slide'}</Badge></td>
                     <td className="px-4 py-3 text-sm text-gray-500">{(item.rolling_interval || 5000) / 1000}s</td>
                     <td className="px-4 py-3">
                       <button onClick={() => handleToggleActive(item)} className="text-gray-500 hover:text-indigo-600 transition-colors">
@@ -226,6 +231,17 @@ export default function AdminBannersPage() {
               onChange={(e) => setFormData((p) => ({ ...p, is_active: e.target.value }))}
             />
           </div>
+          <Select
+            label="전환 방식"
+            options={[
+              { value: 'slide', label: '슬라이드 (Slide)' },
+              { value: 'fade', label: '페이드 (Fade)' },
+              { value: 'zoom', label: '줌 (Zoom)' },
+              { value: 'flip', label: '플립 (Flip)' },
+            ]}
+            value={formData.transition_type || 'slide'}
+            onChange={(e) => setFormData((p) => ({ ...p, transition_type: e.target.value }))}
+          />
 
           <div className="pt-4">
             <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">다국어 콘텐츠</p>

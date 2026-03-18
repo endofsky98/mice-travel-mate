@@ -2,11 +2,12 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Compass, Mail, Lock } from 'lucide-react';
+import { Mail, Lock } from 'lucide-react';
 import { adminLogin } from '@/lib/auth';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
+import Logo from '@/components/ui/Logo';
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -32,9 +33,8 @@ export default function AdminLoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center p-6 bg-gradient-to-br from-gray-50 to-indigo-50 dark:from-dark-main dark:to-dark-sidebar">
       <Card className="w-full max-w-md p-8">
-        <div className="flex items-center gap-2 justify-center mb-8">
-          <Compass className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
-          <span className="text-xl font-bold text-gray-900 dark:text-white">관리자 패널</span>
+        <div className="flex items-center justify-center mb-8">
+          <Logo size="lg" />
         </div>
 
         <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-1 text-center">관리자 로그인</h2>

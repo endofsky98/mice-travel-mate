@@ -7,17 +7,20 @@ import { cn } from '@/lib/utils';
 
 interface BottomNavProps {
   t: (key: string) => string;
+  isLoggedIn?: boolean;
 }
 
-export default function BottomNav({ t }: BottomNavProps) {
+export default function BottomNav({ t, isLoggedIn = false }: BottomNavProps) {
   const pathname = usePathname();
+
+  const myPageHref = isLoggedIn ? '/mypage' : '/auth/login';
 
   const tabs = [
     { href: '/', icon: Home, label: t('nav.home') || 'Home', match: '/' },
     { href: '/map', icon: Map, label: t('nav.map') || 'Map', match: '/map' },
     { href: '/ai-course', icon: Sparkles, label: t('nav.ai_course') || 'AI Course', match: '/ai-course' },
     { href: '/chat', icon: MessageCircle, label: t('nav.chat') || 'Chat', match: '/chat' },
-    { href: '/mypage', icon: User, label: t('nav.mypage') || 'My', match: '/mypage' },
+    { href: myPageHref, icon: User, label: t('nav.mypage') || 'My', match: '/mypage' },
   ];
 
   const isActive = (match: string) => {

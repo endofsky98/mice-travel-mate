@@ -315,6 +315,8 @@ export const SUPPORTED_LANGUAGES: { code: Language; name: string; flag: string }
 
 // --- New types for v4 features ---
 
+export type BannerTransitionType = 'slide' | 'fade' | 'zoom' | 'flip';
+
 export interface RollingBanner {
   id: string;
   title: string | MultilingualText;
@@ -324,6 +326,7 @@ export interface RollingBanner {
   display_order: number;
   is_active: boolean;
   rolling_interval?: number;
+  transition_type?: BannerTransitionType;
 }
 
 export interface Review {

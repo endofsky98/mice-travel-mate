@@ -47,6 +47,7 @@ async def list_banners(
                 "link_url": b.link_url,
                 "display_order": b.display_order,
                 "rolling_interval": b.rolling_interval,
+                "transition_type": b.transition_type or "slide",
                 "event_id": b.event_id,
                 "created_at": b.created_at.isoformat() if b.created_at else None,
             }

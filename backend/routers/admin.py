@@ -1562,6 +1562,7 @@ def serialize_banner_admin(b: RollingBanner) -> dict:
         "is_active": b.is_active,
         "event_id": b.event_id,
         "rolling_interval": b.rolling_interval,
+        "transition_type": b.transition_type or "slide",
         "created_at": b.created_at.isoformat() if b.created_at else None,
         "updated_at": b.updated_at.isoformat() if b.updated_at else None,
     }
@@ -1593,6 +1594,7 @@ async def admin_create_banner(
         is_active=data.get("is_active", True),
         event_id=data.get("event_id") or None,
         rolling_interval=data.get("rolling_interval", 4),
+        transition_type=data.get("transition_type", "slide"),
     )
     # Set multilingual title/subtitle fields
     title = data.get("title", {})
@@ -1659,6 +1661,8 @@ async def admin_update_banner(
         banner.event_id = data["event_id"] or None
     if "rolling_interval" in data:
         banner.rolling_interval = data["rolling_interval"]
+    if "transition_type" in data:
+        banner.transition_type = data["transition_type"]
 
     title = data.get("title")
     if isinstance(title, dict):

@@ -129,6 +129,9 @@ async def run_migrations(conn):
         "ALTER TABLE transport_tips ADD COLUMN content_th TEXT",
         "ALTER TABLE transport_tips ADD COLUMN content_vi TEXT",
         "ALTER TABLE transport_tips ADD COLUMN content_fr TEXT",
+
+        # ── Banners: transition_type ──
+        "ALTER TABLE rolling_banners ADD COLUMN transition_type VARCHAR(20) DEFAULT 'slide'",
     ]
     for migration in migrations:
         try:
