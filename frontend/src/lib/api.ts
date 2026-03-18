@@ -85,7 +85,8 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
           } catch {
             localStorage.removeItem('access_token');
             localStorage.removeItem('refresh_token');
-            window.location.href = '/auth/login';
+            const isAdminRoute = typeof window !== 'undefined' && window.location.pathname.startsWith('/admin');
+            window.location.href = isAdminRoute ? '/admin/login' : '/auth/login';
           }
         }
       }

@@ -7,7 +7,7 @@ import { useLanguage } from '@/hooks/useLanguage';
 import { isAuthenticated, getCurrentUser } from '@/lib/auth';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import LanguageSwitcher from '@/components/ui/LanguageSwitcher';
-import { LogOut, User, ArrowLeft } from 'lucide-react';
+import { LogOut, User, ArrowLeft, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 import { User as UserType } from '@/types';
 
@@ -17,6 +17,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname();
   const [checking, setChecking] = useState(true);
   const [adminUser, setAdminUser] = useState<UserType | null>(null);
+  const [authError, setAuthError] = useState<string | null>(null);
 
   const isLoginPage = pathname === '/admin/login';
 
@@ -28,21 +29,28 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       }
 
       if (!isAuthenticated()) {
-        router.push('/admin/login');
-        setChecking(false);
+        router.replace('/admin/login');
         return;
       }
 
       try {
         const user = await getCurrentUser();
-        if (!user || (user.role !== 'admin' && user.role !== 'superadmin' && !user.is_admin)) {
-          router.push('/');
-          setChecking(false);
+        if (!user) {
+          // API failure or token invalid - redirect to admin login, not homepage
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('refresh_token');
+          router.replace('/admin/login');
+          return;
+        }
+        if (user.role !== 'admin' && user.role !== 'superadmin' && !user.is_admin) {
+          // Confirmed non-admin user - redirect to homepage
+          router.replace('/');
           return;
         }
         setAdminUser(user);
       } catch {
-        router.push('/admin/login');
+        router.replace('/admin/login');
+        return;
       }
       setChecking(false);
     };
@@ -56,7 +64,29 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     router.push('/admin/login');
   };
 
-  if (!isLoaded || checking) return <LoadingSpinner fullPage />;
+  if (!isLoaded || checking) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 dark:bg-dark-main gap-3">
+        <LoadingSpinner size="lg" />
+        <p className="text-sm text-gray-500 dark:text-gray-400">{t('common.loading') || 'Loading...'}</p>
+      </div>
+    );
+  }
+
+  if (authError) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 dark:bg-dark-main gap-4 px-4">
+        <AlertTriangle className="w-12 h-12 text-amber-500" />
+        <p className="text-gray-700 dark:text-gray-300 text-center">{authError}</p>
+        <Link
+          href="/admin/login"
+          className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-400 transition-colors"
+        >
+          {t('admin.login_title') || 'Admin Login'}
+        </Link>
+      </div>
+    );
+  }
 
   if (isLoginPage) {
     return <>{children}</>;
