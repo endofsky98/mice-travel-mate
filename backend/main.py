@@ -1632,6 +1632,18 @@ async def health():
     return {"status": "ok"}
 
 
+@app.post("/api/seed")
+async def seed_database():
+    """Trigger database seeding via API."""
+    try:
+        from seed_data import run_seed
+        await run_seed()
+        return {"status": "ok", "message": "Database seeded successfully"}
+    except Exception as e:
+        logger.error(f"Seed error: {e}")
+        return {"status": "error", "message": str(e)}
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=8007, reload=True)

@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from sqlalchemy import Column, String, Boolean, DateTime, Text, ForeignKey, JSON
+from sqlalchemy import Column, String, Boolean, DateTime, Text, Integer, ForeignKey, JSON
 from database import Base
 
 
@@ -19,9 +19,6 @@ class ChatRoom(Base):
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-
-
-from sqlalchemy import Integer
 
 
 class ChatMessage(Base):
