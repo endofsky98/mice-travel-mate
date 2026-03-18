@@ -162,12 +162,17 @@ async def seed_languages(session):
 
 
 async def seed_admin_user(session):
-    """Seed default admin user."""
+    """Seed default admin user or ensure existing user has superadmin role."""
     import bcrypt
 
     result = await session.execute(select(User).where(User.email == "endofsky98@daum.net"))
-    if result.scalar_one_or_none():
-        return  # Already exists
+    existing = result.scalar_one_or_none()
+    if existing:
+        if existing.role != "superadmin":
+            existing.role = "superadmin"
+            await session.flush()
+            logger.info("Updated endofsky98@daum.net role to superadmin")
+        return
 
     hashed = bcrypt.hashpw(settings.DEFAULT_ADMIN_PASSWORD.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
     admin_user = User(

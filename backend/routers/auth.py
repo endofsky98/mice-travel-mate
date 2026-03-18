@@ -1,5 +1,6 @@
 import bcrypt
 from fastapi import APIRouter, Depends, HTTPException, status
+from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
@@ -20,6 +21,7 @@ from auth.jwt_handler import (
     create_refresh_token,
     create_password_reset_token,
     verify_password_reset_token,
+    verify_token,
 )
 from auth.dependencies import get_current_user
 from auth.social import verify_google_token, verify_apple_token
@@ -238,3 +240,54 @@ async def delete_me(
     current_user.is_active = False
     await db.flush()
     return {"message": "Account deactivated successfully"}
+
+
+@router.post("/admin/login", response_model=TokenResponse)
+async def admin_login(data: UserLogin, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(User).where(User.email == data.email))
+    user = result.scalar_one_or_none()
+
+    if not user:
+        raise HTTPException(status_code=401, detail="이메일 또는 비밀번호가 일치하지 않습니다")
+
+    if not user.password_hash:
+        raise HTTPException(status_code=401, detail="This account uses social login.")
+
+    if not verify_password(data.password, user.password_hash):
+        raise HTTPException(status_code=401, detail="이메일 또는 비밀번호가 일치하지 않습니다")
+
+    if not user.is_active:
+        raise HTTPException(status_code=403, detail="Account is deactivated")
+
+    if user.role not in ("admin", "superadmin"):
+        raise HTTPException(status_code=403, detail="관리자 권한이 없습니다")
+
+    return create_token_response(user)
+
+
+class RefreshTokenRequest(BaseModel):
+    refresh_token: str
+
+
+@router.post("/refresh", response_model=TokenResponse)
+async def refresh_token(data: RefreshTokenRequest, db: AsyncSession = Depends(get_db)):
+    payload = verify_token(data.refresh_token, "refresh")
+    if payload is None:
+        raise HTTPException(status_code=401, detail="Invalid or expired refresh token")
+
+    user_id = payload.get("sub")
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Invalid token payload")
+
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalar_one_or_none()
+
+    if not user or not user.is_active:
+        raise HTTPException(status_code=401, detail="User not found or deactivated")
+
+    return create_token_response(user)
+
+
+@router.post("/logout")
+async def logout():
+    return {"message": "Logged out successfully"}
