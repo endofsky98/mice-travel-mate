@@ -50,7 +50,7 @@ jobs:
           username: Administrator
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 31222
-          source: frontend/.next/standalone/*
+          source: "frontend/.next/standalone/*,frontend/.next/standalone/.next"
           target: C:/Users/Administrator/Documents/aiproject/mice-travel-mate/frontend/standalone
           strip_components: 3
 

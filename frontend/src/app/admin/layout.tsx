@@ -49,7 +49,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         }
         setAdminUser(user);
       } catch {
-        router.replace('/admin/login');
+        // Network error or API unreachable - show error UI instead of infinite spinner
+        setAuthError('Unable to verify admin access. Please try again.');
+        setChecking(false);
         return;
       }
       setChecking(false);
