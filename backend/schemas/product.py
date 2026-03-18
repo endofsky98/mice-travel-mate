@@ -1,0 +1,94 @@
+from pydantic import BaseModel
+from typing import Optional, List, Any
+
+
+class ProductCreate(BaseModel):
+    name_en: str
+    name_ko: Optional[str] = None
+    name_zh_cn: Optional[str] = None
+    name_zh_tw: Optional[str] = None
+    name_ja: Optional[str] = None
+    name_es: Optional[str] = None
+    description_en: Optional[str] = None
+    description_ko: Optional[str] = None
+    description_zh_cn: Optional[str] = None
+    description_zh_tw: Optional[str] = None
+    description_ja: Optional[str] = None
+    description_es: Optional[str] = None
+    category: Optional[str] = None
+    price_usd: Optional[float] = None
+    duration_hours: Optional[float] = None
+    region: Optional[str] = None
+    min_participants: Optional[int] = None
+    max_participants: Optional[int] = None
+    includes_en: Optional[Any] = None
+    includes_ko: Optional[Any] = None
+    includes_zh_cn: Optional[Any] = None
+    includes_zh_tw: Optional[Any] = None
+    includes_ja: Optional[Any] = None
+    includes_es: Optional[Any] = None
+    excludes_en: Optional[Any] = None
+    excludes_ko: Optional[Any] = None
+    excludes_zh_cn: Optional[Any] = None
+    excludes_zh_tw: Optional[Any] = None
+    excludes_ja: Optional[Any] = None
+    excludes_es: Optional[Any] = None
+    itinerary: Optional[Any] = None
+    meeting_point: Optional[str] = None
+    meeting_point_lat: Optional[float] = None
+    meeting_point_lng: Optional[float] = None
+    dismissal_point: Optional[str] = None
+    cancellation_policy_en: Optional[str] = None
+    cancellation_policy_ko: Optional[str] = None
+    cancellation_policy_zh_cn: Optional[str] = None
+    cancellation_policy_zh_tw: Optional[str] = None
+    cancellation_policy_ja: Optional[str] = None
+    cancellation_policy_es: Optional[str] = None
+    images: Optional[List[str]] = None
+    status: Optional[str] = "active"
+
+
+class ProductUpdate(BaseModel):
+    name_en: Optional[str] = None
+    name_ko: Optional[str] = None
+    name_zh_cn: Optional[str] = None
+    name_zh_tw: Optional[str] = None
+    name_ja: Optional[str] = None
+    name_es: Optional[str] = None
+    description_en: Optional[str] = None
+    description_ko: Optional[str] = None
+    description_zh_cn: Optional[str] = None
+    description_zh_tw: Optional[str] = None
+    description_ja: Optional[str] = None
+    description_es: Optional[str] = None
+    category: Optional[str] = None
+    price_usd: Optional[float] = None
+    duration_hours: Optional[float] = None
+    region: Optional[str] = None
+    min_participants: Optional[int] = None
+    max_participants: Optional[int] = None
+    includes_en: Optional[Any] = None
+    includes_ko: Optional[Any] = None
+    includes_zh_cn: Optional[Any] = None
+    includes_zh_tw: Optional[Any] = None
+    includes_ja: Optional[Any] = None
+    includes_es: Optional[Any] = None
+    excludes_en: Optional[Any] = None
+    excludes_ko: Optional[Any] = None
+    excludes_zh_cn: Optional[Any] = None
+    excludes_zh_tw: Optional[Any] = None
+    excludes_ja: Optional[Any] = None
+    excludes_es: Optional[Any] = None
+    itinerary: Optional[Any] = None
+    meeting_point: Optional[str] = None
+    meeting_point_lat: Optional[float] = None
+    meeting_point_lng: Optional[float] = None
+    dismissal_point: Optional[str] = None
+    cancellation_policy_en: Optional[str] = None
+    cancellation_policy_ko: Optional[str] = None
+    cancellation_policy_zh_cn: Optional[str] = None
+    cancellation_policy_zh_tw: Optional[str] = None
+    cancellation_policy_ja: Optional[str] = None
+    cancellation_policy_es: Optional[str] = None
+    images: Optional[List[str]] = None
+    status: Optional[str] = None

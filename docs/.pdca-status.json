@@ -1,0 +1,1131 @@
+{
+  "version": "2.0",
+  "lastUpdated": "2026-03-18T04:30:41.347Z",
+  "activeFeatures": [
+    "backend",
+    "frontend",
+    "auth",
+    "schemas",
+    "ui",
+    "layout",
+    "restaurant",
+    "course",
+    "product",
+    "guide",
+    "booking",
+    "map",
+    "[slug]",
+    "restaurants",
+    "[id]",
+    "courses",
+    "transport",
+    "products",
+    "guides",
+    "confirmation",
+    "lookup",
+    "login",
+    "register",
+    "forgot-password",
+    "mypage",
+    "admin",
+    "events",
+    "bookings",
+    "languages",
+    "users"
+  ],
+  "primaryFeature": "backend",
+  "features": {
+    "backend": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-18T04:06:01.830Z",
+        "lastUpdated": "2026-03-18T04:20:41.726Z"
+      },
+      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/backend/config.py"
+    },
+    "frontend": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-18T04:07:19.250Z",
+        "lastUpdated": "2026-03-18T04:18:33.613Z"
+      },
+      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/frontend/src/app/page.tsx"
+    },
+    "auth": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-18T04:08:34.423Z",
+        "lastUpdated": "2026-03-18T04:09:06.204Z"
+      },
+      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/backend/auth/social.py"
+    },
+    "schemas": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-18T04:09:09.221Z",
+        "lastUpdated": "2026-03-18T04:10:28.428Z"
+      },
+      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/backend/schemas/language.py"
+    },
+    "ui": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-18T04:13:00.027Z",
+        "lastUpdated": "2026-03-18T04:14:32.252Z"
+      },
+      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/frontend/src/components/ui/LanguageSwitcher.tsx"
+    },
+    "layout": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-18T04:14:54.468Z",
+        "lastUpdated": "2026-03-18T04:15:29.085Z"
+      },
+      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/frontend/src/components/layout/AdminSidebar.tsx"
+    },
+    "restaurant": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-18T04:15:42.872Z",
+        "lastUpdated": "2026-03-18T04:15:54.365Z"
+      },
+      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/frontend/src/components/restaurant/RestaurantFilters.tsx"
+    },
+    "course": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-18T04:16:04.233Z",
+        "lastUpdated": "2026-03-18T04:16:14.498Z"
+      },
+      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/frontend/src/components/course/CourseFilters.tsx"
+    },
+    "product": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-18T04:16:23.604Z",
+        "lastUpdated": "2026-03-18T04:16:31.945Z"
+      },
+      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/frontend/src/components/product/ProductFilters.tsx"
+    },
+    "guide": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-18T04:16:43.508Z",
+        "lastUpdated": "2026-03-18T04:16:53.731Z"
+      },
+      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/frontend/src/components/guide/GuideFilters.tsx"
+    },
+    "booking": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-18T04:17:20.885Z",
+        "lastUpdated": "2026-03-18T04:17:20.885Z"
+      },
+      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/frontend/src/components/booking/BookingForm.tsx"
+    },
+    "map": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-18T04:17:34.050Z",
+        "lastUpdated": "2026-03-18T04:17:34.050Z"
+      },
+      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/frontend/src/components/map/MapView.tsx"
+    },
+    "[slug]": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-18T04:18:59.294Z",
+        "lastUpdated": "2026-03-18T04:18:59.294Z"
+      },
+      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/frontend/src/app/events/[slug]/page.tsx"
+    },
+    "restaurants": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-18T04:19:14.208Z",
+        "lastUpdated": "2026-03-18T04:27:19.946Z"
+      },
+      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/frontend/src/app/admin/restaurants/page.tsx"
+    },
+    "[id]": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-18T04:19:39.611Z",
+        "lastUpdated": "2026-03-18T04:22:44.404Z"
+      },
+      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/frontend/src/app/booking/[id]/page.tsx"
+    },
+    "courses": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-18T04:19:51.326Z",
+        "lastUpdated": "2026-03-18T04:27:52.779Z"
+      },
+      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/frontend/src/app/admin/courses/page.tsx"
+    },
+    "transport": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-18T04:20:44.426Z",
+        "lastUpdated": "2026-03-18T04:29:27.807Z"
+      },
+      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/frontend/src/app/admin/transport/page.tsx"
+    },
+    "products": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-18T04:20:56.579Z",
+        "lastUpdated": "2026-03-18T04:28:21.610Z"
+      },
+      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/frontend/src/app/admin/products/page.tsx"
+    },
+    "guides": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-18T04:21:47.264Z",
+        "lastUpdated": "2026-03-18T04:28:56.967Z"
+      },
+      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/frontend/src/app/admin/guides/page.tsx"
+    },
+    "confirmation": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-18T04:22:54.265Z",
+        "lastUpdated": "2026-03-18T04:22:54.265Z"
+      },
+      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/frontend/src/app/booking/confirmation/page.tsx"
+    },
+    "lookup": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-18T04:23:12.734Z",
+        "lastUpdated": "2026-03-18T04:23:12.734Z"
+      },
+      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/frontend/src/app/booking/lookup/page.tsx"
+    },
+    "login": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-18T04:23:45.731Z",
+        "lastUpdated": "2026-03-18T04:25:39.825Z"
+      },
+      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/frontend/src/app/admin/login/page.tsx"
+    },
+    "register": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-18T04:24:10.448Z",
+        "lastUpdated": "2026-03-18T04:24:10.448Z"
+      },
+      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/frontend/src/app/auth/register/page.tsx"
+    },
+    "forgot-password": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-18T04:24:24.167Z",
+        "lastUpdated": "2026-03-18T04:24:24.167Z"
+      },
+      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/frontend/src/app/auth/forgot-password/page.tsx"
+    },
+    "mypage": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-18T04:24:30.648Z",
+        "lastUpdated": "2026-03-18T04:25:10.628Z"
+      },
+      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/frontend/src/app/mypage/page.tsx"
+    },
+    "admin": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-18T04:25:23.925Z",
+        "lastUpdated": "2026-03-18T04:26:04.133Z"
+      },
+      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/frontend/src/app/admin/page.tsx"
+    },
+    "events": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-18T04:26:45.140Z",
+        "lastUpdated": "2026-03-18T04:26:45.140Z"
+      },
+      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/frontend/src/app/admin/events/page.tsx"
+    },
+    "bookings": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-18T04:29:51.013Z",
+        "lastUpdated": "2026-03-18T04:29:51.013Z"
+      },
+      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/frontend/src/app/admin/bookings/page.tsx"
+    },
+    "languages": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-18T04:30:18.534Z",
+        "lastUpdated": "2026-03-18T04:30:18.534Z"
+      },
+      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/frontend/src/app/admin/languages/page.tsx"
+    },
+    "users": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-18T04:30:41.347Z",
+        "lastUpdated": "2026-03-18T04:30:41.347Z"
+      },
+      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/frontend/src/app/admin/users/page.tsx"
+    }
+  },
+  "pipeline": {
+    "currentPhase": 1,
+    "level": "Dynamic",
+    "phaseHistory": []
+  },
+  "session": {
+    "startedAt": "2026-03-18T04:03:46.194Z",
+    "onboardingCompleted": false,
+    "lastActivity": "2026-03-18T04:30:41.347Z"
+  },
+  "history": [
+    {
+      "timestamp": "2026-03-18T04:06:01.830Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:06:06.550Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:06:12.334Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:06:19.867Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:06:30.057Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:06:37.245Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:06:50.856Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:07:00.478Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:07:12.425Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:07:19.250Z",
+      "feature": "frontend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:07:21.642Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:07:23.914Z",
+      "feature": "frontend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:07:29.976Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:07:32.380Z",
+      "feature": "frontend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:07:34.941Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:07:38.136Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:08:09.905Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:08:31.033Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:08:34.423Z",
+      "feature": "auth",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:08:43.178Z",
+      "feature": "auth",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:08:53.380Z",
+      "feature": "auth",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:09:06.204Z",
+      "feature": "auth",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:09:09.221Z",
+      "feature": "schemas",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:09:16.735Z",
+      "feature": "schemas",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:09:24.971Z",
+      "feature": "schemas",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:09:34.658Z",
+      "feature": "schemas",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:09:45.539Z",
+      "feature": "schemas",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:09:55.809Z",
+      "feature": "schemas",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:10:08.129Z",
+      "feature": "schemas",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:10:17.492Z",
+      "feature": "schemas",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:10:23.326Z",
+      "feature": "schemas",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:10:28.428Z",
+      "feature": "schemas",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:10:31.771Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:10:57.511Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:11:10.325Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:11:17.310Z",
+      "feature": "frontend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:11:21.605Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:11:31.939Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:11:33.643Z",
+      "feature": "frontend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:11:39.911Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:11:42.576Z",
+      "feature": "frontend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:11:51.754Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:11:54.445Z",
+      "feature": "frontend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:12:05.498Z",
+      "feature": "frontend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:12:07.891Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:12:19.910Z",
+      "feature": "frontend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:12:31.948Z",
+      "feature": "frontend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:12:39.592Z",
+      "feature": "frontend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:12:43.752Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:12:48.059Z",
+      "feature": "frontend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:12:51.700Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:13:00.027Z",
+      "feature": "ui",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:13:05.013Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:13:09.517Z",
+      "feature": "ui",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:13:15.028Z",
+      "feature": "ui",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:13:21.404Z",
+      "feature": "ui",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:13:31.109Z",
+      "feature": "ui",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:13:38.025Z",
+      "feature": "ui",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:13:44.657Z",
+      "feature": "ui",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:13:56.549Z",
+      "feature": "ui",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:14:05.162Z",
+      "feature": "ui",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:14:11.957Z",
+      "feature": "ui",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:14:19.721Z",
+      "feature": "ui",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:14:32.252Z",
+      "feature": "ui",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:14:51.191Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:14:54.468Z",
+      "feature": "layout",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:15:04.404Z",
+      "feature": "layout",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:15:13.304Z",
+      "feature": "layout",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:15:29.085Z",
+      "feature": "layout",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:15:42.872Z",
+      "feature": "restaurant",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:15:54.365Z",
+      "feature": "restaurant",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:16:04.233Z",
+      "feature": "course",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:16:14.498Z",
+      "feature": "course",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:16:23.604Z",
+      "feature": "product",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:16:31.945Z",
+      "feature": "product",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:16:43.508Z",
+      "feature": "guide",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:16:53.731Z",
+      "feature": "guide",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:17:10.208Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:17:20.885Z",
+      "feature": "booking",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:17:34.050Z",
+      "feature": "map",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:17:53.231Z",
+      "feature": "frontend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:18:33.613Z",
+      "feature": "frontend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:18:59.294Z",
+      "feature": "[slug]",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:19:14.208Z",
+      "feature": "restaurants",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:19:37.761Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:19:39.611Z",
+      "feature": "[id]",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:19:48.760Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:19:51.326Z",
+      "feature": "courses",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:20:19.027Z",
+      "feature": "[id]",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:20:41.726Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:20:44.426Z",
+      "feature": "transport",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:20:56.579Z",
+      "feature": "products",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:21:34.467Z",
+      "feature": "[id]",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:21:47.264Z",
+      "feature": "guides",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:22:27.892Z",
+      "feature": "[id]",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:22:44.404Z",
+      "feature": "[id]",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:22:54.265Z",
+      "feature": "confirmation",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:23:12.734Z",
+      "feature": "lookup",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:23:45.731Z",
+      "feature": "login",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:24:10.448Z",
+      "feature": "register",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:24:24.167Z",
+      "feature": "forgot-password",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:24:30.648Z",
+      "feature": "mypage",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:25:10.628Z",
+      "feature": "mypage",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:25:23.925Z",
+      "feature": "admin",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:25:39.825Z",
+      "feature": "login",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:26:04.133Z",
+      "feature": "admin",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:26:45.140Z",
+      "feature": "events",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:27:19.946Z",
+      "feature": "restaurants",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:27:52.779Z",
+      "feature": "courses",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:28:21.610Z",
+      "feature": "products",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:28:56.967Z",
+      "feature": "guides",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:29:27.807Z",
+      "feature": "transport",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:29:51.013Z",
+      "feature": "bookings",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:30:18.534Z",
+      "feature": "languages",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T04:30:41.347Z",
+      "feature": "users",
+      "phase": "do",
+      "action": "updated"
+    }
+  ]
+}
