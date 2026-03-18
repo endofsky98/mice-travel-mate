@@ -13,7 +13,7 @@ const inter = Inter({ subsets: ['latin'] });
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const { t, language, setLanguage, isLoaded } = useLanguage();
-  const { isLoggedIn, logout } = useAuth();
+  const { user, isLoggedIn, logout } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
 
@@ -49,6 +49,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 onLanguageChange={setLanguage}
                 isLoggedIn={isLoggedIn}
                 onLogout={handleLogout}
+                user={user}
               />
             )}
             <main className="flex-1">{children}</main>

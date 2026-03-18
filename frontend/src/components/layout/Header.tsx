@@ -2,10 +2,10 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Menu, X, User, LogOut, Compass } from 'lucide-react';
+import { Menu, X, User, LogOut, Compass, Shield } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import LanguageSwitcher from '@/components/ui/LanguageSwitcher';
-import { Language } from '@/types';
+import { Language, User as UserType } from '@/types';
 
 interface HeaderProps {
   t: (key: string) => string;
@@ -13,9 +13,11 @@ interface HeaderProps {
   onLanguageChange: (lang: Language) => void;
   isLoggedIn: boolean;
   onLogout: () => void;
+  user?: UserType | null;
 }
 
-export default function Header({ t, language, onLanguageChange, isLoggedIn, onLogout }: HeaderProps) {
+export default function Header({ t, language, onLanguageChange, isLoggedIn, onLogout, user }: HeaderProps) {
+  const isAdmin = user?.role === 'admin' || user?.role === 'superadmin' || user?.is_admin;
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navLinks = [
@@ -60,6 +62,15 @@ export default function Header({ t, language, onLanguageChange, isLoggedIn, onLo
 
             {isLoggedIn ? (
               <div className="hidden md:flex items-center gap-2">
+                {isAdmin && (
+                  <Link
+                    href="/admin"
+                    className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors"
+                  >
+                    <Shield className="w-4 h-4" />
+                    {t('nav.admin') || 'Admin'}
+                  </Link>
+                )}
                 <Link
                   href="/mypage"
                   className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-lg hover:bg-gray-50 dark:hover:bg-white/[0.05] transition-colors"
@@ -114,6 +125,16 @@ export default function Header({ t, language, onLanguageChange, isLoggedIn, onLo
             <div className="pt-2 border-t border-gray-100 dark:border-gray-500/40">
               {isLoggedIn ? (
                 <>
+                  {isAdmin && (
+                    <Link
+                      href="/admin"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium text-indigo-600 dark:text-indigo-400 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors"
+                    >
+                      <Shield className="w-4 h-4" />
+                      {t('nav.admin') || 'Admin'}
+                    </Link>
+                  )}
                   <Link
                     href="/mypage"
                     onClick={() => setIsMobileMenuOpen(false)}

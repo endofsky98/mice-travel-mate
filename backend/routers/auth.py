@@ -45,6 +45,7 @@ def user_to_response(user: User) -> UserResponse:
         preferred_language=user.preferred_language,
         provider=user.provider,
         role=user.role,
+        is_admin=user.role in ("admin", "superadmin"),
         is_active=user.is_active,
         created_at=user.created_at,
         updated_at=user.updated_at,

@@ -45,6 +45,7 @@ class UserResponse(BaseModel):
     preferred_language: str
     provider: str
     role: str
+    is_admin: bool = False
     is_active: bool
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None

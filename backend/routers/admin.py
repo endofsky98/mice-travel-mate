@@ -22,6 +22,12 @@ from models.language import Language, UITranslation
 from models.review import Review
 from models.analytics import SearchLog, VisitorLog
 from models.banner import RollingBanner
+from models.coupon import Coupon, CouponUsage
+from models.festival import Festival
+from models.theme import Theme, ThemeSpot
+from models.living_guide import LivingGuideCategory, LivingGuideArticle
+from models.chat import ChatRoom, ChatMessage
+from models.b2b import B2BPartner
 
 from schemas.event import EventCreate, EventUpdate, EventLinkIds
 from schemas.restaurant import RestaurantCreate, RestaurantUpdate
@@ -1767,7 +1773,7 @@ async def admin_list_users(
                 "provider": u.provider,
                 "role": u.role,
                 "is_active": u.is_active,
-                "is_admin": u.role == "admin",
+                "is_admin": u.role in ("admin", "superadmin"),
                 "created_at": u.created_at.isoformat() if u.created_at else None,
                 "updated_at": u.updated_at.isoformat() if u.updated_at else None,
             }
@@ -2253,3 +2259,1144 @@ async def admin_update_map_settings(
         "default_center_lng": setting.default_longitude or 126.978,
         "default_zoom": setting.default_zoom or 12,
     }
+
+
+# ─────────────────────── Helper: multilingual serializer ───────────────────────
+
+def serialize_ml(obj, prefix):
+    """Serialize multilingual fields for a given prefix (e.g. 'name', 'description')."""
+    result = {}
+    for lang in SUPPORTED_LANG_CODES:
+        result[lang] = getattr(obj, f"{prefix}_{lang}", None) or ""
+    return result
+
+
+def set_ml_fields(obj, data, prefix):
+    """Set multilingual fields from a dict like {"en": "...", "ko": "..."}."""
+    value = data.get(prefix)
+    if isinstance(value, dict):
+        for lang in SUPPORTED_LANG_CODES:
+            if lang in value:
+                setattr(obj, f"{prefix}_{lang}", value[lang])
+
+
+# ─────────────────────── Coupons (Admin) ───────────────────────
+
+def serialize_coupon(c):
+    return {
+        "id": c.id,
+        "code": c.code,
+        "name": c.name,
+        "description": c.description,
+        "discount_type": c.discount_type,
+        "discount_value": float(c.discount_value) if c.discount_value else 0,
+        "max_discount_usd": float(c.max_discount_usd) if c.max_discount_usd else None,
+        "min_order_usd": float(c.min_order_usd) if c.min_order_usd else None,
+        "applicable_to": c.applicable_to,
+        "applicable_ids": c.applicable_ids,
+        "applicable_categories": c.applicable_categories,
+        "event_id": c.event_id,
+        "start_date": c.start_date.isoformat() if c.start_date else None,
+        "end_date": c.end_date.isoformat() if c.end_date else None,
+        "total_limit": c.total_limit,
+        "per_user_limit": c.per_user_limit,
+        "used_count": c.used_count,
+        "is_active": c.is_active,
+        "created_at": c.created_at.isoformat() if c.created_at else None,
+        "updated_at": c.updated_at.isoformat() if c.updated_at else None,
+    }
+
+
+@router.get("/coupons")
+async def admin_list_coupons(
+    search: Optional[str] = Query(None),
+    page: int = Query(1, ge=1),
+    per_page: int = Query(20, ge=1, le=100),
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """List all coupons with pagination."""
+    query = select(Coupon)
+    count_query = select(func.count(Coupon.id))
+
+    if search:
+        search_filter = (
+            Coupon.code.ilike(f"%{search}%") |
+            Coupon.name.ilike(f"%{search}%")
+        )
+        query = query.where(search_filter)
+        count_query = count_query.where(search_filter)
+
+    count_result = await db.execute(count_query)
+    total = count_result.scalar() or 0
+
+    offset = (page - 1) * per_page
+    query = query.order_by(Coupon.created_at.desc()).offset(offset).limit(per_page)
+    result = await db.execute(query)
+    coupons = result.scalars().all()
+
+    pages = (total + per_page - 1) // per_page if per_page else 1
+
+    return {
+        "items": [serialize_coupon(c) for c in coupons],
+        "total": total,
+        "pages": pages,
+    }
+
+
+@router.post("/coupons")
+async def admin_create_coupon(
+    data: dict = Body(...),
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Create a new coupon."""
+    coupon = Coupon(
+        id=str(uuid.uuid4()),
+        code=data.get("code", ""),
+        name=data.get("name", ""),
+        description=data.get("description"),
+        discount_type=data.get("discount_type", "fixed"),
+        discount_value=data.get("discount_value", 0),
+        max_discount_usd=data.get("max_discount_usd"),
+        min_order_usd=data.get("min_order_usd"),
+        applicable_to=data.get("applicable_to", "all"),
+        applicable_ids=data.get("applicable_ids"),
+        applicable_categories=data.get("applicable_categories"),
+        event_id=data.get("event_id") or None,
+        start_date=data.get("start_date"),
+        end_date=data.get("end_date"),
+        total_limit=data.get("total_limit"),
+        per_user_limit=data.get("per_user_limit", 1),
+        is_active=data.get("is_active", True),
+    )
+    db.add(coupon)
+    await db.flush()
+    await db.refresh(coupon)
+    return serialize_coupon(coupon)
+
+
+@router.put("/coupons/{coupon_id}")
+async def admin_update_coupon(
+    coupon_id: str,
+    data: dict = Body(...),
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Update a coupon."""
+    result = await db.execute(select(Coupon).where(Coupon.id == coupon_id))
+    coupon = result.scalar_one_or_none()
+    if not coupon:
+        raise HTTPException(status_code=404, detail="Coupon not found")
+
+    for field in [
+        "code", "name", "description", "discount_type", "discount_value",
+        "max_discount_usd", "min_order_usd", "applicable_to", "applicable_ids",
+        "applicable_categories", "event_id", "start_date", "end_date",
+        "total_limit", "per_user_limit", "is_active",
+    ]:
+        if field in data:
+            setattr(coupon, field, data[field])
+
+    coupon.updated_at = datetime.utcnow()
+    await db.flush()
+    await db.refresh(coupon)
+    return serialize_coupon(coupon)
+
+
+@router.patch("/coupons/{coupon_id}")
+async def admin_patch_coupon(
+    coupon_id: str,
+    data: dict = Body(...),
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Partially update a coupon (e.g., toggle is_active)."""
+    result = await db.execute(select(Coupon).where(Coupon.id == coupon_id))
+    coupon = result.scalar_one_or_none()
+    if not coupon:
+        raise HTTPException(status_code=404, detail="Coupon not found")
+
+    if "is_active" in data:
+        coupon.is_active = data["is_active"]
+
+    coupon.updated_at = datetime.utcnow()
+    await db.flush()
+    await db.refresh(coupon)
+    return serialize_coupon(coupon)
+
+
+@router.delete("/coupons/{coupon_id}")
+async def admin_delete_coupon(
+    coupon_id: str,
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Delete a coupon."""
+    result = await db.execute(select(Coupon).where(Coupon.id == coupon_id))
+    coupon = result.scalar_one_or_none()
+    if not coupon:
+        raise HTTPException(status_code=404, detail="Coupon not found")
+
+    await db.delete(coupon)
+    await db.flush()
+    return {"message": "Coupon deleted"}
+
+
+# ─────────────────────── Festivals (Admin) ───────────────────────
+
+def serialize_festival(f):
+    return {
+        "id": f.id,
+        "name": serialize_ml(f, "name"),
+        "description": serialize_ml(f, "description"),
+        "category": f.category,
+        "image_url": f.image_url,
+        "images": f.images,
+        "venue_name": f.venue_name,
+        "address": f.address,
+        "latitude": f.latitude,
+        "longitude": f.longitude,
+        "start_date": f.start_date.isoformat() if f.start_date else None,
+        "end_date": f.end_date.isoformat() if f.end_date else None,
+        "website_url": f.website_url,
+        "is_active": f.is_active,
+        "created_at": f.created_at.isoformat() if f.created_at else None,
+        "updated_at": f.updated_at.isoformat() if f.updated_at else None,
+    }
+
+
+@router.get("/festivals")
+async def admin_list_festivals(
+    search: Optional[str] = Query(None),
+    category: Optional[str] = Query(None),
+    page: int = Query(1, ge=1),
+    per_page: int = Query(20, ge=1, le=100),
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """List all festivals with pagination."""
+    query = select(Festival)
+    count_query = select(func.count(Festival.id))
+
+    if search:
+        search_filter = (
+            Festival.name_en.ilike(f"%{search}%") |
+            Festival.name_ko.ilike(f"%{search}%")
+        )
+        query = query.where(search_filter)
+        count_query = count_query.where(search_filter)
+
+    if category:
+        query = query.where(Festival.category == category)
+        count_query = count_query.where(Festival.category == category)
+
+    count_result = await db.execute(count_query)
+    total = count_result.scalar() or 0
+
+    offset = (page - 1) * per_page
+    query = query.order_by(Festival.created_at.desc()).offset(offset).limit(per_page)
+    result = await db.execute(query)
+    festivals = result.scalars().all()
+
+    pages = (total + per_page - 1) // per_page if per_page else 1
+
+    return {
+        "items": [serialize_festival(f) for f in festivals],
+        "total": total,
+        "pages": pages,
+    }
+
+
+@router.post("/festivals")
+async def admin_create_festival(
+    data: dict = Body(...),
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Create a new festival."""
+    festival = Festival(
+        id=str(uuid.uuid4()),
+        category=data.get("category"),
+        image_url=data.get("image_url"),
+        images=data.get("images"),
+        venue_name=data.get("venue_name"),
+        address=data.get("address"),
+        latitude=data.get("latitude"),
+        longitude=data.get("longitude"),
+        start_date=data.get("start_date"),
+        end_date=data.get("end_date"),
+        website_url=data.get("website_url"),
+        is_active=data.get("is_active", True),
+    )
+    set_ml_fields(festival, data, "name")
+    set_ml_fields(festival, data, "description")
+
+    if not festival.name_en:
+        festival.name_en = data.get("name", {}).get("en", "") if isinstance(data.get("name"), dict) else data.get("name_en", "")
+
+    db.add(festival)
+    await db.flush()
+    await db.refresh(festival)
+    return serialize_festival(festival)
+
+
+@router.put("/festivals/{festival_id}")
+async def admin_update_festival(
+    festival_id: str,
+    data: dict = Body(...),
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Update a festival."""
+    result = await db.execute(select(Festival).where(Festival.id == festival_id))
+    festival = result.scalar_one_or_none()
+    if not festival:
+        raise HTTPException(status_code=404, detail="Festival not found")
+
+    for field in [
+        "category", "image_url", "images", "venue_name", "address",
+        "latitude", "longitude", "start_date", "end_date",
+        "website_url", "is_active",
+    ]:
+        if field in data:
+            setattr(festival, field, data[field])
+
+    set_ml_fields(festival, data, "name")
+    set_ml_fields(festival, data, "description")
+
+    festival.updated_at = datetime.utcnow()
+    await db.flush()
+    await db.refresh(festival)
+    return serialize_festival(festival)
+
+
+@router.delete("/festivals/{festival_id}")
+async def admin_delete_festival(
+    festival_id: str,
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Delete a festival."""
+    result = await db.execute(select(Festival).where(Festival.id == festival_id))
+    festival = result.scalar_one_or_none()
+    if not festival:
+        raise HTTPException(status_code=404, detail="Festival not found")
+
+    await db.delete(festival)
+    await db.flush()
+    return {"message": "Festival deleted"}
+
+
+# ─────────────────────── Themes (Admin) ───────────────────────
+
+def serialize_theme(t):
+    return {
+        "id": t.id,
+        "name": serialize_ml(t, "name"),
+        "description": serialize_ml(t, "description"),
+        "icon": t.icon,
+        "color": t.color,
+        "display_order": t.display_order,
+        "is_active": t.is_active,
+        "created_at": t.created_at.isoformat() if t.created_at else None,
+        "updated_at": t.updated_at.isoformat() if t.updated_at else None,
+    }
+
+
+def serialize_theme_spot(s):
+    return {
+        "id": s.id,
+        "theme_id": s.theme_id,
+        "target_type": s.target_type,
+        "target_id": s.target_id,
+        "display_order": s.display_order,
+    }
+
+
+@router.get("/themes")
+async def admin_list_themes(
+    search: Optional[str] = Query(None),
+    page: int = Query(1, ge=1),
+    per_page: int = Query(20, ge=1, le=100),
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """List all themes with pagination."""
+    query = select(Theme)
+    count_query = select(func.count(Theme.id))
+
+    if search:
+        search_filter = (
+            Theme.name_en.ilike(f"%{search}%") |
+            Theme.name_ko.ilike(f"%{search}%")
+        )
+        query = query.where(search_filter)
+        count_query = count_query.where(search_filter)
+
+    count_result = await db.execute(count_query)
+    total = count_result.scalar() or 0
+
+    offset = (page - 1) * per_page
+    query = query.order_by(Theme.display_order, Theme.created_at.desc()).offset(offset).limit(per_page)
+    result = await db.execute(query)
+    themes = result.scalars().all()
+
+    pages = (total + per_page - 1) // per_page if per_page else 1
+
+    return {
+        "items": [serialize_theme(t) for t in themes],
+        "total": total,
+        "pages": pages,
+    }
+
+
+@router.post("/themes")
+async def admin_create_theme(
+    data: dict = Body(...),
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Create a new theme."""
+    theme = Theme(
+        id=str(uuid.uuid4()),
+        icon=data.get("icon"),
+        color=data.get("color"),
+        display_order=data.get("display_order", 0),
+        is_active=data.get("is_active", True),
+    )
+    set_ml_fields(theme, data, "name")
+    set_ml_fields(theme, data, "description")
+
+    if not theme.name_en:
+        theme.name_en = data.get("name", {}).get("en", "") if isinstance(data.get("name"), dict) else data.get("name_en", "")
+
+    db.add(theme)
+    await db.flush()
+    await db.refresh(theme)
+    return serialize_theme(theme)
+
+
+@router.put("/themes/{theme_id}")
+async def admin_update_theme(
+    theme_id: str,
+    data: dict = Body(...),
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Update a theme."""
+    result = await db.execute(select(Theme).where(Theme.id == theme_id))
+    theme = result.scalar_one_or_none()
+    if not theme:
+        raise HTTPException(status_code=404, detail="Theme not found")
+
+    for field in ["icon", "color", "display_order", "is_active"]:
+        if field in data:
+            setattr(theme, field, data[field])
+
+    set_ml_fields(theme, data, "name")
+    set_ml_fields(theme, data, "description")
+
+    theme.updated_at = datetime.utcnow()
+    await db.flush()
+    await db.refresh(theme)
+    return serialize_theme(theme)
+
+
+@router.delete("/themes/{theme_id}")
+async def admin_delete_theme(
+    theme_id: str,
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Delete a theme and its spots."""
+    result = await db.execute(select(Theme).where(Theme.id == theme_id))
+    theme = result.scalar_one_or_none()
+    if not theme:
+        raise HTTPException(status_code=404, detail="Theme not found")
+
+    # Delete associated spots
+    spots_result = await db.execute(select(ThemeSpot).where(ThemeSpot.theme_id == theme_id))
+    spots = spots_result.scalars().all()
+    for spot in spots:
+        await db.delete(spot)
+
+    await db.delete(theme)
+    await db.flush()
+    return {"message": "Theme deleted"}
+
+
+@router.post("/themes/{theme_id}/spots")
+async def admin_add_theme_spot(
+    theme_id: str,
+    data: dict = Body(...),
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Add a spot to a theme."""
+    result = await db.execute(select(Theme).where(Theme.id == theme_id))
+    if not result.scalar_one_or_none():
+        raise HTTPException(status_code=404, detail="Theme not found")
+
+    spot = ThemeSpot(
+        id=str(uuid.uuid4()),
+        theme_id=theme_id,
+        target_type=data.get("target_type", ""),
+        target_id=data.get("target_id", ""),
+        display_order=data.get("display_order", 0),
+    )
+    db.add(spot)
+    await db.flush()
+    await db.refresh(spot)
+    return {
+        "id": spot.id,
+        "theme_id": spot.theme_id,
+        "target_type": spot.target_type,
+        "target_id": spot.target_id,
+        "display_order": spot.display_order,
+    }
+
+
+@router.delete("/themes/{theme_id}/spots/{spot_id}")
+async def admin_remove_theme_spot(
+    theme_id: str,
+    spot_id: str,
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Remove a spot from a theme."""
+    result = await db.execute(
+        select(ThemeSpot).where(ThemeSpot.id == spot_id, ThemeSpot.theme_id == theme_id)
+    )
+    spot = result.scalar_one_or_none()
+    if not spot:
+        raise HTTPException(status_code=404, detail="Theme spot not found")
+
+    await db.delete(spot)
+    await db.flush()
+    return {"message": "Theme spot removed"}
+
+
+# ─────────────────────── Living Guide (Admin) ───────────────────────
+
+def serialize_living_guide_category(c):
+    return {
+        "id": c.id,
+        "name": serialize_ml(c, "name"),
+        "icon": c.icon,
+        "display_order": c.display_order,
+        "is_active": c.is_active,
+    }
+
+
+def serialize_living_guide_article(a):
+    return {
+        "id": a.id,
+        "category_id": a.category_id,
+        "title": serialize_ml(a, "title"),
+        "content": serialize_ml(a, "content"),
+        "image_url": a.image_url,
+        "display_order": a.display_order,
+        "is_active": a.is_active,
+        "created_at": a.created_at.isoformat() if a.created_at else None,
+        "updated_at": a.updated_at.isoformat() if a.updated_at else None,
+    }
+
+
+@router.get("/living-guide/categories")
+async def admin_list_living_guide_categories(
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """List all living guide categories."""
+    result = await db.execute(
+        select(LivingGuideCategory).order_by(LivingGuideCategory.display_order)
+    )
+    categories = result.scalars().all()
+    return {"items": [serialize_living_guide_category(c) for c in categories]}
+
+
+@router.post("/living-guide/categories")
+async def admin_create_living_guide_category(
+    data: dict = Body(...),
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Create a living guide category."""
+    category = LivingGuideCategory(
+        id=str(uuid.uuid4()),
+        icon=data.get("icon"),
+        display_order=data.get("display_order", 0),
+        is_active=data.get("is_active", True),
+    )
+    set_ml_fields(category, data, "name")
+
+    if not category.name_en:
+        category.name_en = data.get("name", {}).get("en", "") if isinstance(data.get("name"), dict) else data.get("name_en", "")
+
+    db.add(category)
+    await db.flush()
+    await db.refresh(category)
+    return serialize_living_guide_category(category)
+
+
+@router.put("/living-guide/categories/{category_id}")
+async def admin_update_living_guide_category(
+    category_id: str,
+    data: dict = Body(...),
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Update a living guide category."""
+    result = await db.execute(
+        select(LivingGuideCategory).where(LivingGuideCategory.id == category_id)
+    )
+    category = result.scalar_one_or_none()
+    if not category:
+        raise HTTPException(status_code=404, detail="Category not found")
+
+    for field in ["icon", "display_order", "is_active"]:
+        if field in data:
+            setattr(category, field, data[field])
+
+    set_ml_fields(category, data, "name")
+
+    await db.flush()
+    await db.refresh(category)
+    return serialize_living_guide_category(category)
+
+
+@router.delete("/living-guide/categories/{category_id}")
+async def admin_delete_living_guide_category(
+    category_id: str,
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Delete a living guide category."""
+    result = await db.execute(
+        select(LivingGuideCategory).where(LivingGuideCategory.id == category_id)
+    )
+    category = result.scalar_one_or_none()
+    if not category:
+        raise HTTPException(status_code=404, detail="Category not found")
+
+    # Delete associated articles
+    articles_result = await db.execute(
+        select(LivingGuideArticle).where(LivingGuideArticle.category_id == category_id)
+    )
+    articles = articles_result.scalars().all()
+    for article in articles:
+        await db.delete(article)
+
+    await db.delete(category)
+    await db.flush()
+    return {"message": "Category deleted"}
+
+
+@router.get("/living-guide/articles")
+async def admin_list_living_guide_articles(
+    category_id: Optional[str] = Query(None),
+    search: Optional[str] = Query(None),
+    page: int = Query(1, ge=1),
+    per_page: int = Query(20, ge=1, le=100),
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """List living guide articles with pagination."""
+    query = select(LivingGuideArticle)
+    count_query = select(func.count(LivingGuideArticle.id))
+
+    if category_id:
+        query = query.where(LivingGuideArticle.category_id == category_id)
+        count_query = count_query.where(LivingGuideArticle.category_id == category_id)
+
+    if search:
+        search_filter = (
+            LivingGuideArticle.title_en.ilike(f"%{search}%") |
+            LivingGuideArticle.title_ko.ilike(f"%{search}%")
+        )
+        query = query.where(search_filter)
+        count_query = count_query.where(search_filter)
+
+    count_result = await db.execute(count_query)
+    total = count_result.scalar() or 0
+
+    offset = (page - 1) * per_page
+    query = query.order_by(LivingGuideArticle.display_order, LivingGuideArticle.created_at.desc()).offset(offset).limit(per_page)
+    result = await db.execute(query)
+    articles = result.scalars().all()
+
+    pages = (total + per_page - 1) // per_page if per_page else 1
+
+    return {
+        "items": [serialize_living_guide_article(a) for a in articles],
+        "total": total,
+        "pages": pages,
+    }
+
+
+@router.post("/living-guide/articles")
+async def admin_create_living_guide_article(
+    data: dict = Body(...),
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Create a living guide article."""
+    article = LivingGuideArticle(
+        id=str(uuid.uuid4()),
+        category_id=data.get("category_id", ""),
+        image_url=data.get("image_url"),
+        display_order=data.get("display_order", 0),
+        is_active=data.get("is_active", True),
+    )
+    set_ml_fields(article, data, "title")
+    set_ml_fields(article, data, "content")
+
+    if not article.title_en:
+        article.title_en = data.get("title", {}).get("en", "") if isinstance(data.get("title"), dict) else data.get("title_en", "")
+
+    db.add(article)
+    await db.flush()
+    await db.refresh(article)
+    return serialize_living_guide_article(article)
+
+
+@router.put("/living-guide/articles/{article_id}")
+async def admin_update_living_guide_article(
+    article_id: str,
+    data: dict = Body(...),
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Update a living guide article."""
+    result = await db.execute(
+        select(LivingGuideArticle).where(LivingGuideArticle.id == article_id)
+    )
+    article = result.scalar_one_or_none()
+    if not article:
+        raise HTTPException(status_code=404, detail="Article not found")
+
+    for field in ["category_id", "image_url", "display_order", "is_active"]:
+        if field in data:
+            setattr(article, field, data[field])
+
+    set_ml_fields(article, data, "title")
+    set_ml_fields(article, data, "content")
+
+    article.updated_at = datetime.utcnow()
+    await db.flush()
+    await db.refresh(article)
+    return serialize_living_guide_article(article)
+
+
+@router.delete("/living-guide/articles/{article_id}")
+async def admin_delete_living_guide_article(
+    article_id: str,
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Delete a living guide article."""
+    result = await db.execute(
+        select(LivingGuideArticle).where(LivingGuideArticle.id == article_id)
+    )
+    article = result.scalar_one_or_none()
+    if not article:
+        raise HTTPException(status_code=404, detail="Article not found")
+
+    await db.delete(article)
+    await db.flush()
+    return {"message": "Article deleted"}
+
+
+@router.get("/living-guide/categories/{category_id}/articles")
+async def admin_list_articles_by_category(
+    category_id: str,
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """List articles for a specific category."""
+    result = await db.execute(
+        select(LivingGuideArticle).where(
+            LivingGuideArticle.category_id == category_id
+        ).order_by(LivingGuideArticle.display_order)
+    )
+    articles = result.scalars().all()
+    return {"items": [serialize_living_guide_article(a) for a in articles]}
+
+
+@router.post("/living-guide/categories/{category_id}/articles")
+async def admin_create_article_in_category(
+    category_id: str,
+    data: dict = Body(...),
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Create an article in a specific category."""
+    data["category_id"] = category_id
+    article = LivingGuideArticle(
+        id=str(uuid.uuid4()),
+        category_id=category_id,
+        image_url=data.get("image_url"),
+        display_order=data.get("display_order", 0),
+        is_active=data.get("is_active", True),
+    )
+    set_ml_fields(article, data, "title")
+    set_ml_fields(article, data, "content")
+    if not article.title_en:
+        article.title_en = data.get("title", {}).get("en", "") if isinstance(data.get("title"), dict) else data.get("title_en", "")
+    db.add(article)
+    await db.flush()
+    await db.refresh(article)
+    return serialize_living_guide_article(article)
+
+
+# ─────────────────────── Chat Monitoring (Admin) ───────────────────────
+
+def serialize_chat_room(r):
+    return {
+        "id": r.id,
+        "user_id": r.user_id,
+        "guide_id": r.guide_id,
+        "last_message": r.last_message,
+        "last_message_at": r.last_message_at.isoformat() if r.last_message_at else None,
+        "is_active": r.is_active,
+        "created_at": r.created_at.isoformat() if r.created_at else None,
+    }
+
+
+def serialize_chat_message(m):
+    return {
+        "id": m.id,
+        "room_id": m.room_id,
+        "sender_type": m.sender_type,
+        "sender_id": m.sender_id,
+        "message_type": m.message_type,
+        "content": m.content,
+        "image_url": m.image_url,
+        "is_read": m.is_read,
+        "is_reported": m.is_reported,
+        "report_reason": m.report_reason,
+        "created_at": m.created_at.isoformat() if m.created_at else None,
+    }
+
+
+@router.get("/chat/reported")
+async def admin_list_reported_chats(
+    page: int = Query(1, ge=1),
+    per_page: int = Query(20, ge=1, le=100),
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """List reported chat messages."""
+    query = select(ChatMessage).where(ChatMessage.is_reported == True)
+    count_query = select(func.count(ChatMessage.id)).where(ChatMessage.is_reported == True)
+
+    count_result = await db.execute(count_query)
+    total = count_result.scalar() or 0
+
+    offset = (page - 1) * per_page
+    query = query.order_by(ChatMessage.created_at.desc()).offset(offset).limit(per_page)
+    result = await db.execute(query)
+    messages = result.scalars().all()
+
+    pages = (total + per_page - 1) // per_page if per_page else 1
+
+    return {
+        "items": [serialize_chat_message(m) for m in messages],
+        "total": total,
+        "pages": pages,
+    }
+
+
+@router.get("/chat/rooms/{room_id}/messages")
+async def admin_get_chat_messages(
+    room_id: str,
+    page: int = Query(1, ge=1),
+    per_page: int = Query(50, ge=1, le=200),
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Get messages for a specific chat room."""
+    room_result = await db.execute(select(ChatRoom).where(ChatRoom.id == room_id))
+    room = room_result.scalar_one_or_none()
+    if not room:
+        raise HTTPException(status_code=404, detail="Chat room not found")
+
+    query = select(ChatMessage).where(ChatMessage.room_id == room_id)
+    count_query = select(func.count(ChatMessage.id)).where(ChatMessage.room_id == room_id)
+
+    count_result = await db.execute(count_query)
+    total = count_result.scalar() or 0
+
+    offset = (page - 1) * per_page
+    query = query.order_by(ChatMessage.created_at.desc()).offset(offset).limit(per_page)
+    result = await db.execute(query)
+    messages = result.scalars().all()
+
+    pages = (total + per_page - 1) // per_page if per_page else 1
+
+    return {
+        "room": serialize_chat_room(room),
+        "messages": [serialize_chat_message(m) for m in messages],
+        "total": total,
+        "pages": pages,
+    }
+
+
+@router.patch("/chat/messages/{message_id}/review")
+async def admin_review_chat_message(
+    message_id: str,
+    data: dict = Body(...),
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Review a reported chat message - dismiss report or take action."""
+    result = await db.execute(select(ChatMessage).where(ChatMessage.id == message_id))
+    message = result.scalar_one_or_none()
+    if not message:
+        raise HTTPException(status_code=404, detail="Message not found")
+
+    action = data.get("action", "dismiss")  # dismiss, warn, delete
+
+    if action == "dismiss":
+        message.is_reported = False
+        message.report_reason = None
+    elif action == "delete":
+        message.content = "[Message removed by admin]"
+        message.is_reported = False
+        message.report_reason = None
+    elif action == "warn":
+        message.is_reported = False
+        message.report_reason = None
+
+    await db.flush()
+    await db.refresh(message)
+    return serialize_chat_message(message)
+
+
+@router.patch("/chat/rooms/{room_id}/sanction")
+async def admin_sanction_chat_room(
+    room_id: str,
+    data: dict = Body(...),
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Sanction a chat room - disable or enable."""
+    result = await db.execute(select(ChatRoom).where(ChatRoom.id == room_id))
+    room = result.scalar_one_or_none()
+    if not room:
+        raise HTTPException(status_code=404, detail="Chat room not found")
+
+    if "is_active" in data:
+        room.is_active = data["is_active"]
+
+    room.updated_at = datetime.utcnow()
+    await db.flush()
+    await db.refresh(room)
+    return serialize_chat_room(room)
+
+
+# ─────────────────────── B2B Partners (Admin) ───────────────────────
+
+def serialize_b2b_partner(p):
+    return {
+        "id": p.id,
+        "user_id": p.user_id,
+        "company_name": p.company_name,
+        "contact_name": p.contact_name,
+        "contact_email": p.contact_email,
+        "contact_phone": p.contact_phone,
+        "assigned_events": p.assigned_events,
+        "landing_config": p.landing_config,
+        "is_active": p.is_active,
+        "created_at": p.created_at.isoformat() if p.created_at else None,
+        "updated_at": p.updated_at.isoformat() if p.updated_at else None,
+    }
+
+
+@router.get("/b2b-partners")
+async def admin_list_b2b_partners(
+    search: Optional[str] = Query(None),
+    page: int = Query(1, ge=1),
+    per_page: int = Query(20, ge=1, le=100),
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """List all B2B partners with pagination."""
+    query = select(B2BPartner)
+    count_query = select(func.count(B2BPartner.id))
+
+    if search:
+        search_filter = (
+            B2BPartner.company_name.ilike(f"%{search}%") |
+            B2BPartner.contact_name.ilike(f"%{search}%") |
+            B2BPartner.contact_email.ilike(f"%{search}%")
+        )
+        query = query.where(search_filter)
+        count_query = count_query.where(search_filter)
+
+    count_result = await db.execute(count_query)
+    total = count_result.scalar() or 0
+
+    offset = (page - 1) * per_page
+    query = query.order_by(B2BPartner.created_at.desc()).offset(offset).limit(per_page)
+    result = await db.execute(query)
+    partners = result.scalars().all()
+
+    pages = (total + per_page - 1) // per_page if per_page else 1
+
+    return {
+        "items": [serialize_b2b_partner(p) for p in partners],
+        "total": total,
+        "pages": pages,
+    }
+
+
+@router.post("/b2b-partners")
+async def admin_create_b2b_partner(
+    data: dict = Body(...),
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Create a new B2B partner."""
+    partner = B2BPartner(
+        id=str(uuid.uuid4()),
+        user_id=data.get("user_id", ""),
+        company_name=data.get("company_name", ""),
+        contact_name=data.get("contact_name"),
+        contact_email=data.get("contact_email"),
+        contact_phone=data.get("contact_phone"),
+        assigned_events=data.get("assigned_events"),
+        landing_config=data.get("landing_config"),
+        is_active=data.get("is_active", True),
+    )
+    db.add(partner)
+    await db.flush()
+    await db.refresh(partner)
+    return serialize_b2b_partner(partner)
+
+
+@router.put("/b2b-partners/{partner_id}")
+async def admin_update_b2b_partner(
+    partner_id: str,
+    data: dict = Body(...),
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Update a B2B partner."""
+    result = await db.execute(select(B2BPartner).where(B2BPartner.id == partner_id))
+    partner = result.scalar_one_or_none()
+    if not partner:
+        raise HTTPException(status_code=404, detail="B2B Partner not found")
+
+    for field in [
+        "company_name", "contact_name", "contact_email", "contact_phone",
+        "assigned_events", "landing_config", "is_active",
+    ]:
+        if field in data:
+            setattr(partner, field, data[field])
+
+    partner.updated_at = datetime.utcnow()
+    await db.flush()
+    await db.refresh(partner)
+    return serialize_b2b_partner(partner)
+
+
+@router.delete("/b2b-partners/{partner_id}")
+async def admin_delete_b2b_partner(
+    partner_id: str,
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Delete a B2B partner."""
+    result = await db.execute(select(B2BPartner).where(B2BPartner.id == partner_id))
+    partner = result.scalar_one_or_none()
+    if not partner:
+        raise HTTPException(status_code=404, detail="B2B Partner not found")
+
+    await db.delete(partner)
+    await db.flush()
+    return {"message": "B2B Partner deleted"}
+
+
+# ─────────────────────── Route Aliases (Frontend compatibility) ───────────────────────
+
+# Chat aliases - frontend uses /chat/reports instead of /chat/reported
+@router.get("/chat/reports")
+async def admin_list_reported_chats_alias(
+    page: int = Query(1, ge=1),
+    per_page: int = Query(20, ge=1, le=100),
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    return await admin_list_reported_chats(page=page, per_page=per_page, admin=admin, db=db)
+
+
+@router.patch("/chat/reports/{message_id}")
+async def admin_review_chat_report_alias(
+    message_id: str,
+    data: dict = Body(...),
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Handle report action (frontend format: {status: 'dismissed'|'warned'|'deleted'})."""
+    status = data.get("status", "")
+    action_map = {"dismissed": "dismiss", "warned": "warn", "deleted": "delete"}
+    action = action_map.get(status, data.get("action", "dismiss"))
+    return await admin_review_chat_message(message_id=message_id, data={"action": action}, admin=admin, db=db)
+
+
+@router.delete("/chat/messages/{message_id}")
+async def admin_delete_chat_message(
+    message_id: str,
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Delete a chat message."""
+    result = await db.execute(select(ChatMessage).where(ChatMessage.id == message_id))
+    message = result.scalar_one_or_none()
+    if not message:
+        raise HTTPException(status_code=404, detail="Message not found")
+    await db.delete(message)
+    await db.flush()
+    return {"message": "Message deleted"}
+
+
+# B2B aliases - frontend uses /b2b/partners instead of /b2b-partners
+@router.get("/b2b/partners")
+async def admin_list_b2b_alias(
+    search: Optional[str] = Query(None),
+    page: int = Query(1, ge=1),
+    per_page: int = Query(20, ge=1, le=100),
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    return await admin_list_b2b_partners(search=search, page=page, per_page=per_page, admin=admin, db=db)
+
+
+@router.post("/b2b/partners")
+async def admin_create_b2b_alias(
+    data: dict = Body(...),
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    return await admin_create_b2b_partner(data=data, admin=admin, db=db)
+
+
+@router.put("/b2b/partners/{partner_id}")
+async def admin_update_b2b_alias(
+    partner_id: str,
+    data: dict = Body(...),
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    return await admin_update_b2b_partner(partner_id=partner_id, data=data, admin=admin, db=db)
+
+
+@router.delete("/b2b/partners/{partner_id}")
+async def admin_delete_b2b_alias(
+    partner_id: str,
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    return await admin_delete_b2b_partner(partner_id=partner_id, admin=admin, db=db)
