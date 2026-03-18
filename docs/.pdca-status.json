@@ -1,6 +1,6 @@
 {
   "version": "2.0",
-  "lastUpdated": "2026-03-18T19:12:03.643Z",
+  "lastUpdated": "2026-03-18T19:22:14.060Z",
   "activeFeatures": [
     "backend",
     "frontend",
@@ -60,9 +60,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-03-18T04:06:01.830Z",
-        "lastUpdated": "2026-03-18T19:12:03.643Z"
+        "lastUpdated": "2026-03-18T19:18:51.007Z"
       },
-      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/backend/seed_data.py"
+      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/backend/main.py"
     },
     "frontend": {
       "phase": "do",
@@ -229,9 +229,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-03-18T04:19:14.208Z",
-        "lastUpdated": "2026-03-18T16:27:11.875Z"
+        "lastUpdated": "2026-03-18T19:22:02.127Z"
       },
-      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/frontend/src/app/admin/restaurants/page.tsx"
+      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/frontend/src/app/restaurants/page.tsx"
     },
     "[id]": {
       "phase": "do",
@@ -255,9 +255,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-03-18T04:19:51.326Z",
-        "lastUpdated": "2026-03-18T16:27:38.170Z"
+        "lastUpdated": "2026-03-18T19:22:05.774Z"
       },
-      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/frontend/src/app/admin/courses/page.tsx"
+      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/frontend/src/app/courses/page.tsx"
     },
     "transport": {
       "phase": "do",
@@ -294,9 +294,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-03-18T04:21:47.264Z",
-        "lastUpdated": "2026-03-18T16:28:30.476Z"
+        "lastUpdated": "2026-03-18T19:22:10.049Z"
       },
-      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/frontend/src/app/admin/guides/page.tsx"
+      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/frontend/src/app/guides/page.tsx"
     },
     "confirmation": {
       "phase": "do",
@@ -463,9 +463,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-03-18T06:33:04.995Z",
-        "lastUpdated": "2026-03-18T16:29:42.547Z"
+        "lastUpdated": "2026-03-18T19:22:14.060Z"
       },
-      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/frontend/src/app/admin/festivals/page.tsx"
+      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/frontend/src/app/festivals/page.tsx"
     },
     "themes": {
       "phase": "do",
@@ -658,7 +658,7 @@
   "session": {
     "startedAt": "2026-03-18T04:03:46.194Z",
     "onboardingCompleted": false,
-    "lastActivity": "2026-03-18T19:12:03.643Z"
+    "lastActivity": "2026-03-18T19:22:14.060Z"
   },
   "history": [
     {
@@ -3190,6 +3190,108 @@
     {
       "timestamp": "2026-03-18T19:12:03.643Z",
       "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T19:18:51.007Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T19:20:23.054Z",
+      "feature": "restaurants",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T19:20:28.066Z",
+      "feature": "restaurants",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T19:20:35.029Z",
+      "feature": "restaurants",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T19:20:39.463Z",
+      "feature": "courses",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T19:20:45.369Z",
+      "feature": "courses",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T19:20:50.534Z",
+      "feature": "courses",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T19:20:54.341Z",
+      "feature": "guides",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T19:20:59.548Z",
+      "feature": "guides",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T19:21:06.541Z",
+      "feature": "guides",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T19:21:12.152Z",
+      "feature": "festivals",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T19:21:17.145Z",
+      "feature": "festivals",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T19:21:22.211Z",
+      "feature": "festivals",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T19:22:02.127Z",
+      "feature": "restaurants",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T19:22:05.774Z",
+      "feature": "courses",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T19:22:10.049Z",
+      "feature": "guides",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T19:22:14.060Z",
+      "feature": "festivals",
       "phase": "do",
       "action": "updated"
     }
