@@ -1047,6 +1047,7 @@ async def admin_delete_transport_tip(
 async def admin_list_bookings(
     status: Optional[str] = Query(None),
     sort: Optional[str] = Query(None),
+    search: Optional[str] = Query(None),
     page: int = Query(1, ge=1),
     per_page: int = Query(20, ge=1, le=100),
     limit: Optional[int] = Query(None, ge=1, le=100),
@@ -1055,12 +1056,22 @@ async def admin_list_bookings(
     db: AsyncSession = Depends(get_db),
 ):
     query = select(Booking)
+    count_query = select(func.count(Booking.id))
+
     if status:
         query = query.where(Booking.status == status)
+        count_query = count_query.where(Booking.status == status)
 
-    count_result = await db.execute(select(func.count(Booking.id)).where(
-        Booking.status == status if status else True
-    ))
+    if search:
+        search_filter = (
+            Booking.booking_number.ilike(f"%{search}%") |
+            Booking.guest_name.ilike(f"%{search}%") |
+            Booking.guest_email.ilike(f"%{search}%")
+        )
+        query = query.where(search_filter)
+        count_query = count_query.where(search_filter)
+
+    count_result = await db.execute(count_query)
     total = count_result.scalar() or 0
 
     # Sort order
@@ -1187,21 +1198,39 @@ async def admin_patch_booking(
 @router.get("/reviews")
 async def admin_list_reviews(
     status: Optional[str] = Query(None),
+    target_type: Optional[str] = Query(None),
+    rating: Optional[int] = Query(None, ge=1, le=5),
+    is_reported: Optional[str] = Query(None),
+    search: Optional[str] = Query(None),
     page: int = Query(1, ge=1),
     per_page: int = Query(20, ge=1, le=100),
     admin: User = Depends(get_current_admin),
     db: AsyncSession = Depends(get_db),
 ):
-    """List reviews for admin dashboard, optionally filtered by status."""
+    """List reviews for admin dashboard, with filters."""
     query = select(Review)
+    count_query = select(func.count(Review.id))
+
     if status:
         query = query.where(Review.status == status)
+        count_query = count_query.where(Review.status == status)
+    if target_type:
+        query = query.where(Review.target_type == target_type)
+        count_query = count_query.where(Review.target_type == target_type)
+    if rating:
+        query = query.where(Review.rating == rating)
+        count_query = count_query.where(Review.rating == rating)
+    if is_reported == "true":
+        query = query.where(Review.is_reported == True)
+        count_query = count_query.where(Review.is_reported == True)
+    elif is_reported == "false":
+        query = query.where(Review.is_reported == False)
+        count_query = count_query.where(Review.is_reported == False)
+    if search:
+        query = query.where(Review.content.ilike(f"%{search}%"))
+        count_query = count_query.where(Review.content.ilike(f"%{search}%"))
 
-    count_result = await db.execute(
-        select(func.count(Review.id)).where(
-            Review.status == status if status else True
-        )
-    )
+    count_result = await db.execute(count_query)
     total = count_result.scalar() or 0
 
     offset = (page - 1) * per_page
@@ -2158,3 +2187,69 @@ async def admin_delete_translation(
     await db.delete(translation)
     await db.flush()
     return {"message": "Translation deleted"}
+
+
+# ─────────────────────── Map Settings (Admin) ───────────────────────
+
+@router.get("/settings/map")
+async def admin_get_map_settings(
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Get map settings."""
+    from models.map_setting import MapSetting
+
+    result = await db.execute(select(MapSetting).limit(1))
+    setting = result.scalar_one_or_none()
+
+    if not setting:
+        return {
+            "mapbox_api_key": "",
+            "default_center_lat": 37.5665,
+            "default_center_lng": 126.978,
+            "default_zoom": 12,
+        }
+
+    return {
+        "mapbox_api_key": setting.mapbox_api_key or "",
+        "default_center_lat": setting.default_latitude or 37.5665,
+        "default_center_lng": setting.default_longitude or 126.978,
+        "default_zoom": setting.default_zoom or 12,
+    }
+
+
+@router.put("/settings/map")
+async def admin_update_map_settings(
+    data: dict = Body(...),
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Update map settings."""
+    from models.map_setting import MapSetting
+
+    result = await db.execute(select(MapSetting).limit(1))
+    setting = result.scalar_one_or_none()
+
+    if not setting:
+        setting = MapSetting(id=str(uuid.uuid4()))
+        db.add(setting)
+
+    if "mapbox_api_key" in data:
+        setting.mapbox_api_key = data["mapbox_api_key"]
+    if "default_center_lat" in data:
+        setting.default_latitude = data["default_center_lat"]
+    if "default_center_lng" in data:
+        setting.default_longitude = data["default_center_lng"]
+    if "default_zoom" in data:
+        setting.default_zoom = data["default_zoom"]
+
+    setting.updated_at = datetime.utcnow()
+    await db.flush()
+    await db.refresh(setting)
+
+    return {
+        "mapbox_api_key": setting.mapbox_api_key or "",
+        "default_center_lat": setting.default_latitude or 37.5665,
+        "default_center_lng": setting.default_longitude or 126.978,
+        "default_zoom": setting.default_zoom or 12,
+    }
