@@ -1,6 +1,6 @@
 {
   "version": "2.0",
-  "lastUpdated": "2026-03-18T07:13:43.180Z",
+  "lastUpdated": "2026-03-18T10:30:10.527Z",
   "activeFeatures": [
     "backend",
     "frontend",
@@ -46,7 +46,8 @@
     "[roomId]",
     "search",
     "compare",
-    "guide-dashboard"
+    "guide-dashboard",
+    "seed"
   ],
   "primaryFeature": "backend",
   "features": {
@@ -59,9 +60,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-03-18T04:06:01.830Z",
-        "lastUpdated": "2026-03-18T07:13:43.180Z"
+        "lastUpdated": "2026-03-18T10:30:10.527Z"
       },
-      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/backend/routers/admin.py"
+      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/backend/models/chat.py"
     },
     "frontend": {
       "phase": "do",
@@ -241,9 +242,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-03-18T04:19:39.611Z",
-        "lastUpdated": "2026-03-18T07:05:05.917Z"
+        "lastUpdated": "2026-03-18T09:58:25.663Z"
       },
-      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/frontend/src/app/products/[id]/page.tsx"
+      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/frontend/src/app/festivals/[id]/page.tsx"
     },
     "courses": {
       "phase": "do",
@@ -332,9 +333,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-03-18T04:23:45.731Z",
-        "lastUpdated": "2026-03-18T04:25:39.825Z"
+        "lastUpdated": "2026-03-18T09:58:51.360Z"
       },
-      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/frontend/src/app/admin/login/page.tsx"
+      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/frontend/src/app/guide-dashboard/login/page.tsx"
     },
     "register": {
       "phase": "do",
@@ -634,6 +635,19 @@
         "lastUpdated": "2026-03-18T07:08:54.048Z"
       },
       "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/frontend/src/app/guide-dashboard/page.tsx"
+    },
+    "seed": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-18T09:59:08.175Z",
+        "lastUpdated": "2026-03-18T10:29:16.361Z"
+      },
+      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/backend/seed/supplementary.py"
     }
   },
   "pipeline": {
@@ -644,7 +658,7 @@
   "session": {
     "startedAt": "2026-03-18T04:03:46.194Z",
     "onboardingCompleted": false,
-    "lastActivity": "2026-03-18T07:13:43.180Z"
+    "lastActivity": "2026-03-18T10:30:10.527Z"
   },
   "history": [
     {
@@ -2137,6 +2151,102 @@
     },
     {
       "timestamp": "2026-03-18T07:13:43.180Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T09:58:25.663Z",
+      "feature": "[id]",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T09:58:51.360Z",
+      "feature": "login",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T09:59:08.175Z",
+      "feature": "seed",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T09:59:31.470Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T09:59:49.691Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T10:03:10.979Z",
+      "feature": "seed",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T10:03:49.616Z",
+      "feature": "seed",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T10:03:54.803Z",
+      "feature": "seed",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T10:04:01.769Z",
+      "feature": "seed",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T10:04:07.046Z",
+      "feature": "seed",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T10:21:26.545Z",
+      "feature": "seed",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T10:23:59.100Z",
+      "feature": "seed",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T10:25:39.168Z",
+      "feature": "seed",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T10:29:16.361Z",
+      "feature": "seed",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T10:30:06.442Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T10:30:10.527Z",
       "feature": "backend",
       "phase": "do",
       "action": "updated"
