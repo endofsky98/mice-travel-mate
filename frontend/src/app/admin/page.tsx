@@ -15,7 +15,6 @@ import {
   Search,
   Star,
 } from 'lucide-react';
-import { useLanguage } from '@/hooks/useLanguage';
 import api from '@/lib/api';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
@@ -51,7 +50,6 @@ interface PopularSearch {
 }
 
 export default function AdminDashboardPage() {
-  const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<DashboardStats>({
     today_bookings: 0,
@@ -103,18 +101,28 @@ export default function AdminDashboardPage() {
     }
   };
 
+  const statusLabel = (status: string) => {
+    switch (status) {
+      case 'confirmed': return '확정';
+      case 'pending': return '대기';
+      case 'cancelled': return '취소';
+      case 'completed': return '완료';
+      default: return status;
+    }
+  };
+
   if (loading) return <LoadingSpinner fullPage />;
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">{t('admin.dashboard')}</h1>
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">대시보드</h1>
 
       {/* Untranslated Alert */}
       {stats.untranslated_count > 0 && (
         <div className="mb-6 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl flex items-center gap-3">
           <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
           <p className="text-sm text-amber-800 dark:text-amber-300">
-            <span className="font-semibold">{stats.untranslated_count}</span> items have incomplete translations. Please review the Languages section.
+            <span className="font-semibold">{stats.untranslated_count}</span>개 항목의 번역이 완료되지 않았습니다. 언어 관리 섹션을 확인해 주세요.
           </p>
         </div>
       )}
@@ -127,7 +135,7 @@ export default function AdminDashboardPage() {
             <Calendar className="w-5 h-5 text-white" />
           </div>
           <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats.today_bookings}</p>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Today&apos;s Bookings</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">오늘의 예약</p>
         </Card>
 
         {/* Today's Booking Amount */}
@@ -136,7 +144,7 @@ export default function AdminDashboardPage() {
             <DollarSign className="w-5 h-5 text-white" />
           </div>
           <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{formatCurrency(stats.today_booking_amount, 'KRW')}</p>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Today&apos;s Revenue</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">오늘의 매출</p>
         </Card>
 
         {/* Total Content */}
@@ -155,7 +163,7 @@ export default function AdminDashboardPage() {
             <span className="text-[10px] text-gray-400"><ShoppingBag className="w-3 h-3 inline mr-0.5" />{stats.total_products}</span>
             <span className="text-[10px] text-gray-400"><Users className="w-3 h-3 inline mr-0.5" />{stats.total_guides}</span>
           </div>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Total Content</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">전체 콘텐츠</p>
         </Card>
 
         {/* Today's Visitors */}
@@ -172,7 +180,7 @@ export default function AdminDashboardPage() {
               </span>
             )}
           </div>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Today&apos;s Visitors</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">오늘의 방문자</p>
         </Card>
       </div>
 
@@ -180,26 +188,26 @@ export default function AdminDashboardPage() {
         {/* Recent Bookings */}
         <Card className="overflow-hidden lg:col-span-2">
           <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-500/40">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{t('admin.recent_bookings')}</h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">최근 예약</h2>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50 dark:bg-dark-input">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    {t('booking.booking_number')}
+                    예약번호
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    {t('booking.booker_name')}
+                    예약자명
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    {t('booking.date')}
+                    날짜
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    {t('booking.total')}
+                    합계
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    {t('booking.status')}
+                    상태
                   </th>
                 </tr>
               </thead>
@@ -207,7 +215,7 @@ export default function AdminDashboardPage() {
                 {recentBookings.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="px-6 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
-                      {t('common.no_results')}
+                      결과가 없습니다
                     </td>
                   </tr>
                 ) : (
@@ -227,7 +235,7 @@ export default function AdminDashboardPage() {
                       </td>
                       <td className="px-6 py-4">
                         <Badge variant={statusVariant(booking.status)}>
-                          {t(`booking.status_${booking.status}`)}
+                          {statusLabel(booking.status)}
                         </Badge>
                       </td>
                     </tr>
@@ -243,13 +251,13 @@ export default function AdminDashboardPage() {
           <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-500/40">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
               <Star className="w-5 h-5 text-amber-500" />
-              Pending Reviews
+              대기 중인 리뷰
             </h2>
           </div>
           <div className="divide-y divide-gray-200 dark:divide-gray-500/40">
             {pendingReviews.length === 0 ? (
               <div className="px-6 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
-                No pending reviews
+                대기 중인 리뷰가 없습니다
               </div>
             ) : (
               pendingReviews.map((review) => (
@@ -281,12 +289,12 @@ export default function AdminDashboardPage() {
         <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-500/40">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
             <Search className="w-5 h-5 text-indigo-500" />
-            Popular Searches (Top 10)
+            인기 검색어 (Top 10)
           </h2>
         </div>
         <div className="p-6">
           {popularSearches.length === 0 ? (
-            <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">No search data available</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">검색 데이터가 없습니다</p>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
               {popularSearches.map((search, idx) => (
@@ -299,7 +307,7 @@ export default function AdminDashboardPage() {
                   </span>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{search.keyword}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">{search.count.toLocaleString()} searches</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{search.count.toLocaleString()}회 검색</p>
                   </div>
                 </div>
               ))}

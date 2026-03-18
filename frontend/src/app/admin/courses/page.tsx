@@ -17,7 +17,7 @@ import Pagination from '@/components/ui/Pagination';
 import { Course, SUPPORTED_LANGUAGES } from '@/types';
 
 export default function AdminCoursesPage() {
-  const { t, lt } = useLanguage();
+  const { lt } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [items, setItems] = useState<Course[]>([]);
   const [totalPages, setTotalPages] = useState(1);
@@ -71,13 +71,13 @@ export default function AdminCoursesPage() {
       if (editingItem) await api.put(`/api/admin/courses/${editingItem.id}`, payload);
       else await api.post('/api/admin/courses', payload);
       setShowModal(false); fetchItems();
-    } catch { alert('Failed to save'); }
+    } catch { alert('저장에 실패했습니다'); }
     setSaving(false);
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm(t('admin.confirm_delete'))) return;
-    try { await api.delete(`/api/admin/courses/${id}`); fetchItems(); } catch { alert('Failed to delete'); }
+    if (!confirm('정말 삭제하시겠습니까?')) return;
+    try { await api.delete(`/api/admin/courses/${id}`); fetchItems(); } catch { alert('삭제에 실패했습니다'); }
   };
 
   const langTabs = SUPPORTED_LANGUAGES.map((l) => ({ id: l.code, label: l.name }));
@@ -85,13 +85,13 @@ export default function AdminCoursesPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t('admin.courses')}</h1>
-        <Button onClick={openCreateModal}><Plus className="w-4 h-4" />{t('admin.add_new')}</Button>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">코스</h1>
+        <Button onClick={openCreateModal}><Plus className="w-4 h-4" />추가</Button>
       </div>
-      <div className="mb-4"><div className="relative max-w-md"><Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" /><Input placeholder={t('admin.search_placeholder')} value={search} onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }} className="pl-10" /></div></div>
+      <div className="mb-4"><div className="relative max-w-md"><Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" /><Input placeholder="검색어를 입력하세요..." value={search} onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }} className="pl-10" /></div></div>
 
       {loading ? <LoadingSpinner fullPage /> : items.length === 0 ? (
-        <EmptyState icon={Map} title={t('common.no_results')} actionLabel={t('admin.add_new')} onAction={openCreateModal} />
+        <EmptyState icon={Map} title="결과가 없습니다" actionLabel="추가" onAction={openCreateModal} />
       ) : (
         <Card className="overflow-hidden">
           <div className="overflow-x-auto">
@@ -99,11 +99,11 @@ export default function AdminCoursesPage() {
               <thead className="bg-gray-50 dark:bg-dark-input">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('common.name')}</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('course.duration')}</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('course.theme')}</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('admin.status')}</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('admin.actions')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">이름</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">소요시간</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">테마</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">상태</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">작업</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-500/40">
@@ -113,7 +113,7 @@ export default function AdminCoursesPage() {
                     <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-100">{lt(item.name)}</td>
                     <td className="px-6 py-4 text-sm"><Badge>{item.duration}</Badge></td>
                     <td className="px-6 py-4 text-sm"><Badge variant="info">{item.theme}</Badge></td>
-                    <td className="px-6 py-4"><Badge variant={item.is_active ? 'success' : 'error'}>{item.is_active ? t('admin.active') : t('admin.inactive')}</Badge></td>
+                    <td className="px-6 py-4"><Badge variant={item.is_active ? 'success' : 'error'}>{item.is_active ? '활성' : '비활성'}</Badge></td>
                     <td className="px-6 py-4"><div className="flex items-center gap-2">
                       <button onClick={() => openEditModal(item)} className="p-1 hover:bg-gray-100 dark:hover:bg-white/[0.08] rounded"><Pencil className="w-4 h-4 text-gray-500" /></button>
                       <button onClick={() => handleDelete(item.id)} className="p-1 hover:bg-red-50 rounded"><Trash2 className="w-4 h-4 text-red-500" /></button>
@@ -127,26 +127,26 @@ export default function AdminCoursesPage() {
         </Card>
       )}
 
-      <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={editingItem ? t('common.edit') : t('admin.add_new')} size="lg">
+      <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={editingItem ? '수정' : '추가'} size="lg">
         <div className="space-y-4">
           <div className="grid grid-cols-3 gap-4">
-            <Select label={t('course.duration')} options={[{ value: 'half_day', label: t('course.half_day') }, { value: 'full_day', label: t('course.full_day') }, { value: 'two_days', label: t('course.two_days') }]} value={formData.duration || ''} onChange={(e) => setFormData((p) => ({ ...p, duration: e.target.value }))} />
-            <Select label={t('course.difficulty')} options={[{ value: 'easy', label: t('course.easy') }, { value: 'moderate', label: t('course.moderate') }, { value: 'challenging', label: t('course.challenging') }]} value={formData.difficulty || ''} onChange={(e) => setFormData((p) => ({ ...p, difficulty: e.target.value }))} />
-            <Select label={t('course.theme')} options={[{ value: 'culture', label: t('course.culture') }, { value: 'food', label: t('course.food') }, { value: 'shopping', label: t('course.shopping') }, { value: 'nature', label: t('course.nature') }, { value: 'history', label: t('course.history') }]} value={formData.theme || ''} onChange={(e) => setFormData((p) => ({ ...p, theme: e.target.value }))} />
+            <Select label="소요시간" options={[{ value: 'half_day', label: '반나절' }, { value: 'full_day', label: '하루' }, { value: 'two_days', label: '2일' }]} value={formData.duration || ''} onChange={(e) => setFormData((p) => ({ ...p, duration: e.target.value }))} />
+            <Select label="난이도" options={[{ value: 'easy', label: '쉬움' }, { value: 'moderate', label: '보통' }, { value: 'challenging', label: '도전' }]} value={formData.difficulty || ''} onChange={(e) => setFormData((p) => ({ ...p, difficulty: e.target.value }))} />
+            <Select label="테마" options={[{ value: 'culture', label: '문화' }, { value: 'food', label: '음식' }, { value: 'shopping', label: '쇼핑' }, { value: 'nature', label: '자연' }, { value: 'history', label: '역사' }]} value={formData.theme || ''} onChange={(e) => setFormData((p) => ({ ...p, theme: e.target.value }))} />
           </div>
-          <Input label={t('course.region')} value={formData.region || ''} onChange={(e) => setFormData((p) => ({ ...p, region: e.target.value }))} />
+          <Input label="지역" value={formData.region || ''} onChange={(e) => setFormData((p) => ({ ...p, region: e.target.value }))} />
           <div className="pt-4">
-            <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('admin.multilingual')}</p>
+            <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">다국어 콘텐츠</p>
             <Tabs tabs={langTabs} activeTab={formLangTab} onChange={setFormLangTab} className="mb-4" />
             <div className="space-y-3">
-              <Input label={`${t('common.name')} (${formLangTab})`} value={formData[`name_${formLangTab}`] || ''} onChange={(e) => setFormData((p) => ({ ...p, [`name_${formLangTab}`]: e.target.value }))} />
-              <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Description ({formLangTab})</label>
+              <Input label={`이름 (${formLangTab})`} value={formData[`name_${formLangTab}`] || ''} onChange={(e) => setFormData((p) => ({ ...p, [`name_${formLangTab}`]: e.target.value }))} />
+              <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">설명 ({formLangTab})</label>
               <textarea className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-transparent outline-none transition focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 dark:border-gray-500/40 dark:bg-[#2a2a2a] dark:text-gray-100 min-h-[80px] resize-y" value={formData[`description_${formLangTab}`] || ''} onChange={(e) => setFormData((p) => ({ ...p, [`description_${formLangTab}`]: e.target.value }))} /></div>
             </div>
           </div>
           <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-500/40">
-            <Button variant="outline" onClick={() => setShowModal(false)}>{t('common.cancel')}</Button>
-            <Button onClick={handleSave} disabled={saving}>{saving ? t('common.loading') : t('common.save')}</Button>
+            <Button variant="outline" onClick={() => setShowModal(false)}>취소</Button>
+            <Button onClick={handleSave} disabled={saving}>{saving ? '로딩 중...' : '저장'}</Button>
           </div>
         </div>
       </Modal>

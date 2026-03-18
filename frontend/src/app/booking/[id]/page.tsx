@@ -27,10 +27,10 @@ export default function BookingPage() {
       setLoading(true);
       try {
         if (type === 'guide') {
-          const data = await api.get<Guide>(`/api/guides/${id}`);
+          const data = await api.get<Guide>(`/api/v1/guides/${id}`);
           setItem(data);
         } else {
-          const data = await api.get<Product>(`/api/products/${id}`);
+          const data = await api.get<Product>(`/api/v1/products/${id}`);
           setItem(data);
         }
       } catch {
@@ -56,7 +56,7 @@ export default function BookingPage() {
         booker_nationality: data.nationality,
         special_requests: data.specialRequests,
       };
-      const result = await api.post<{ booking_number: string }>('/api/bookings', bookingData);
+      const result = await api.post<{ booking_number: string }>('/api/v1/bookings', bookingData);
       router.push(`/booking/confirmation?booking_number=${result.booking_number}`);
     } catch {
       alert('Booking failed. Please try again.');

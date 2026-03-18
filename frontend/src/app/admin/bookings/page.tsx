@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { Search, ClipboardList } from 'lucide-react';
-import { useLanguage } from '@/hooks/useLanguage';
 import api from '@/lib/api';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -16,7 +15,6 @@ import { Booking } from '@/types';
 import { formatCurrency, formatDate } from '@/lib/utils';
 
 export default function AdminBookingsPage() {
-  const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [totalPages, setTotalPages] = useState(1);
@@ -41,15 +39,15 @@ export default function AdminBookingsPage() {
     try {
       await api.patch(`/api/admin/bookings/${bookingId}`, { status: newStatus });
       fetchBookings();
-    } catch { alert('Failed to update status'); }
+    } catch { alert('상태 변경에 실패했습니다'); }
   };
 
   const handleRefund = async (bookingId: number) => {
-    if (!confirm('Process refund?')) return;
+    if (!confirm('환불을 진행하시겠습니까?')) return;
     try {
       await api.post(`/api/admin/bookings/${bookingId}/refund`);
       fetchBookings();
-    } catch { alert('Refund failed'); }
+    } catch { alert('환불에 실패했습니다'); }
   };
 
   const statusVariant = (status: string) => {
@@ -63,28 +61,28 @@ export default function AdminBookingsPage() {
   };
 
   const statusOptions = [
-    { value: '', label: t('common.all') },
-    { value: 'pending', label: t('booking.status_pending') },
-    { value: 'confirmed', label: t('booking.status_confirmed') },
-    { value: 'cancelled', label: t('booking.status_cancelled') },
-    { value: 'completed', label: t('booking.status_completed') },
+    { value: '', label: '전체' },
+    { value: 'pending', label: '대기' },
+    { value: 'confirmed', label: '확정' },
+    { value: 'cancelled', label: '취소' },
+    { value: 'completed', label: '완료' },
   ];
 
   const changeStatusOptions = [
-    { value: 'pending', label: t('booking.status_pending') },
-    { value: 'confirmed', label: t('booking.status_confirmed') },
-    { value: 'cancelled', label: t('booking.status_cancelled') },
-    { value: 'completed', label: t('booking.status_completed') },
+    { value: 'pending', label: '대기' },
+    { value: 'confirmed', label: '확정' },
+    { value: 'cancelled', label: '취소' },
+    { value: 'completed', label: '완료' },
   ];
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">{t('admin.bookings')}</h1>
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">예약</h1>
 
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-          <Input placeholder={t('admin.search_placeholder')} value={search} onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }} className="pl-10" />
+          <Input placeholder="검색어를 입력하세요..." value={search} onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }} className="pl-10" />
         </div>
         <div className="w-48">
           <Select options={statusOptions} value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }} />
@@ -92,18 +90,18 @@ export default function AdminBookingsPage() {
       </div>
 
       {loading ? <LoadingSpinner fullPage /> : bookings.length === 0 ? (
-        <EmptyState icon={ClipboardList} title={t('common.no_results')} />
+        <EmptyState icon={ClipboardList} title="결과가 없습니다" />
       ) : (
         <Card className="overflow-hidden">
           <div className="overflow-x-auto"><table className="w-full">
             <thead className="bg-gray-50 dark:bg-dark-input"><tr>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('booking.booking_number')}</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('booking.booker_name')}</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('booking.date')}</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('booking.participants')}</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('booking.total')}</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('booking.status')}</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('admin.actions')}</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">예약번호</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">예약자명</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">날짜</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">인원</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">합계</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">상태</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">작업</th>
             </tr></thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-500/40">
               {bookings.map((b) => (
@@ -127,7 +125,7 @@ export default function AdminBookingsPage() {
                   </td>
                   <td className="px-4 py-4">
                     <Button variant="destructive" size="sm" onClick={() => handleRefund(b.id)}>
-                      {t('admin.refund')}
+                      환불
                     </Button>
                   </td>
                 </tr>

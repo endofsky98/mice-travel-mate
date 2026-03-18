@@ -31,7 +31,7 @@ export default function ProductDetailPage() {
     const fetchProduct = async () => {
       setLoading(true);
       try {
-        const data = await api.get<Product>(`/api/products/${id}`);
+        const data = await api.get<Product>(`/api/v1/products/${id}`);
         setProduct(data);
       } catch {
         setProduct(null);

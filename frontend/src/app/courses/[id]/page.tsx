@@ -37,7 +37,7 @@ export default function CourseDetailPage() {
     const fetchCourse = async () => {
       setLoading(true);
       try {
-        const data = await api.get<Course>(`/api/courses/${id}`);
+        const data = await api.get<Course>(`/api/v1/courses/${id}`);
         setCourse(data);
       } catch {
         setCourse(null);

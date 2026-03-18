@@ -26,7 +26,7 @@ export default function ProductsPage() {
     const fetchProducts = async () => {
       setLoading(true);
       try {
-        const data = await api.get<{ items: Product[]; pages: number }>('/api/products', {
+        const data = await api.get<{ items: Product[]; pages: number }>('/api/v1/products', {
           page: currentPage,
           per_page: 12,
           search: search || undefined,

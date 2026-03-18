@@ -18,7 +18,7 @@ import { Restaurant, SUPPORTED_LANGUAGES } from '@/types';
 import { getPriceRangeSymbol } from '@/lib/utils';
 
 export default function AdminRestaurantsPage() {
-  const { t, lt } = useLanguage();
+  const { lt } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [items, setItems] = useState<Restaurant[]>([]);
   const [totalPages, setTotalPages] = useState(1);
@@ -94,38 +94,38 @@ export default function AdminRestaurantsPage() {
       else { await api.post('/api/admin/restaurants', payload); }
       setShowModal(false);
       fetchItems();
-    } catch { alert('Failed to save'); }
+    } catch { alert('저장에 실패했습니다'); }
     setSaving(false);
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm(t('admin.confirm_delete'))) return;
-    try { await api.delete(`/api/admin/restaurants/${id}`); fetchItems(); } catch { alert('Failed to delete'); }
+    if (!confirm('정말 삭제하시겠습니까?')) return;
+    try { await api.delete(`/api/admin/restaurants/${id}`); fetchItems(); } catch { alert('삭제에 실패했습니다'); }
   };
 
   const langTabs = SUPPORTED_LANGUAGES.map((l) => ({ id: l.code, label: l.name }));
   const categoryOptions = [
-    { value: 'korean', label: t('restaurant.korean') }, { value: 'japanese', label: t('restaurant.japanese') },
-    { value: 'chinese', label: t('restaurant.chinese') }, { value: 'western', label: t('restaurant.western') },
-    { value: 'fusion', label: t('restaurant.fusion') }, { value: 'cafe', label: t('restaurant.cafe') },
-    { value: 'bar', label: t('restaurant.bar') }, { value: 'street_food', label: t('restaurant.street_food') },
+    { value: 'korean', label: '한식' }, { value: 'japanese', label: '일식' },
+    { value: 'chinese', label: '중식' }, { value: 'western', label: '양식' },
+    { value: 'fusion', label: '퓨전' }, { value: 'cafe', label: '카페' },
+    { value: 'bar', label: '바' }, { value: 'street_food', label: '길거리 음식' },
   ];
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t('admin.restaurants')}</h1>
-        <Button onClick={openCreateModal}><Plus className="w-4 h-4" />{t('admin.add_new')}</Button>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">맛집</h1>
+        <Button onClick={openCreateModal}><Plus className="w-4 h-4" />추가</Button>
       </div>
       <div className="mb-4">
         <div className="relative max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-          <Input placeholder={t('admin.search_placeholder')} value={search} onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }} className="pl-10" />
+          <Input placeholder="검색어를 입력하세요..." value={search} onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }} className="pl-10" />
         </div>
       </div>
 
       {loading ? <LoadingSpinner fullPage /> : items.length === 0 ? (
-        <EmptyState icon={UtensilsCrossed} title={t('common.no_results')} actionLabel={t('admin.add_new')} onAction={openCreateModal} />
+        <EmptyState icon={UtensilsCrossed} title="결과가 없습니다" actionLabel="추가" onAction={openCreateModal} />
       ) : (
         <Card className="overflow-hidden">
           <div className="overflow-x-auto">
@@ -133,11 +133,11 @@ export default function AdminRestaurantsPage() {
               <thead className="bg-gray-50 dark:bg-dark-input">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">ID</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{t('common.name')}</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{t('restaurant.category')}</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{t('restaurant.price_range')}</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{t('admin.status')}</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{t('admin.actions')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">이름</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">카테고리</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">가격대</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">상태</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">작업</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-500/40">
@@ -147,7 +147,7 @@ export default function AdminRestaurantsPage() {
                     <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-100">{lt(item.name)}</td>
                     <td className="px-6 py-4 text-sm"><Badge>{item.category}</Badge></td>
                     <td className="px-6 py-4 text-sm text-indigo-600 dark:text-indigo-400 font-medium">{getPriceRangeSymbol(item.price_range)}</td>
-                    <td className="px-6 py-4"><Badge variant={item.is_active ? 'success' : 'error'}>{item.is_active ? t('admin.active') : t('admin.inactive')}</Badge></td>
+                    <td className="px-6 py-4"><Badge variant={item.is_active ? 'success' : 'error'}>{item.is_active ? '활성' : '비활성'}</Badge></td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
                         <button onClick={() => openEditModal(item)} className="p-1 hover:bg-gray-100 dark:hover:bg-white/[0.08] rounded"><Pencil className="w-4 h-4 text-gray-500" /></button>
@@ -165,29 +165,29 @@ export default function AdminRestaurantsPage() {
         </Card>
       )}
 
-      <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={editingItem ? t('common.edit') : t('admin.add_new')} size="lg">
+      <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={editingItem ? '수정' : '추가'} size="lg">
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            <Select label={t('restaurant.category')} options={categoryOptions} value={formData.category || ''} onChange={(e) => setFormData((p) => ({ ...p, category: e.target.value }))} />
-            <Select label={t('restaurant.price_range')} options={[{ value: '1', label: '$' }, { value: '2', label: '$$' }, { value: '3', label: '$$$' }, { value: '4', label: '$$$$' }]} value={formData.price_range || ''} onChange={(e) => setFormData((p) => ({ ...p, price_range: e.target.value }))} />
+            <Select label="카테고리" options={categoryOptions} value={formData.category || ''} onChange={(e) => setFormData((p) => ({ ...p, category: e.target.value }))} />
+            <Select label="가격대" options={[{ value: '1', label: '$' }, { value: '2', label: '$$' }, { value: '3', label: '$$$' }, { value: '4', label: '$$$$' }]} value={formData.price_range || ''} onChange={(e) => setFormData((p) => ({ ...p, price_range: e.target.value }))} />
           </div>
-          <Input label={t('restaurant.phone')} value={formData.phone || ''} onChange={(e) => setFormData((p) => ({ ...p, phone: e.target.value }))} />
+          <Input label="전화번호" value={formData.phone || ''} onChange={(e) => setFormData((p) => ({ ...p, phone: e.target.value }))} />
           <div className="pt-4">
-            <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('admin.multilingual')}</p>
+            <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">다국어 콘텐츠</p>
             <Tabs tabs={langTabs} activeTab={formLangTab} onChange={setFormLangTab} className="mb-4" />
             <div className="space-y-3">
-              <Input label={`${t('common.name')} (${formLangTab})`} value={formData[`name_${formLangTab}`] || ''} onChange={(e) => setFormData((p) => ({ ...p, [`name_${formLangTab}`]: e.target.value }))} />
-              <Input label={`${t('restaurant.address')} (${formLangTab})`} value={formData[`address_${formLangTab}`] || ''} onChange={(e) => setFormData((p) => ({ ...p, [`address_${formLangTab}`]: e.target.value }))} />
-              <Input label={`${t('restaurant.hours')} (${formLangTab})`} value={formData[`hours_${formLangTab}`] || ''} onChange={(e) => setFormData((p) => ({ ...p, [`hours_${formLangTab}`]: e.target.value }))} />
+              <Input label={`이름 (${formLangTab})`} value={formData[`name_${formLangTab}`] || ''} onChange={(e) => setFormData((p) => ({ ...p, [`name_${formLangTab}`]: e.target.value }))} />
+              <Input label={`주소 (${formLangTab})`} value={formData[`address_${formLangTab}`] || ''} onChange={(e) => setFormData((p) => ({ ...p, [`address_${formLangTab}`]: e.target.value }))} />
+              <Input label={`영업시간 (${formLangTab})`} value={formData[`hours_${formLangTab}`] || ''} onChange={(e) => setFormData((p) => ({ ...p, [`hours_${formLangTab}`]: e.target.value }))} />
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Description ({formLangTab})</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">설명 ({formLangTab})</label>
                 <textarea className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-transparent outline-none transition focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 dark:border-gray-500/40 dark:bg-[#2a2a2a] dark:text-gray-100 min-h-[80px] resize-y" value={formData[`description_${formLangTab}`] || ''} onChange={(e) => setFormData((p) => ({ ...p, [`description_${formLangTab}`]: e.target.value }))} />
               </div>
             </div>
           </div>
           <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-500/40">
-            <Button variant="outline" onClick={() => setShowModal(false)}>{t('common.cancel')}</Button>
-            <Button onClick={handleSave} disabled={saving}>{saving ? t('common.loading') : t('common.save')}</Button>
+            <Button variant="outline" onClick={() => setShowModal(false)}>취소</Button>
+            <Button onClick={handleSave} disabled={saving}>{saving ? '로딩 중...' : '저장'}</Button>
           </div>
         </div>
       </Modal>

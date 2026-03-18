@@ -14,7 +14,7 @@ import EmptyState from '@/components/ui/EmptyState';
 import { LivingGuideCategory, LivingGuideArticle, SUPPORTED_LANGUAGES } from '@/types';
 
 export default function AdminLivingGuidePage() {
-  const { t, lt } = useLanguage();
+  const { lt } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState<LivingGuideCategory[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<LivingGuideCategory | null>(null);
@@ -94,17 +94,17 @@ export default function AdminLivingGuidePage() {
       }
       setShowCatModal(false);
       fetchCategories();
-    } catch { alert('Failed to save'); }
+    } catch { alert('저장에 실패했습니다'); }
     setSaving(false);
   };
 
   const handleDeleteCat = async (id: string) => {
-    if (!confirm(t('admin.confirm_delete'))) return;
+    if (!confirm('정말 삭제하시겠습니까?')) return;
     try {
       await api.delete(`/api/admin/living-guide/categories/${id}`);
       if (selectedCategory?.id === id) { setSelectedCategory(null); setArticles([]); }
       fetchCategories();
-    } catch { alert('Failed to delete'); }
+    } catch { alert('삭제에 실패했습니다'); }
   };
 
   // Article CRUD
@@ -147,13 +147,13 @@ export default function AdminLivingGuidePage() {
       }
       setShowArtModal(false);
       fetchArticles(selectedCategory.id);
-    } catch { alert('Failed to save'); }
+    } catch { alert('저장에 실패했습니다'); }
     setSaving(false);
   };
 
   const handleDeleteArt = async (id: string) => {
-    if (!selectedCategory || !confirm(t('admin.confirm_delete'))) return;
-    try { await api.delete(`/api/admin/living-guide/articles/${id}`); fetchArticles(selectedCategory.id); } catch { alert('Failed to delete'); }
+    if (!selectedCategory || !confirm('정말 삭제하시겠습니까?')) return;
+    try { await api.delete(`/api/admin/living-guide/articles/${id}`); fetchArticles(selectedCategory.id); } catch { alert('삭제에 실패했습니다'); }
   };
 
   const langTabs = SUPPORTED_LANGUAGES.map((l) => ({ id: l.code, label: l.name }));
@@ -170,20 +170,20 @@ export default function AdminLivingGuidePage() {
             </button>
           )}
           <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-            {selectedCategory ? `Living Guide - ${lt(selectedCategory.name)}` : 'Living Guide Management'}
+            {selectedCategory ? `생활 가이드 - ${lt(selectedCategory.name)}` : '생활 가이드 관리'}
           </h1>
         </div>
         {selectedCategory ? (
-          <Button onClick={openCreateArtModal}><Plus className="w-4 h-4" />Add Article</Button>
+          <Button onClick={openCreateArtModal}><Plus className="w-4 h-4" />글 추가</Button>
         ) : (
-          <Button onClick={openCreateCatModal}><Plus className="w-4 h-4" />Add Category</Button>
+          <Button onClick={openCreateCatModal}><Plus className="w-4 h-4" />카테고리 추가</Button>
         )}
       </div>
 
       {/* Category List */}
       {!selectedCategory && (
         categories.length === 0 ? (
-          <EmptyState icon={BookOpen} title="No categories yet" actionLabel="Add Category" onAction={openCreateCatModal} />
+          <EmptyState icon={BookOpen} title="카테고리가 없습니다" actionLabel="카테고리 추가" onAction={openCreateCatModal} />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {categories.map((cat) => (
@@ -195,7 +195,7 @@ export default function AdminLivingGuidePage() {
                     </div>
                     <div>
                       <h3 className="font-semibold text-gray-900 dark:text-gray-100">{lt(cat.name)}</h3>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">{cat.articles?.length || 0} articles</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{cat.articles?.length || 0}개 글</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-1">
@@ -213,7 +213,7 @@ export default function AdminLivingGuidePage() {
       {/* Article List */}
       {selectedCategory && (
         loadingArticles ? <LoadingSpinner fullPage /> : articles.length === 0 ? (
-          <EmptyState icon={BookOpen} title="No articles in this category" actionLabel="Add Article" onAction={openCreateArtModal} />
+          <EmptyState icon={BookOpen} title="이 카테고리에 글이 없습니다" actionLabel="글 추가" onAction={openCreateArtModal} />
         ) : (
           <Card className="overflow-hidden">
             <div className="overflow-x-auto">
@@ -221,9 +221,9 @@ export default function AdminLivingGuidePage() {
                 <thead className="bg-gray-50 dark:bg-dark-input">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">ID</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Title</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Image</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Actions</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">제목</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">이미지</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">작업</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 dark:divide-gray-500/40">
@@ -254,32 +254,32 @@ export default function AdminLivingGuidePage() {
       )}
 
       {/* Category Modal */}
-      <Modal isOpen={showCatModal} onClose={() => setShowCatModal(false)} title={editingCat ? 'Edit Category' : 'Add Category'} size="md">
+      <Modal isOpen={showCatModal} onClose={() => setShowCatModal(false)} title={editingCat ? '카테고리 수정' : '카테고리 추가'} size="md">
         <div className="space-y-4">
-          <Input label="Icon (emoji or name)" value={catFormData.icon || ''} onChange={(e) => setCatFormData((p) => ({ ...p, icon: e.target.value }))} placeholder="e.g. 📖 or book" />
+          <Input label="아이콘 (이모지 또는 이름)" value={catFormData.icon || ''} onChange={(e) => setCatFormData((p) => ({ ...p, icon: e.target.value }))} placeholder="예: 📖 또는 book" />
           <div className="pt-4">
-            <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Multilingual Content</p>
+            <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">다국어 콘텐츠</p>
             <Tabs tabs={langTabs} activeTab={catFormLangTab} onChange={setCatFormLangTab} className="mb-4" />
-            <Input label={`Name (${catFormLangTab})`} value={catFormData[`name_${catFormLangTab}`] || ''} onChange={(e) => setCatFormData((p) => ({ ...p, [`name_${catFormLangTab}`]: e.target.value }))} />
+            <Input label={`이름 (${catFormLangTab})`} value={catFormData[`name_${catFormLangTab}`] || ''} onChange={(e) => setCatFormData((p) => ({ ...p, [`name_${catFormLangTab}`]: e.target.value }))} />
           </div>
           <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-500/40">
-            <Button variant="outline" onClick={() => setShowCatModal(false)}>{t('common.cancel')}</Button>
-            <Button onClick={handleSaveCat} disabled={saving}>{saving ? t('common.loading') : t('common.save')}</Button>
+            <Button variant="outline" onClick={() => setShowCatModal(false)}>취소</Button>
+            <Button onClick={handleSaveCat} disabled={saving}>{saving ? '로딩 중...' : '저장'}</Button>
           </div>
         </div>
       </Modal>
 
       {/* Article Modal */}
-      <Modal isOpen={showArtModal} onClose={() => setShowArtModal(false)} title={editingArt ? 'Edit Article' : 'Add Article'} size="lg">
+      <Modal isOpen={showArtModal} onClose={() => setShowArtModal(false)} title={editingArt ? '글 수정' : '글 추가'} size="lg">
         <div className="space-y-4">
-          <Input label="Image URL" value={artFormData.image_url || ''} onChange={(e) => setArtFormData((p) => ({ ...p, image_url: e.target.value }))} />
+          <Input label="이미지 URL" value={artFormData.image_url || ''} onChange={(e) => setArtFormData((p) => ({ ...p, image_url: e.target.value }))} />
           <div className="pt-4">
-            <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Multilingual Content</p>
+            <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">다국어 콘텐츠</p>
             <Tabs tabs={langTabs} activeTab={artFormLangTab} onChange={setArtFormLangTab} className="mb-4" />
             <div className="space-y-3">
-              <Input label={`Title (${artFormLangTab})`} value={artFormData[`title_${artFormLangTab}`] || ''} onChange={(e) => setArtFormData((p) => ({ ...p, [`title_${artFormLangTab}`]: e.target.value }))} />
+              <Input label={`제목 (${artFormLangTab})`} value={artFormData[`title_${artFormLangTab}`] || ''} onChange={(e) => setArtFormData((p) => ({ ...p, [`title_${artFormLangTab}`]: e.target.value }))} />
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Content ({artFormLangTab})</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">내용 ({artFormLangTab})</label>
                 <textarea
                   className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-transparent outline-none transition focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 dark:border-gray-500/40 dark:bg-[#2a2a2a] dark:text-gray-100 min-h-[160px] resize-y"
                   value={artFormData[`content_${artFormLangTab}`] || ''}
@@ -289,8 +289,8 @@ export default function AdminLivingGuidePage() {
             </div>
           </div>
           <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-500/40">
-            <Button variant="outline" onClick={() => setShowArtModal(false)}>{t('common.cancel')}</Button>
-            <Button onClick={handleSaveArt} disabled={saving}>{saving ? t('common.loading') : t('common.save')}</Button>
+            <Button variant="outline" onClick={() => setShowArtModal(false)}>취소</Button>
+            <Button onClick={handleSaveArt} disabled={saving}>{saving ? '로딩 중...' : '저장'}</Button>
           </div>
         </div>
       </Modal>

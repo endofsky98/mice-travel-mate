@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { Search, Star, Check, Trash2, AlertTriangle, Flag } from 'lucide-react';
-import { useLanguage } from '@/hooks/useLanguage';
 import api from '@/lib/api';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -16,7 +15,6 @@ import { Review } from '@/types';
 import { formatDate } from '@/lib/utils';
 
 export default function AdminReviewsPage() {
-  const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [items, setItems] = useState<Review[]>([]);
   const [totalPages, setTotalPages] = useState(1);
@@ -51,15 +49,15 @@ export default function AdminReviewsPage() {
     try {
       await api.patch(`/api/admin/reviews/${id}`, { status: 'approved' });
       fetchItems();
-    } catch { alert('Failed to approve'); }
+    } catch { alert('승인에 실패했습니다'); }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this review?')) return;
+    if (!confirm('이 리뷰를 삭제하시겠습니까?')) return;
     try {
       await api.patch(`/api/admin/reviews/${id}`, { status: 'deleted' });
       fetchItems();
-    } catch { alert('Failed to delete'); }
+    } catch { alert('삭제에 실패했습니다'); }
   };
 
   const statusVariant = (status: string) => {
@@ -71,25 +69,34 @@ export default function AdminReviewsPage() {
     }
   };
 
+  const statusLabel = (status: string) => {
+    switch (status) {
+      case 'approved': return '승인';
+      case 'pending': return '대기';
+      case 'deleted': return '삭제됨';
+      default: return status;
+    }
+  };
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Review Management</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">리뷰 관리</h1>
       </div>
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3 mb-4 flex-wrap">
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-          <Input placeholder="Search reviews..." value={search} onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }} className="pl-10" />
+          <Input placeholder="리뷰 검색..." value={search} onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }} className="pl-10" />
         </div>
         <Select
           options={[
-            { value: '', label: 'All Types' },
-            { value: 'restaurant', label: 'Restaurant' },
-            { value: 'course', label: 'Course' },
-            { value: 'product', label: 'Product' },
-            { value: 'guide', label: 'Guide' },
+            { value: '', label: '전체 유형' },
+            { value: 'restaurant', label: '맛집' },
+            { value: 'course', label: '코스' },
+            { value: 'product', label: '상품' },
+            { value: 'guide', label: '가이드' },
           ]}
           value={filterType}
           onChange={(e) => { setFilterType(e.target.value); setCurrentPage(1); }}
@@ -97,10 +104,10 @@ export default function AdminReviewsPage() {
         />
         <Select
           options={[
-            { value: '', label: 'All Status' },
-            { value: 'pending', label: 'Pending' },
-            { value: 'approved', label: 'Approved' },
-            { value: 'deleted', label: 'Deleted' },
+            { value: '', label: '전체 상태' },
+            { value: 'pending', label: '대기' },
+            { value: 'approved', label: '승인' },
+            { value: 'deleted', label: '삭제됨' },
           ]}
           value={filterStatus}
           onChange={(e) => { setFilterStatus(e.target.value); setCurrentPage(1); }}
@@ -108,12 +115,12 @@ export default function AdminReviewsPage() {
         />
         <Select
           options={[
-            { value: '', label: 'All Ratings' },
-            { value: '5', label: '5 Stars' },
-            { value: '4', label: '4 Stars' },
-            { value: '3', label: '3 Stars' },
-            { value: '2', label: '2 Stars' },
-            { value: '1', label: '1 Star' },
+            { value: '', label: '전체 별점' },
+            { value: '5', label: '5점' },
+            { value: '4', label: '4점' },
+            { value: '3', label: '3점' },
+            { value: '2', label: '2점' },
+            { value: '1', label: '1점' },
           ]}
           value={filterRating}
           onChange={(e) => { setFilterRating(e.target.value); setCurrentPage(1); }}
@@ -121,9 +128,9 @@ export default function AdminReviewsPage() {
         />
         <Select
           options={[
-            { value: '', label: 'All Reports' },
-            { value: 'true', label: 'Reported' },
-            { value: 'false', label: 'Not Reported' },
+            { value: '', label: '전체 신고' },
+            { value: 'true', label: '신고됨' },
+            { value: 'false', label: '신고 없음' },
           ]}
           value={filterReported}
           onChange={(e) => { setFilterReported(e.target.value); setCurrentPage(1); }}
@@ -132,20 +139,20 @@ export default function AdminReviewsPage() {
       </div>
 
       {loading ? <LoadingSpinner fullPage /> : items.length === 0 ? (
-        <EmptyState icon={Star} title="No reviews found" />
+        <EmptyState icon={Star} title="리뷰가 없습니다" />
       ) : (
         <Card className="overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50 dark:bg-dark-input">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">User</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Target</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Rating</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Content</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Date</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Actions</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">사용자</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">대상</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">별점</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">내용</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">날짜</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">상태</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">작업</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-500/40">
@@ -181,17 +188,17 @@ export default function AdminReviewsPage() {
                       {formatDate(item.created_at)}
                     </td>
                     <td className="px-6 py-4">
-                      <Badge variant={statusVariant(item.status)}>{item.status}</Badge>
+                      <Badge variant={statusVariant(item.status)}>{statusLabel(item.status)}</Badge>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
                         {item.status === 'pending' && (
-                          <button onClick={() => handleApprove(item.id)} className="p-1 hover:bg-green-50 dark:hover:bg-green-950/40 rounded" title="Approve">
+                          <button onClick={() => handleApprove(item.id)} className="p-1 hover:bg-green-50 dark:hover:bg-green-950/40 rounded" title="승인">
                             <Check className="w-4 h-4 text-green-600" />
                           </button>
                         )}
                         {item.status !== 'deleted' && (
-                          <button onClick={() => handleDelete(item.id)} className="p-1 hover:bg-red-50 dark:hover:bg-red-950/40 rounded" title="Delete">
+                          <button onClick={() => handleDelete(item.id)} className="p-1 hover:bg-red-50 dark:hover:bg-red-950/40 rounded" title="삭제">
                             <Trash2 className="w-4 h-4 text-red-500" />
                           </button>
                         )}

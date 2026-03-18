@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { MessageCircle, AlertTriangle, Check, Trash2, ShieldAlert } from 'lucide-react';
-import { useLanguage } from '@/hooks/useLanguage';
 import api from '@/lib/api';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -27,7 +26,6 @@ interface ReportedMessage {
 }
 
 export default function AdminChatMonitorPage() {
-  const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [items, setItems] = useState<ReportedMessage[]>([]);
   const [totalPages, setTotalPages] = useState(1);
@@ -51,15 +49,15 @@ export default function AdminChatMonitorPage() {
     try {
       await api.patch(`/api/admin/chat/reports/${id}`, { status: action });
       fetchItems();
-    } catch { alert('Failed to update'); }
+    } catch { alert('업데이트에 실패했습니다'); }
   };
 
   const handleDeleteMessage = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this message?')) return;
+    if (!confirm('이 메시지를 삭제하시겠습니까?')) return;
     try {
       await api.delete(`/api/admin/chat/messages/${id}`);
       fetchItems();
-    } catch { alert('Failed to delete'); }
+    } catch { alert('삭제에 실패했습니다'); }
   };
 
   const statusVariant = (status: string) => {
@@ -72,15 +70,25 @@ export default function AdminChatMonitorPage() {
     }
   };
 
+  const statusLabel = (status: string) => {
+    switch (status) {
+      case 'reviewed': return '검토됨';
+      case 'dismissed': return '무시됨';
+      case 'warned': return '경고됨';
+      case 'pending': return '대기';
+      default: return status;
+    }
+  };
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Chat Monitor</h1>
-        <Badge variant="warning">{items.filter((i) => i.status === 'pending').length} Pending</Badge>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">채팅 모니터</h1>
+        <Badge variant="warning">{items.filter((i) => i.status === 'pending').length}건 대기</Badge>
       </div>
 
       {loading ? <LoadingSpinner fullPage /> : items.length === 0 ? (
-        <EmptyState icon={MessageCircle} title="No reported messages" description="All chat messages are clean." />
+        <EmptyState icon={MessageCircle} title="신고된 메시지가 없습니다" description="모든 채팅 메시지가 정상입니다." />
       ) : (
         <div className="space-y-4">
           {items.map((item) => (
@@ -92,7 +100,7 @@ export default function AdminChatMonitorPage() {
                       {item.sender_name || item.sender_id}
                     </span>
                     <Badge>{item.sender_type}</Badge>
-                    <Badge variant={statusVariant(item.status)}>{item.status}</Badge>
+                    <Badge variant={statusVariant(item.status)}>{statusLabel(item.status)}</Badge>
                     <span className="text-xs text-gray-400">{formatDate(item.created_at)}</span>
                   </div>
 
@@ -109,8 +117,8 @@ export default function AdminChatMonitorPage() {
                     <div className="flex items-start gap-2 text-sm text-red-600 dark:text-red-400">
                       <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
                       <div>
-                        <span className="font-medium">Report reason:</span> {item.report_reason}
-                        {item.reported_by && <span className="text-gray-400 ml-2">by {item.reported_by}</span>}
+                        <span className="font-medium">신고 사유:</span> {item.report_reason}
+                        {item.reported_by && <span className="text-gray-400 ml-2">신고자: {item.reported_by}</span>}
                       </div>
                     </div>
                   )}
@@ -119,18 +127,18 @@ export default function AdminChatMonitorPage() {
                 <div className="flex items-center gap-1 ml-4 flex-shrink-0">
                   {item.status === 'pending' && (
                     <>
-                      <Button size="sm" variant="outline" onClick={() => handleAction(item.id, 'reviewed')} title="Mark Reviewed">
+                      <Button size="sm" variant="outline" onClick={() => handleAction(item.id, 'reviewed')} title="검토 완료">
                         <Check className="w-4 h-4 text-green-600" />
                       </Button>
-                      <Button size="sm" variant="outline" onClick={() => handleAction(item.id, 'dismissed')} title="Dismiss">
+                      <Button size="sm" variant="outline" onClick={() => handleAction(item.id, 'dismissed')} title="무시">
                         <Trash2 className="w-4 h-4 text-gray-500" />
                       </Button>
-                      <Button size="sm" variant="destructive" onClick={() => handleAction(item.id, 'warned')} title="Warn User">
+                      <Button size="sm" variant="destructive" onClick={() => handleAction(item.id, 'warned')} title="경고">
                         <ShieldAlert className="w-4 h-4" />
                       </Button>
                     </>
                   )}
-                  <Button size="sm" variant="destructive" onClick={() => handleDeleteMessage(item.id)} title="Delete Message">
+                  <Button size="sm" variant="destructive" onClick={() => handleDeleteMessage(item.id)} title="메시지 삭제">
                     <Trash2 className="w-4 h-4" />
                   </Button>
                 </div>

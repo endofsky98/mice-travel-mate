@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { Plus, Search, Pencil, Trash2, Ticket, ToggleLeft, ToggleRight, Copy, RefreshCw } from 'lucide-react';
-import { useLanguage } from '@/hooks/useLanguage';
 import api from '@/lib/api';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -26,7 +25,6 @@ interface CouponFull extends Coupon {
 }
 
 export default function AdminCouponsPage() {
-  const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [items, setItems] = useState<CouponFull[]>([]);
   const [totalPages, setTotalPages] = useState(1);
@@ -120,20 +118,20 @@ export default function AdminCouponsPage() {
       }
       setShowModal(false);
       fetchItems();
-    } catch { alert('Failed to save'); }
+    } catch { alert('저장에 실패했습니다'); }
     setSaving(false);
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm(t('admin.confirm_delete'))) return;
-    try { await api.delete(`/api/admin/coupons/${id}`); fetchItems(); } catch { alert('Failed to delete'); }
+    if (!confirm('정말 삭제하시겠습니까?')) return;
+    try { await api.delete(`/api/admin/coupons/${id}`); fetchItems(); } catch { alert('삭제에 실패했습니다'); }
   };
 
   const handleToggleActive = async (item: CouponFull) => {
     try {
       await api.patch(`/api/admin/coupons/${item.id}`, { is_valid: !item.is_valid });
       fetchItems();
-    } catch { alert('Failed to update'); }
+    } catch { alert('업데이트에 실패했습니다'); }
   };
 
   const copyCode = (code: string) => {
@@ -143,32 +141,32 @@ export default function AdminCouponsPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Coupon Management</h1>
-        <Button onClick={openCreateModal}><Plus className="w-4 h-4" />Add Coupon</Button>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">쿠폰 관리</h1>
+        <Button onClick={openCreateModal}><Plus className="w-4 h-4" />쿠폰 추가</Button>
       </div>
 
       <div className="mb-4">
         <div className="relative max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-          <Input placeholder="Search coupons..." value={search} onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }} className="pl-10" />
+          <Input placeholder="쿠폰 검색..." value={search} onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }} className="pl-10" />
         </div>
       </div>
 
       {loading ? <LoadingSpinner fullPage /> : items.length === 0 ? (
-        <EmptyState icon={Ticket} title="No coupons found" actionLabel="Add Coupon" onAction={openCreateModal} />
+        <EmptyState icon={Ticket} title="쿠폰이 없습니다" actionLabel="쿠폰 추가" onAction={openCreateModal} />
       ) : (
         <Card className="overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50 dark:bg-dark-input">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Code</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Discount</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Usage</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Period</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Active</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Actions</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">코드</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">이름</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">할인</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">사용량</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">기간</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">활성</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">작업</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-500/40">
@@ -196,7 +194,7 @@ export default function AdminCouponsPage() {
                       {item.start_date && item.end_date ? (
                         <span>{item.start_date.split('T')[0]} ~ {item.end_date.split('T')[0]}</span>
                       ) : (
-                        <span>No limit</span>
+                        <span>제한 없음</span>
                       )}
                     </td>
                     <td className="px-6 py-4">
@@ -221,52 +219,52 @@ export default function AdminCouponsPage() {
         </Card>
       )}
 
-      <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={editingItem ? 'Edit Coupon' : 'Add Coupon'} size="lg">
+      <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={editingItem ? '쿠폰 수정' : '쿠폰 추가'} size="lg">
         <div className="space-y-4">
           <div className="flex items-end gap-3">
-            <Input label="Code" value={formData.code || ''} onChange={(e) => setFormData((p) => ({ ...p, code: e.target.value.toUpperCase() }))} className="flex-1 font-mono" />
+            <Input label="코드" value={formData.code || ''} onChange={(e) => setFormData((p) => ({ ...p, code: e.target.value.toUpperCase() }))} className="flex-1 font-mono" />
             {!editingItem && (
               <Button variant="outline" onClick={() => setFormData((p) => ({ ...p, code: generateCode() }))} className="mb-0">
-                <RefreshCw className="w-4 h-4" />Auto
+                <RefreshCw className="w-4 h-4" />자동생성
               </Button>
             )}
           </div>
-          <Input label="Name" value={formData.name || ''} onChange={(e) => setFormData((p) => ({ ...p, name: e.target.value }))} />
+          <Input label="이름" value={formData.name || ''} onChange={(e) => setFormData((p) => ({ ...p, name: e.target.value }))} />
           <div className="grid grid-cols-2 gap-4">
             <Select
-              label="Discount Type"
+              label="할인 유형"
               options={[
-                { value: 'percentage', label: 'Percentage (%)' },
-                { value: 'fixed', label: 'Fixed Amount ($)' },
-                { value: 'upgrade', label: 'Upgrade' },
+                { value: 'percentage', label: '비율 (%)' },
+                { value: 'fixed', label: '고정 금액 ($)' },
+                { value: 'upgrade', label: '업그레이드' },
               ]}
               value={formData.discount_type || ''}
               onChange={(e) => setFormData((p) => ({ ...p, discount_type: e.target.value }))}
             />
-            <Input label="Discount Value" type="number" value={formData.discount_value || ''} onChange={(e) => setFormData((p) => ({ ...p, discount_value: e.target.value }))} />
+            <Input label="할인 값" type="number" value={formData.discount_value || ''} onChange={(e) => setFormData((p) => ({ ...p, discount_value: e.target.value }))} />
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <Input label="Max Discount (USD)" type="number" value={formData.max_discount_usd || ''} onChange={(e) => setFormData((p) => ({ ...p, max_discount_usd: e.target.value }))} placeholder="Optional" />
-            <Input label="Min Order (USD)" type="number" value={formData.min_order_usd || ''} onChange={(e) => setFormData((p) => ({ ...p, min_order_usd: e.target.value }))} placeholder="Optional" />
+            <Input label="최대 할인액 (USD)" type="number" value={formData.max_discount_usd || ''} onChange={(e) => setFormData((p) => ({ ...p, max_discount_usd: e.target.value }))} placeholder="선택사항" />
+            <Input label="최소 주문액 (USD)" type="number" value={formData.min_order_usd || ''} onChange={(e) => setFormData((p) => ({ ...p, min_order_usd: e.target.value }))} placeholder="선택사항" />
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <Input label="Start Date" type="date" value={formData.start_date || ''} onChange={(e) => setFormData((p) => ({ ...p, start_date: e.target.value }))} />
-            <Input label="End Date" type="date" value={formData.end_date || ''} onChange={(e) => setFormData((p) => ({ ...p, end_date: e.target.value }))} />
+            <Input label="시작일" type="date" value={formData.start_date || ''} onChange={(e) => setFormData((p) => ({ ...p, start_date: e.target.value }))} />
+            <Input label="종료일" type="date" value={formData.end_date || ''} onChange={(e) => setFormData((p) => ({ ...p, end_date: e.target.value }))} />
           </div>
           <div className="grid grid-cols-3 gap-4">
-            <Input label="Max Total Uses" type="number" value={formData.max_uses || ''} onChange={(e) => setFormData((p) => ({ ...p, max_uses: e.target.value }))} placeholder="Unlimited" />
-            <Input label="Max Per User" type="number" value={formData.max_uses_per_user || ''} onChange={(e) => setFormData((p) => ({ ...p, max_uses_per_user: e.target.value }))} />
-            <Input label="Event ID" value={formData.event_id || ''} onChange={(e) => setFormData((p) => ({ ...p, event_id: e.target.value }))} placeholder="Optional" />
+            <Input label="최대 사용 횟수" type="number" value={formData.max_uses || ''} onChange={(e) => setFormData((p) => ({ ...p, max_uses: e.target.value }))} placeholder="무제한" />
+            <Input label="1인당 최대 사용" type="number" value={formData.max_uses_per_user || ''} onChange={(e) => setFormData((p) => ({ ...p, max_uses_per_user: e.target.value }))} />
+            <Input label="이벤트 ID" value={formData.event_id || ''} onChange={(e) => setFormData((p) => ({ ...p, event_id: e.target.value }))} placeholder="선택사항" />
           </div>
           <Select
-            label="Status"
-            options={[{ value: 'true', label: 'Active' }, { value: 'false', label: 'Inactive' }]}
+            label="상태"
+            options={[{ value: 'true', label: '활성' }, { value: 'false', label: '비활성' }]}
             value={formData.is_valid || 'true'}
             onChange={(e) => setFormData((p) => ({ ...p, is_valid: e.target.value }))}
           />
           <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-500/40">
-            <Button variant="outline" onClick={() => setShowModal(false)}>{t('common.cancel')}</Button>
-            <Button onClick={handleSave} disabled={saving}>{saving ? t('common.loading') : t('common.save')}</Button>
+            <Button variant="outline" onClick={() => setShowModal(false)}>취소</Button>
+            <Button onClick={handleSave} disabled={saving}>{saving ? '로딩 중...' : '저장'}</Button>
           </div>
         </div>
       </Modal>

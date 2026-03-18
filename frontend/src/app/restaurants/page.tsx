@@ -43,7 +43,7 @@ export default function RestaurantsPage() {
           sort: sortBy || undefined,
           event_id: eventId || undefined,
         };
-        const data = await api.get<{ items: Restaurant[]; pages: number }>('/api/restaurants', params);
+        const data = await api.get<{ items: Restaurant[]; pages: number }>('/api/v1/restaurants', params);
         setRestaurants(data.items || []);
         setTotalPages(data.pages || 1);
       } catch {

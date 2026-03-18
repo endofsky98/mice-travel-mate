@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { MapPin, Save } from 'lucide-react';
-import { useLanguage } from '@/hooks/useLanguage';
 import api from '@/lib/api';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -17,7 +16,6 @@ interface MapSettings {
 }
 
 export default function AdminMapSettingsPage() {
-  const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -49,7 +47,7 @@ export default function AdminMapSettingsPage() {
       await api.put('/api/admin/settings/map', settings);
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
-    } catch { alert('Failed to save settings'); }
+    } catch { alert('설정 저장에 실패했습니다'); }
     setSaving(false);
   };
 
@@ -58,10 +56,10 @@ export default function AdminMapSettingsPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Map Settings</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">지도 설정</h1>
         <Button onClick={handleSave} disabled={saving}>
           <Save className="w-4 h-4" />
-          {saving ? 'Saving...' : saved ? 'Saved!' : 'Save Settings'}
+          {saving ? '저장 중...' : saved ? '저장 완료!' : '설정 저장'}
         </Button>
       </div>
 
@@ -69,32 +67,32 @@ export default function AdminMapSettingsPage() {
         {/* Settings */}
         <div className="space-y-6">
           <Card className="p-6">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">API Configuration</h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">API 설정</h2>
             <Input
-              label="Mapbox API Key"
+              label="Mapbox API 키"
               type="password"
               value={settings.mapbox_api_key}
               onChange={(e) => setSettings((p) => ({ ...p, mapbox_api_key: e.target.value }))}
               placeholder="pk.eyJ1Ijoi..."
             />
             <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-              Get your API key from <a href="https://account.mapbox.com/" target="_blank" rel="noopener noreferrer" className="text-indigo-600 dark:text-indigo-400 hover:underline">mapbox.com</a>
+              <a href="https://account.mapbox.com/" target="_blank" rel="noopener noreferrer" className="text-indigo-600 dark:text-indigo-400 hover:underline">mapbox.com</a>에서 API 키를 발급받으세요
             </p>
           </Card>
 
           <Card className="p-6">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Default View</h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">기본 표시 설정</h2>
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <Input
-                  label="Center Latitude"
+                  label="중심 위도"
                   type="number"
                   step="any"
                   value={String(settings.default_center_lat)}
                   onChange={(e) => setSettings((p) => ({ ...p, default_center_lat: parseFloat(e.target.value) || 0 }))}
                 />
                 <Input
-                  label="Center Longitude"
+                  label="중심 경도"
                   type="number"
                   step="any"
                   value={String(settings.default_center_lng)}
@@ -102,7 +100,7 @@ export default function AdminMapSettingsPage() {
                 />
               </div>
               <Input
-                label="Default Zoom Level"
+                label="기본 줌 레벨"
                 type="number"
                 min="1"
                 max="20"
@@ -115,28 +113,28 @@ export default function AdminMapSettingsPage() {
                   size="sm"
                   onClick={() => setSettings((p) => ({ ...p, default_center_lat: 37.5665, default_center_lng: 126.978, default_zoom: 12 }))}
                 >
-                  Seoul
+                  서울
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setSettings((p) => ({ ...p, default_center_lat: 35.1796, default_center_lng: 129.0756, default_zoom: 12 }))}
                 >
-                  Busan
+                  부산
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setSettings((p) => ({ ...p, default_center_lat: 33.4996, default_center_lng: 126.5312, default_zoom: 11 }))}
                 >
-                  Jeju
+                  제주
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setSettings((p) => ({ ...p, default_center_lat: 35.8714, default_center_lng: 128.6014, default_zoom: 12 }))}
                 >
-                  Daegu
+                  대구
                 </Button>
               </div>
             </div>
@@ -145,21 +143,21 @@ export default function AdminMapSettingsPage() {
 
         {/* Map Preview */}
         <Card className="p-6">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Map Preview</h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">지도 미리보기</h2>
           <div className="w-full h-[400px] rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-green-50 dark:from-blue-950/30 dark:to-green-950/30" />
             <div className="relative text-center">
               <MapPin className="w-12 h-12 text-indigo-500 mx-auto mb-3" />
-              <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Map Preview</p>
+              <p className="text-sm font-medium text-gray-700 dark:text-gray-300">지도 미리보기</p>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Center: {settings.default_center_lat.toFixed(4)}, {settings.default_center_lng.toFixed(4)}
+                중심: {settings.default_center_lat.toFixed(4)}, {settings.default_center_lng.toFixed(4)}
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                Zoom: {settings.default_zoom}
+                줌: {settings.default_zoom}
               </p>
               {!settings.mapbox_api_key && (
                 <p className="text-xs text-amber-600 dark:text-amber-400 mt-3">
-                  Add a Mapbox API key to see the live preview
+                  Mapbox API 키를 입력하면 실시간 미리보기를 볼 수 있습니다
                 </p>
               )}
             </div>

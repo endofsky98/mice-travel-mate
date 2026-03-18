@@ -31,6 +31,7 @@ import CourseCard from '@/components/course/CourseCard';
 import ProductCard from '@/components/product/ProductCard';
 import GuideCard from '@/components/guide/GuideCard';
 import Card from '@/components/ui/Card';
+import MapView from '@/components/map/MapView';
 import {
   RollingBanner as BannerType,
   Event,
@@ -83,7 +84,7 @@ export default function HomePage() {
         // If event slug, fetch event data
         if (eventSlug) {
           try {
-            const eventData = await api.get<Event>(`/api/events/${eventSlug}`);
+            const eventData = await api.get<Event>(`/api/v1/events/${eventSlug}`);
             setSelectedEvent(eventData);
           } catch {
             setSelectedEvent(null);
@@ -92,15 +93,14 @@ export default function HomePage() {
 
         // Fetch all section data in parallel
         const [restData, courseData, prodData, guideData, festData] = await Promise.all([
-          api.get<{ items: Restaurant[] }>('/api/restaurants', {
+          api.get<{ items: Restaurant[] }>('/api/v1/restaurants', {
             per_page: 10,
             lat: userLat,
             lng: userLng,
-            ...(eventSlug ? {} : {}),
           }).catch(() => ({ items: [] })),
-          api.get<{ items: Course[] }>('/api/courses', { per_page: 10 }).catch(() => ({ items: [] })),
-          api.get<{ items: Product[] }>('/api/products', { per_page: 10 }).catch(() => ({ items: [] })),
-          api.get<{ items: Guide[] }>('/api/guides', { per_page: 10 }).catch(() => ({ items: [] })),
+          api.get<{ items: Course[] }>('/api/v1/courses', { per_page: 10 }).catch(() => ({ items: [] })),
+          api.get<{ items: Product[] }>('/api/v1/products', { per_page: 10 }).catch(() => ({ items: [] })),
+          api.get<{ items: Guide[] }>('/api/v1/guides', { per_page: 10 }).catch(() => ({ items: [] })),
           api.get<{ items: Festival[] }>('/api/festivals', { per_page: 6 }).catch(() => ({ items: [] })),
         ]);
 
@@ -280,15 +280,19 @@ export default function HomePage() {
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
-          <div className="w-full h-[200px] rounded-xl bg-gray-200 dark:bg-gray-800 flex items-center justify-center text-gray-400">
-            <div className="text-center">
-              <MapPin className="w-8 h-8 mx-auto mb-2" />
-              <p className="text-sm">{t('map.explore_title') || 'Interactive Map'}</p>
-              <Link href="/map" className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline mt-1 inline-block">
-                {t('common.view_on_map') || 'Open Map'}
-              </Link>
-            </div>
-          </div>
+          <MapView
+            center={{ lat: userLat, lng: userLng }}
+            zoom={13}
+            markers={restaurants.slice(0, 5).filter(r => (r.lat || r.latitude) && (r.lng || r.longitude)).map(r => ({
+              id: r.id,
+              lat: r.lat || r.latitude || 0,
+              lng: r.lng || r.longitude || 0,
+              title: lt(r.name),
+              type: 'restaurant',
+            }))}
+            t={t}
+            className="h-[200px]"
+          />
         </div>
       </section>
 

@@ -1,14 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { MapPin, Search, Navigation, X } from 'lucide-react';
+import { MapPin, Search, Navigation } from 'lucide-react';
 import { useLanguage } from '@/hooks/useLanguage';
 import api from '@/lib/api';
 import FilterChips from '@/components/ui/FilterChips';
 import Card from '@/components/ui/Card';
 import StarRating from '@/components/ui/StarRating';
+import MapView from '@/components/map/MapView';
 import Link from 'next/link';
-import { Restaurant, Guide, Festival } from '@/types';
 
 export default function MapPage() {
   const { t, lt, language } = useLanguage();
@@ -27,7 +27,7 @@ export default function MapPage() {
   useEffect(() => {
     const fetchItems = async () => {
       try {
-        const endpoint = categoryFilter === 'festivals' ? '/api/festivals' : `/api/${categoryFilter}`;
+        const endpoint = categoryFilter === 'festivals' ? '/api/festivals' : `/api/v1/${categoryFilter}`;
         const data = await api.get<{ items: any[] }>(endpoint, { per_page: 50 });
         setItems(data.items || []);
       } catch {
@@ -36,6 +36,22 @@ export default function MapPage() {
     };
     fetchItems();
   }, [categoryFilter, language]);
+
+  const markers = items
+    .filter((item: any) => {
+      const lat = item.lat || item.latitude || item.venue_lat;
+      const lng = item.lng || item.longitude || item.venue_lng;
+      return lat && lng;
+    })
+    .map((item: any) => ({
+      id: item.id,
+      lat: item.lat || item.latitude || item.venue_lat || 0,
+      lng: item.lng || item.longitude || item.venue_lng || 0,
+      title: lt(item.name || ''),
+      description: lt(item.description || item.address || ''),
+      type: categoryFilter,
+      rating: item.avg_rating,
+    }));
 
   return (
     <div className="relative h-[calc(100vh-64px)] md:h-[calc(100vh-64px)] flex flex-col">
@@ -57,16 +73,19 @@ export default function MapPage() {
       </div>
 
       {/* Map Area */}
-      <div className="flex-1 bg-gray-100 dark:bg-gray-900 flex items-center justify-center relative">
-        <div className="text-center text-gray-400">
-          <MapPin className="w-16 h-16 mx-auto mb-4 opacity-30" />
-          <p className="text-lg font-medium">{t('map.explore_title') || 'Map Explorer'}</p>
-          <p className="text-sm mt-1">{items.length} {categoryFilter} {t('common.found') || 'found'}</p>
-        </div>
+      <div className="flex-1 relative">
+        <MapView
+          center={{ lat: 37.5665, lng: 126.978 }}
+          zoom={12}
+          markers={markers}
+          onMarkerClick={(marker) => setSelectedItem(marker)}
+          t={t}
+          className="h-full w-full rounded-none border-0"
+        />
 
-        {/* Item markers (simplified - shown as cards at bottom) */}
+        {/* Item cards at bottom */}
         {items.length > 0 && (
-          <div className="absolute bottom-4 left-0 right-0 px-4">
+          <div className="absolute bottom-4 left-0 right-0 px-4 z-10">
             <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2">
               {items.slice(0, 10).map((item: any) => (
                 <Link

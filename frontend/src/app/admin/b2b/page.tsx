@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { Plus, Search, Pencil, Trash2, Briefcase, Building2, Phone, Mail, Calendar } from 'lucide-react';
-import { useLanguage } from '@/hooks/useLanguage';
 import api from '@/lib/api';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -32,7 +31,6 @@ interface B2BPartner {
 }
 
 export default function AdminB2BPage() {
-  const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [items, setItems] = useState<B2BPartner[]>([]);
   const [totalPages, setTotalPages] = useState(1);
@@ -110,13 +108,13 @@ export default function AdminB2BPage() {
       }
       setShowModal(false);
       fetchItems();
-    } catch { alert('Failed to save'); }
+    } catch { alert('저장에 실패했습니다'); }
     setSaving(false);
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm(t('admin.confirm_delete'))) return;
-    try { await api.delete(`/api/admin/b2b/partners/${id}`); fetchItems(); } catch { alert('Failed to delete'); }
+    if (!confirm('정말 삭제하시겠습니까?')) return;
+    try { await api.delete(`/api/admin/b2b/partners/${id}`); fetchItems(); } catch { alert('삭제에 실패했습니다'); }
   };
 
   const statusVariant = (status: string) => {
@@ -128,41 +126,50 @@ export default function AdminB2BPage() {
     }
   };
 
+  const statusLabel = (status: string) => {
+    switch (status) {
+      case 'active': return '활성';
+      case 'inactive': return '비활성';
+      case 'pending': return '대기';
+      default: return status;
+    }
+  };
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">B2B Partner Management</h1>
-        <Button onClick={openCreateModal}><Plus className="w-4 h-4" />Add Partner</Button>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">B2B 파트너 관리</h1>
+        <Button onClick={openCreateModal}><Plus className="w-4 h-4" />파트너 추가</Button>
       </div>
 
       <div className="mb-4">
         <div className="relative max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-          <Input placeholder="Search partners..." value={search} onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }} className="pl-10" />
+          <Input placeholder="파트너 검색..." value={search} onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }} className="pl-10" />
         </div>
       </div>
 
       {loading ? <LoadingSpinner fullPage /> : items.length === 0 ? (
-        <EmptyState icon={Briefcase} title="No B2B partners yet" actionLabel="Add Partner" onAction={openCreateModal} />
+        <EmptyState icon={Briefcase} title="B2B 파트너가 없습니다" actionLabel="파트너 추가" onAction={openCreateModal} />
       ) : (
         <>
           {/* Stats Summary */}
           <div className="grid grid-cols-3 gap-4 mb-6">
             <Card className="p-4 text-center">
               <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{items.length}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Total Partners</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">전체 파트너</p>
             </Card>
             <Card className="p-4 text-center">
               <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
                 {items.filter((i) => i.status === 'active').length}
               </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Active</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">활성</p>
             </Card>
             <Card className="p-4 text-center">
               <p className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
                 ${items.reduce((sum, i) => sum + (i.total_revenue || 0), 0).toLocaleString()}
               </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Total Revenue</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">총 매출</p>
             </Card>
           </div>
 
@@ -171,14 +178,14 @@ export default function AdminB2BPage() {
               <table className="w-full">
                 <thead className="bg-gray-50 dark:bg-dark-input">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Company</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Contact</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Type</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Events</th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Bookings</th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Revenue</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Actions</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">회사</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">담당자</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">유형</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">이벤트</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">예약</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">매출</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">상태</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">작업</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 dark:divide-gray-500/40">
@@ -213,7 +220,7 @@ export default function AdminB2BPage() {
                       </td>
                       <td className="px-6 py-4 text-sm text-right text-gray-500 dark:text-gray-400">{(item.total_bookings || 0).toLocaleString()}</td>
                       <td className="px-6 py-4 text-sm text-right font-medium text-emerald-600 dark:text-emerald-400">${(item.total_revenue || 0).toLocaleString()}</td>
-                      <td className="px-6 py-4"><Badge variant={statusVariant(item.status)}>{item.status}</Badge></td>
+                      <td className="px-6 py-4"><Badge variant={statusVariant(item.status)}>{statusLabel(item.status)}</Badge></td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
                           <button onClick={() => openEditModal(item)} className="p-1 hover:bg-gray-100 dark:hover:bg-white/[0.08] rounded"><Pencil className="w-4 h-4 text-gray-500" /></button>
@@ -232,45 +239,45 @@ export default function AdminB2BPage() {
         </>
       )}
 
-      <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={editingItem ? 'Edit Partner' : 'Add Partner'} size="lg">
+      <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={editingItem ? '파트너 수정' : '파트너 추가'} size="lg">
         <div className="space-y-4">
-          <Input label="Company Name" value={formData.company_name || ''} onChange={(e) => setFormData((p) => ({ ...p, company_name: e.target.value }))} />
+          <Input label="회사명" value={formData.company_name || ''} onChange={(e) => setFormData((p) => ({ ...p, company_name: e.target.value }))} />
           <div className="grid grid-cols-2 gap-4">
-            <Input label="Contact Name" value={formData.contact_name || ''} onChange={(e) => setFormData((p) => ({ ...p, contact_name: e.target.value }))} />
-            <Input label="Contact Email" type="email" value={formData.contact_email || ''} onChange={(e) => setFormData((p) => ({ ...p, contact_email: e.target.value }))} />
+            <Input label="담당자 이름" value={formData.contact_name || ''} onChange={(e) => setFormData((p) => ({ ...p, contact_name: e.target.value }))} />
+            <Input label="담당자 이메일" type="email" value={formData.contact_email || ''} onChange={(e) => setFormData((p) => ({ ...p, contact_email: e.target.value }))} />
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <Input label="Contact Phone" value={formData.contact_phone || ''} onChange={(e) => setFormData((p) => ({ ...p, contact_phone: e.target.value }))} />
+            <Input label="담당자 전화번호" value={formData.contact_phone || ''} onChange={(e) => setFormData((p) => ({ ...p, contact_phone: e.target.value }))} />
             <Select
-              label="Business Type"
+              label="업종"
               options={[
-                { value: 'agency', label: 'Travel Agency' },
-                { value: 'hotel', label: 'Hotel' },
-                { value: 'transport', label: 'Transport' },
-                { value: 'venue', label: 'Venue' },
-                { value: 'media', label: 'Media' },
-                { value: 'other', label: 'Other' },
+                { value: 'agency', label: '여행사' },
+                { value: 'hotel', label: '호텔' },
+                { value: 'transport', label: '교통' },
+                { value: 'venue', label: '행사장' },
+                { value: 'media', label: '미디어' },
+                { value: 'other', label: '기타' },
               ]}
               value={formData.business_type || 'agency'}
               onChange={(e) => setFormData((p) => ({ ...p, business_type: e.target.value }))}
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <Input label="Commission Rate (%)" type="number" value={formData.commission_rate || ''} onChange={(e) => setFormData((p) => ({ ...p, commission_rate: e.target.value }))} />
+            <Input label="수수료율 (%)" type="number" value={formData.commission_rate || ''} onChange={(e) => setFormData((p) => ({ ...p, commission_rate: e.target.value }))} />
             <Select
-              label="Status"
+              label="상태"
               options={[
-                { value: 'active', label: 'Active' },
-                { value: 'inactive', label: 'Inactive' },
-                { value: 'pending', label: 'Pending' },
+                { value: 'active', label: '활성' },
+                { value: 'inactive', label: '비활성' },
+                { value: 'pending', label: '대기' },
               ]}
               value={formData.status || 'active'}
               onChange={(e) => setFormData((p) => ({ ...p, status: e.target.value }))}
             />
           </div>
-          <Input label="Assigned Event IDs (comma-separated)" value={formData.assigned_events || ''} onChange={(e) => setFormData((p) => ({ ...p, assigned_events: e.target.value }))} placeholder="e.g. 1, 2, 3" />
+          <Input label="할당 이벤트 ID (쉼표로 구분)" value={formData.assigned_events || ''} onChange={(e) => setFormData((p) => ({ ...p, assigned_events: e.target.value }))} placeholder="예: 1, 2, 3" />
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Notes</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">메모</label>
             <textarea
               className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-transparent outline-none transition focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 dark:border-gray-500/40 dark:bg-[#2a2a2a] dark:text-gray-100 min-h-[80px] resize-y"
               value={formData.notes || ''}
@@ -278,8 +285,8 @@ export default function AdminB2BPage() {
             />
           </div>
           <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-500/40">
-            <Button variant="outline" onClick={() => setShowModal(false)}>{t('common.cancel')}</Button>
-            <Button onClick={handleSave} disabled={saving}>{saving ? t('common.loading') : t('common.save')}</Button>
+            <Button variant="outline" onClick={() => setShowModal(false)}>취소</Button>
+            <Button onClick={handleSave} disabled={saving}>{saving ? '로딩 중...' : '저장'}</Button>
           </div>
         </div>
       </Modal>

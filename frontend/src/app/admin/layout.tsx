@@ -6,13 +6,12 @@ import AdminSidebar from '@/components/layout/AdminSidebar';
 import { useLanguage } from '@/hooks/useLanguage';
 import { isAuthenticated, getCurrentUser } from '@/lib/auth';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
-import LanguageSwitcher from '@/components/ui/LanguageSwitcher';
 import { LogOut, User, ArrowLeft, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 import { User as UserType } from '@/types';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const { t, language, setLanguage, isLoaded } = useLanguage();
+  const { t, isLoaded } = useLanguage();
   const router = useRouter();
   const pathname = usePathname();
   const [checking, setChecking] = useState(true);
@@ -36,21 +35,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       try {
         const user = await getCurrentUser();
         if (!user) {
-          // API failure or token invalid - redirect to admin login, not homepage
           localStorage.removeItem('access_token');
           localStorage.removeItem('refresh_token');
           router.replace('/admin/login');
           return;
         }
         if (user.role !== 'admin' && user.role !== 'superadmin' && !user.is_admin) {
-          // Confirmed non-admin user - redirect to homepage
           router.replace('/');
           return;
         }
         setAdminUser(user);
       } catch {
-        // Network error or API unreachable - show error UI instead of infinite spinner
-        setAuthError('Unable to verify admin access. Please try again.');
+        setAuthError('관리자 접근 권한을 확인할 수 없습니다. 다시 시도해 주세요.');
         setChecking(false);
         return;
       }
@@ -70,7 +66,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 dark:bg-dark-main gap-3">
         <LoadingSpinner size="lg" />
-        <p className="text-sm text-gray-500 dark:text-gray-400">{t('common.loading') || 'Loading...'}</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400">로딩 중...</p>
       </div>
     );
   }
@@ -84,7 +80,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           href="/admin/login"
           className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-400 transition-colors"
         >
-          {t('admin.login_title') || 'Admin Login'}
+          관리자 로그인
         </Link>
       </div>
     );
@@ -106,15 +102,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               className="hidden md:flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
-              {t('nav.home') || 'Home'}
+              홈으로
             </Link>
-            <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100 md:hidden">Admin</h1>
+            <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100 md:hidden">관리자</h1>
           </div>
           <div className="flex items-center gap-3 ml-auto">
-            <LanguageSwitcher currentLanguage={language} onLanguageChange={setLanguage} compact />
             <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
               <User className="w-4 h-4" />
-              <span className="hidden sm:inline">{adminUser?.name || 'Admin'}</span>
+              <span className="hidden sm:inline">{adminUser?.name || '관리자'}</span>
               {adminUser?.role === 'superadmin' && (
                 <span className="text-[10px] px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 font-medium">
                   Super

@@ -16,7 +16,7 @@ import Select from '@/components/ui/Select';
 import { RollingBanner, SUPPORTED_LANGUAGES } from '@/types';
 
 export default function AdminBannersPage() {
-  const { t, lt } = useLanguage();
+  const { lt } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [items, setItems] = useState<RollingBanner[]>([]);
   const [showModal, setShowModal] = useState(false);
@@ -98,20 +98,20 @@ export default function AdminBannersPage() {
       }
       setShowModal(false);
       fetchItems();
-    } catch { alert('Failed to save'); }
+    } catch { alert('저장에 실패했습니다'); }
     setSaving(false);
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm(t('admin.confirm_delete'))) return;
-    try { await api.delete(`/api/admin/banners/${id}`); fetchItems(); } catch { alert('Failed to delete'); }
+    if (!confirm('정말 삭제하시겠습니까?')) return;
+    try { await api.delete(`/api/admin/banners/${id}`); fetchItems(); } catch { alert('삭제에 실패했습니다'); }
   };
 
   const handleToggleActive = async (item: RollingBanner) => {
     try {
       await api.patch(`/api/admin/banners/${item.id}`, { is_active: !item.is_active });
       fetchItems();
-    } catch { alert('Failed to update'); }
+    } catch { alert('업데이트에 실패했습니다'); }
   };
 
   const handleDragStart = (idx: number) => {
@@ -141,12 +141,12 @@ export default function AdminBannersPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Banner Management</h1>
-        <Button onClick={openCreateModal}><Plus className="w-4 h-4" />Add Banner</Button>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">배너 관리</h1>
+        <Button onClick={openCreateModal}><Plus className="w-4 h-4" />배너 추가</Button>
       </div>
 
       {loading ? <LoadingSpinner fullPage /> : items.length === 0 ? (
-        <EmptyState icon={Image} title="No banners yet" actionLabel="Add Banner" onAction={openCreateModal} />
+        <EmptyState icon={Image} title="배너가 없습니다" actionLabel="배너 추가" onAction={openCreateModal} />
       ) : (
         <Card className="overflow-hidden">
           <div className="overflow-x-auto">
@@ -154,12 +154,12 @@ export default function AdminBannersPage() {
               <thead className="bg-gray-50 dark:bg-dark-input">
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase w-12"></th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase w-12">Order</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase w-20">Thumbnail</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Title</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Interval</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Active</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Actions</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase w-12">순서</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase w-20">미리보기</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">제목</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">간격</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">활성</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">작업</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-500/40">
@@ -208,37 +208,37 @@ export default function AdminBannersPage() {
         </Card>
       )}
 
-      <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={editingItem ? 'Edit Banner' : 'Add Banner'} size="lg">
+      <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={editingItem ? '배너 수정' : '배너 추가'} size="lg">
         <div className="space-y-4">
-          <Input label="Image URL" value={formData.image_url || ''} onChange={(e) => setFormData((p) => ({ ...p, image_url: e.target.value }))} placeholder="https://example.com/image.jpg" />
+          <Input label="이미지 URL" value={formData.image_url || ''} onChange={(e) => setFormData((p) => ({ ...p, image_url: e.target.value }))} placeholder="https://example.com/image.jpg" />
           {formData.image_url && (
             <div className="w-full h-40 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
-              <img src={formData.image_url} alt="Preview" className="w-full h-full object-cover" />
+              <img src={formData.image_url} alt="미리보기" className="w-full h-full object-cover" />
             </div>
           )}
-          <Input label="Link URL" value={formData.link_url || ''} onChange={(e) => setFormData((p) => ({ ...p, link_url: e.target.value }))} placeholder="https://example.com/event" />
+          <Input label="링크 URL" value={formData.link_url || ''} onChange={(e) => setFormData((p) => ({ ...p, link_url: e.target.value }))} placeholder="https://example.com/event" />
           <div className="grid grid-cols-2 gap-4">
-            <Input label="Rolling Interval (ms)" type="number" value={formData.rolling_interval || ''} onChange={(e) => setFormData((p) => ({ ...p, rolling_interval: e.target.value }))} />
+            <Input label="롤링 간격 (ms)" type="number" value={formData.rolling_interval || ''} onChange={(e) => setFormData((p) => ({ ...p, rolling_interval: e.target.value }))} />
             <Select
-              label="Active"
-              options={[{ value: 'true', label: 'Active' }, { value: 'false', label: 'Inactive' }]}
+              label="활성"
+              options={[{ value: 'true', label: '활성' }, { value: 'false', label: '비활성' }]}
               value={formData.is_active || 'true'}
               onChange={(e) => setFormData((p) => ({ ...p, is_active: e.target.value }))}
             />
           </div>
 
           <div className="pt-4">
-            <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Multilingual Content</p>
+            <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">다국어 콘텐츠</p>
             <Tabs tabs={langTabs} activeTab={formLangTab} onChange={setFormLangTab} className="mb-4" />
             <div className="space-y-3">
-              <Input label={`Title (${formLangTab})`} value={formData[`title_${formLangTab}`] || ''} onChange={(e) => setFormData((p) => ({ ...p, [`title_${formLangTab}`]: e.target.value }))} />
-              <Input label={`Subtitle (${formLangTab})`} value={formData[`subtitle_${formLangTab}`] || ''} onChange={(e) => setFormData((p) => ({ ...p, [`subtitle_${formLangTab}`]: e.target.value }))} />
+              <Input label={`제목 (${formLangTab})`} value={formData[`title_${formLangTab}`] || ''} onChange={(e) => setFormData((p) => ({ ...p, [`title_${formLangTab}`]: e.target.value }))} />
+              <Input label={`부제목 (${formLangTab})`} value={formData[`subtitle_${formLangTab}`] || ''} onChange={(e) => setFormData((p) => ({ ...p, [`subtitle_${formLangTab}`]: e.target.value }))} />
             </div>
           </div>
 
           <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-500/40">
-            <Button variant="outline" onClick={() => setShowModal(false)}>{t('common.cancel')}</Button>
-            <Button onClick={handleSave} disabled={saving}>{saving ? t('common.loading') : t('common.save')}</Button>
+            <Button variant="outline" onClick={() => setShowModal(false)}>취소</Button>
+            <Button onClick={handleSave} disabled={saving}>{saving ? '로딩 중...' : '저장'}</Button>
           </div>
         </div>
       </Modal>

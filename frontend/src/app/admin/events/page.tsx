@@ -17,7 +17,7 @@ import { Event, SUPPORTED_LANGUAGES } from '@/types';
 import { formatDateRange } from '@/lib/utils';
 
 export default function AdminEventsPage() {
-  const { t, lt } = useLanguage();
+  const { lt } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [events, setEvents] = useState<Event[]>([]);
   const [totalPages, setTotalPages] = useState(1);
@@ -121,18 +121,18 @@ export default function AdminEventsPage() {
       setShowModal(false);
       fetchEvents();
     } catch {
-      alert('Failed to save');
+      alert('저장에 실패했습니다');
     }
     setSaving(false);
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm(t('admin.confirm_delete'))) return;
+    if (!confirm('정말 삭제하시겠습니까?')) return;
     try {
       await api.delete(`/api/admin/events/${id}`);
       fetchEvents();
     } catch {
-      alert('Failed to delete');
+      alert('삭제에 실패했습니다');
     }
   };
 
@@ -141,10 +141,10 @@ export default function AdminEventsPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t('admin.events')}</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">전시회</h1>
         <Button onClick={openCreateModal}>
           <Plus className="w-4 h-4" />
-          {t('admin.add_new')}
+          추가
         </Button>
       </div>
 
@@ -152,7 +152,7 @@ export default function AdminEventsPage() {
         <div className="relative max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
           <Input
-            placeholder={t('admin.search_placeholder')}
+            placeholder="검색어를 입력하세요..."
             value={search}
             onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
             className="pl-10"
@@ -163,7 +163,7 @@ export default function AdminEventsPage() {
       {loading ? (
         <LoadingSpinner fullPage />
       ) : events.length === 0 ? (
-        <EmptyState icon={Calendar} title={t('common.no_results')} actionLabel={t('admin.add_new')} onAction={openCreateModal} />
+        <EmptyState icon={Calendar} title="결과가 없습니다" actionLabel="추가" onAction={openCreateModal} />
       ) : (
         <Card className="overflow-hidden">
           <div className="overflow-x-auto">
@@ -171,10 +171,10 @@ export default function AdminEventsPage() {
               <thead className="bg-gray-50 dark:bg-dark-input">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">ID</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{t('common.name')}</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{t('booking.date')}</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{t('admin.status')}</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{t('admin.actions')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">이름</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">날짜</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">상태</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">작업</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-500/40">
@@ -187,7 +187,7 @@ export default function AdminEventsPage() {
                     </td>
                     <td className="px-6 py-4">
                       <Badge variant={event.is_active ? 'success' : 'error'}>
-                        {event.is_active ? t('admin.active') : t('admin.inactive')}
+                        {event.is_active ? '활성' : '비활성'}
                       </Badge>
                     </td>
                     <td className="px-6 py-4">
@@ -212,27 +212,27 @@ export default function AdminEventsPage() {
       )}
 
       {/* Create/Edit Modal */}
-      <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={editingEvent ? t('common.edit') : t('admin.add_new')} size="lg">
+      <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={editingEvent ? '수정' : '추가'} size="lg">
         <div className="space-y-4">
-          <Input label="Slug" value={formData.slug || ''} onChange={(e) => setFormData((p) => ({ ...p, slug: e.target.value }))} />
+          <Input label="슬러그" value={formData.slug || ''} onChange={(e) => setFormData((p) => ({ ...p, slug: e.target.value }))} />
           <div className="grid grid-cols-2 gap-4">
-            <Input type="date" label={t('booking.date') + ' (Start)'} value={formData.start_date || ''} onChange={(e) => setFormData((p) => ({ ...p, start_date: e.target.value }))} />
-            <Input type="date" label={t('booking.date') + ' (End)'} value={formData.end_date || ''} onChange={(e) => setFormData((p) => ({ ...p, end_date: e.target.value }))} />
+            <Input type="date" label="시작일" value={formData.start_date || ''} onChange={(e) => setFormData((p) => ({ ...p, start_date: e.target.value }))} />
+            <Input type="date" label="종료일" value={formData.end_date || ''} onChange={(e) => setFormData((p) => ({ ...p, end_date: e.target.value }))} />
           </div>
-          <Input label="Region" value={formData.region || ''} onChange={(e) => setFormData((p) => ({ ...p, region: e.target.value }))} />
+          <Input label="지역" value={formData.region || ''} onChange={(e) => setFormData((p) => ({ ...p, region: e.target.value }))} />
 
           <div className="pt-4">
-            <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('admin.multilingual')}</p>
+            <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">다국어 콘텐츠</p>
             <Tabs tabs={langTabs} activeTab={formLangTab} onChange={setFormLangTab} className="mb-4" />
             <div className="space-y-3">
               <Input
-                label={`${t('common.name')} (${formLangTab})`}
+                label={`이름 (${formLangTab})`}
                 value={formData[`name_${formLangTab}`] || ''}
                 onChange={(e) => setFormData((p) => ({ ...p, [`name_${formLangTab}`]: e.target.value }))}
               />
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                  Description ({formLangTab})
+                  설명 ({formLangTab})
                 </label>
                 <textarea
                   className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-transparent outline-none transition focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 dark:border-gray-500/40 dark:bg-[#2a2a2a] dark:text-gray-100 min-h-[100px] resize-y"
@@ -241,7 +241,7 @@ export default function AdminEventsPage() {
                 />
               </div>
               <Input
-                label={`Venue Name (${formLangTab})`}
+                label={`장소명 (${formLangTab})`}
                 value={formData[`venue_name_${formLangTab}`] || ''}
                 onChange={(e) => setFormData((p) => ({ ...p, [`venue_name_${formLangTab}`]: e.target.value }))}
               />
@@ -249,8 +249,8 @@ export default function AdminEventsPage() {
           </div>
 
           <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-500/40">
-            <Button variant="outline" onClick={() => setShowModal(false)}>{t('common.cancel')}</Button>
-            <Button onClick={handleSave} disabled={saving}>{saving ? t('common.loading') : t('common.save')}</Button>
+            <Button variant="outline" onClick={() => setShowModal(false)}>취소</Button>
+            <Button onClick={handleSave} disabled={saving}>{saving ? '로딩 중...' : '저장'}</Button>
           </div>
         </div>
       </Modal>

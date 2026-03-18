@@ -1,8 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Globe, Plus, Save, AlertTriangle } from 'lucide-react';
-import { useLanguage } from '@/hooks/useLanguage';
 import api from '@/lib/api';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -24,7 +23,6 @@ interface TranslationEntry {
 }
 
 export default function AdminLanguagesPage() {
-  const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [languages, setLanguages] = useState<LanguageSetting[]>([]);
   const [activeTab, setActiveTab] = useState('languages');
@@ -35,7 +33,15 @@ export default function AdminLanguagesPage() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => { fetchLanguages(); }, []);
-  useEffect(() => { if (activeTab === 'translations') fetchTranslations(); }, [activeTab, selectedLang]);
+
+  const fetchTranslations = useCallback(async () => {
+    try {
+      const data = await api.get<{ items: TranslationEntry[] }>('/api/admin/translations', { lang: selectedLang });
+      setTranslations(data.items || []);
+    } catch { setTranslations([]); }
+  }, [selectedLang]);
+
+  useEffect(() => { if (activeTab === 'translations') fetchTranslations(); }, [activeTab, selectedLang, fetchTranslations]);
 
   const fetchLanguages = async () => {
     setLoading(true);
@@ -48,18 +54,11 @@ export default function AdminLanguagesPage() {
     setLoading(false);
   };
 
-  const fetchTranslations = async () => {
-    try {
-      const data = await api.get<{ items: TranslationEntry[] }>('/api/admin/translations', { lang: selectedLang });
-      setTranslations(data.items || []);
-    } catch { setTranslations([]); }
-  };
-
   const toggleLanguage = async (code: string, isActive: boolean) => {
     try {
       await api.patch(`/api/admin/languages/${code}`, { is_active: !isActive });
       setLanguages((prev) => prev.map((l) => l.code === code ? { ...l, is_active: !isActive } : l));
-    } catch { alert('Failed to update'); }
+    } catch { alert('업데이트에 실패했습니다'); }
   };
 
   const handleAddTranslation = async () => {
@@ -69,19 +68,19 @@ export default function AdminLanguagesPage() {
       await api.post('/api/admin/translations', { key: newKey, value: newValue, lang: selectedLang });
       setNewKey(''); setNewValue('');
       fetchTranslations();
-    } catch { alert('Failed to save'); }
+    } catch { alert('저장에 실패했습니다'); }
     setSaving(false);
   };
 
   const handleUpdateTranslation = async (key: string, value: string) => {
     try {
       await api.put('/api/admin/translations', { key, value, lang: selectedLang });
-    } catch { alert('Failed to update'); }
+    } catch { alert('업데이트에 실패했습니다'); }
   };
 
   const tabs = [
-    { id: 'languages', label: t('admin.languages') },
-    { id: 'translations', label: 'Translations' },
+    { id: 'languages', label: '언어 설정' },
+    { id: 'translations', label: '번역 관리' },
   ];
 
   const langTabs = SUPPORTED_LANGUAGES.map((l) => ({ id: l.code, label: l.name }));
@@ -90,7 +89,7 @@ export default function AdminLanguagesPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">{t('admin.languages')}</h1>
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">언어 관리</h1>
 
       <Tabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} className="mb-6" />
 
@@ -128,20 +127,20 @@ export default function AdminLanguagesPage() {
           <Card className="p-4 mb-6">
             <div className="flex flex-col sm:flex-row gap-3">
               <Input
-                placeholder={t('admin.translation_key')}
+                placeholder="번역 키"
                 value={newKey}
                 onChange={(e) => setNewKey(e.target.value)}
                 className="flex-1"
               />
               <Input
-                placeholder={t('admin.translation_value')}
+                placeholder="번역 값"
                 value={newValue}
                 onChange={(e) => setNewValue(e.target.value)}
                 className="flex-1"
               />
               <Button onClick={handleAddTranslation} disabled={saving}>
                 <Plus className="w-4 h-4" />
-                {t('admin.add_new')}
+                추가
               </Button>
             </div>
           </Card>
@@ -150,19 +149,20 @@ export default function AdminLanguagesPage() {
           <Card className="overflow-hidden">
             <div className="overflow-x-auto"><table className="w-full">
               <thead className="bg-gray-50 dark:bg-dark-input"><tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('admin.translation_key')}</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('admin.translation_value')}</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase w-20">{t('admin.status')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">키</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">값</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase w-20">상태</th>
               </tr></thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-500/40">
                 {translations.length === 0 ? (
-                  <tr><td colSpan={3} className="px-6 py-8 text-center text-sm text-gray-500">{t('common.no_results')}</td></tr>
+                  <tr><td colSpan={3} className="px-6 py-8 text-center text-sm text-gray-500">결과가 없습니다</td></tr>
                 ) : translations.map((entry) => (
-                  <tr key={entry.key} className="hover:bg-gray-50 dark:hover:bg-white/[0.02]">
+                  <tr key={`${entry.key}-${selectedLang}`} className="hover:bg-gray-50 dark:hover:bg-white/[0.02]">
                     <td className="px-6 py-3 text-sm font-mono text-gray-500 dark:text-gray-400">{entry.key}</td>
                     <td className="px-6 py-3">
                       <input
                         type="text"
+                        key={`${entry.key}-${selectedLang}`}
                         defaultValue={entry.values[selectedLang] || ''}
                         onBlur={(e) => handleUpdateTranslation(entry.key, e.target.value)}
                         className="w-full text-sm px-2 py-1 rounded border border-transparent hover:border-gray-200 focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600/20 outline-none bg-transparent dark:text-gray-100"
@@ -170,7 +170,7 @@ export default function AdminLanguagesPage() {
                     </td>
                     <td className="px-6 py-3">
                       {!entry.values[selectedLang] && (
-                        <Badge variant="warning"><AlertTriangle className="w-3 h-3 mr-1" />{t('admin.missing_translations')}</Badge>
+                        <Badge variant="warning"><AlertTriangle className="w-3 h-3 mr-1" />미번역</Badge>
                       )}
                     </td>
                   </tr>

@@ -16,7 +16,7 @@ import Badge from '@/components/ui/Badge';
 import { ThemeData, ThemeSpot, SUPPORTED_LANGUAGES } from '@/types';
 
 export default function AdminThemesPage() {
-  const { t, lt } = useLanguage();
+  const { lt } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [items, setItems] = useState<ThemeData[]>([]);
   const [showModal, setShowModal] = useState(false);
@@ -89,13 +89,13 @@ export default function AdminThemesPage() {
       }
       setShowModal(false);
       fetchItems();
-    } catch { alert('Failed to save'); }
+    } catch { alert('저장에 실패했습니다'); }
     setSaving(false);
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm(t('admin.confirm_delete'))) return;
-    try { await api.delete(`/api/admin/themes/${id}`); fetchItems(); } catch { alert('Failed to delete'); }
+    if (!confirm('정말 삭제하시겠습니까?')) return;
+    try { await api.delete(`/api/admin/themes/${id}`); fetchItems(); } catch { alert('삭제에 실패했습니다'); }
   };
 
   const handleAssignSpot = async () => {
@@ -108,7 +108,7 @@ export default function AdminThemesPage() {
       });
       setShowAssignModal(false);
       fetchItems();
-    } catch { alert('Failed to assign'); }
+    } catch { alert('할당에 실패했습니다'); }
     setSaving(false);
   };
 
@@ -116,35 +116,35 @@ export default function AdminThemesPage() {
     try {
       await api.delete(`/api/admin/themes/${themeId}/spots/${spotId}`);
       fetchItems();
-    } catch { alert('Failed to remove'); }
+    } catch { alert('제거에 실패했습니다'); }
   };
 
   const langTabs = SUPPORTED_LANGUAGES.map((l) => ({ id: l.code, label: l.name }));
 
   const iconOptions = [
-    { value: '', label: 'None' },
-    { value: 'utensils', label: 'Utensils' },
-    { value: 'camera', label: 'Camera' },
-    { value: 'mountain', label: 'Mountain' },
-    { value: 'shopping-bag', label: 'Shopping' },
-    { value: 'music', label: 'Music' },
-    { value: 'palette', label: 'Art' },
-    { value: 'heart', label: 'Heart' },
-    { value: 'star', label: 'Star' },
-    { value: 'map-pin', label: 'Map Pin' },
-    { value: 'coffee', label: 'Coffee' },
-    { value: 'sunset', label: 'Sunset' },
+    { value: '', label: '없음' },
+    { value: 'utensils', label: '식기' },
+    { value: 'camera', label: '카메라' },
+    { value: 'mountain', label: '산' },
+    { value: 'shopping-bag', label: '쇼핑' },
+    { value: 'music', label: '음악' },
+    { value: 'palette', label: '예술' },
+    { value: 'heart', label: '하트' },
+    { value: 'star', label: '별' },
+    { value: 'map-pin', label: '지도 핀' },
+    { value: 'coffee', label: '커피' },
+    { value: 'sunset', label: '일몰' },
   ];
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Theme Management</h1>
-        <Button onClick={openCreateModal}><Plus className="w-4 h-4" />Add Theme</Button>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">테마 관리</h1>
+        <Button onClick={openCreateModal}><Plus className="w-4 h-4" />테마 추가</Button>
       </div>
 
       {loading ? <LoadingSpinner fullPage /> : items.length === 0 ? (
-        <EmptyState icon={Palette} title="No themes yet" actionLabel="Add Theme" onAction={openCreateModal} />
+        <EmptyState icon={Palette} title="테마가 없습니다" actionLabel="테마 추가" onAction={openCreateModal} />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {items.map((item) => (
@@ -159,7 +159,7 @@ export default function AdminThemesPage() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900 dark:text-gray-100">{lt(item.name)}</h3>
-                    {item.icon && <p className="text-xs text-gray-500 dark:text-gray-400">Icon: {item.icon}</p>}
+                    {item.icon && <p className="text-xs text-gray-500 dark:text-gray-400">아이콘: {item.icon}</p>}
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
@@ -176,10 +176,10 @@ export default function AdminThemesPage() {
               <div className="border-t border-gray-200 dark:border-gray-500/40 pt-3 mt-3">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
-                    Assigned Spots ({item.spots?.length || 0})
+                    할당된 스팟 ({item.spots?.length || 0})
                   </span>
                   <button onClick={() => openAssignModal(item)} className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1">
-                    <Link2 className="w-3 h-3" /> Assign
+                    <Link2 className="w-3 h-3" /> 할당
                   </button>
                 </div>
                 {item.spots && item.spots.length > 0 ? (
@@ -196,11 +196,11 @@ export default function AdminThemesPage() {
                       </div>
                     ))}
                     {item.spots.length > 5 && (
-                      <p className="text-xs text-gray-400">+{item.spots.length - 5} more</p>
+                      <p className="text-xs text-gray-400">+{item.spots.length - 5}개 더</p>
                     )}
                   </div>
                 ) : (
-                  <p className="text-xs text-gray-400">No spots assigned</p>
+                  <p className="text-xs text-gray-400">할당된 스팟이 없습니다</p>
                 )}
               </div>
             </Card>
@@ -209,12 +209,12 @@ export default function AdminThemesPage() {
       )}
 
       {/* Create/Edit Modal */}
-      <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={editingItem ? 'Edit Theme' : 'Add Theme'} size="lg">
+      <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={editingItem ? '테마 수정' : '테마 추가'} size="lg">
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            <Select label="Icon" options={iconOptions} value={formData.icon || ''} onChange={(e) => setFormData((p) => ({ ...p, icon: e.target.value }))} />
+            <Select label="아이콘" options={iconOptions} value={formData.icon || ''} onChange={(e) => setFormData((p) => ({ ...p, icon: e.target.value }))} />
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Color</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">색상</label>
               <div className="flex items-center gap-3">
                 <input
                   type="color"
@@ -228,12 +228,12 @@ export default function AdminThemesPage() {
           </div>
 
           <div className="pt-4">
-            <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Multilingual Content</p>
+            <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">다국어 콘텐츠</p>
             <Tabs tabs={langTabs} activeTab={formLangTab} onChange={setFormLangTab} className="mb-4" />
             <div className="space-y-3">
-              <Input label={`Name (${formLangTab})`} value={formData[`name_${formLangTab}`] || ''} onChange={(e) => setFormData((p) => ({ ...p, [`name_${formLangTab}`]: e.target.value }))} />
+              <Input label={`이름 (${formLangTab})`} value={formData[`name_${formLangTab}`] || ''} onChange={(e) => setFormData((p) => ({ ...p, [`name_${formLangTab}`]: e.target.value }))} />
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Description ({formLangTab})</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">설명 ({formLangTab})</label>
                 <textarea
                   className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-transparent outline-none transition focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 dark:border-gray-500/40 dark:bg-[#2a2a2a] dark:text-gray-100 min-h-[80px] resize-y"
                   value={formData[`description_${formLangTab}`] || ''}
@@ -244,31 +244,31 @@ export default function AdminThemesPage() {
           </div>
 
           <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-500/40">
-            <Button variant="outline" onClick={() => setShowModal(false)}>{t('common.cancel')}</Button>
-            <Button onClick={handleSave} disabled={saving}>{saving ? t('common.loading') : t('common.save')}</Button>
+            <Button variant="outline" onClick={() => setShowModal(false)}>취소</Button>
+            <Button onClick={handleSave} disabled={saving}>{saving ? '로딩 중...' : '저장'}</Button>
           </div>
         </div>
       </Modal>
 
       {/* Assign Spot Modal */}
-      <Modal isOpen={showAssignModal} onClose={() => setShowAssignModal(false)} title={`Assign Spot to "${selectedTheme ? lt(selectedTheme.name) : ''}"`} size="sm">
+      <Modal isOpen={showAssignModal} onClose={() => setShowAssignModal(false)} title={`"${selectedTheme ? lt(selectedTheme.name) : ''}"에 스팟 할당`} size="sm">
         <div className="space-y-4">
           <Select
-            label="Target Type"
+            label="대상 유형"
             options={[
-              { value: 'restaurant', label: 'Restaurant' },
-              { value: 'course', label: 'Course' },
-              { value: 'product', label: 'Product' },
-              { value: 'guide', label: 'Guide' },
-              { value: 'festival', label: 'Festival' },
+              { value: 'restaurant', label: '맛집' },
+              { value: 'course', label: '코스' },
+              { value: 'product', label: '상품' },
+              { value: 'guide', label: '가이드' },
+              { value: 'festival', label: '축제' },
             ]}
             value={assignData.target_type}
             onChange={(e) => setAssignData((p) => ({ ...p, target_type: e.target.value }))}
           />
-          <Input label="Target ID" value={assignData.target_id} onChange={(e) => setAssignData((p) => ({ ...p, target_id: e.target.value }))} placeholder="Enter the item ID" />
+          <Input label="대상 ID" value={assignData.target_id} onChange={(e) => setAssignData((p) => ({ ...p, target_id: e.target.value }))} placeholder="항목 ID를 입력하세요" />
           <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-500/40">
-            <Button variant="outline" onClick={() => setShowAssignModal(false)}>{t('common.cancel')}</Button>
-            <Button onClick={handleAssignSpot} disabled={saving || !assignData.target_id}>{saving ? t('common.loading') : 'Assign'}</Button>
+            <Button variant="outline" onClick={() => setShowAssignModal(false)}>취소</Button>
+            <Button onClick={handleAssignSpot} disabled={saving || !assignData.target_id}>{saving ? '로딩 중...' : '할당'}</Button>
           </div>
         </div>
       </Modal>

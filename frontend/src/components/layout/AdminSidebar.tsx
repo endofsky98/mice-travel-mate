@@ -45,30 +45,30 @@ export default function AdminSidebar({ t, onLogout }: AdminSidebarProps) {
   });
 
   const contentSubItems = [
-    { href: '/admin/restaurants', icon: UtensilsCrossed, label: 'Restaurants' },
-    { href: '/admin/courses', icon: Map, label: 'Courses' },
-    { href: '/admin/products', icon: ShoppingBag, label: 'Products' },
-    { href: '/admin/guides', icon: Users, label: 'Guides' },
-    { href: '/admin/transport', icon: Bus, label: 'Transport' },
-    { href: '/admin/festivals', icon: PartyPopper, label: 'Festivals' },
-    { href: '/admin/themes', icon: Palette, label: 'Themes' },
-    { href: '/admin/living-guide', icon: BookOpen, label: 'Living Guide' },
+    { href: '/admin/restaurants', icon: UtensilsCrossed, label: '맛집' },
+    { href: '/admin/courses', icon: Map, label: '코스' },
+    { href: '/admin/products', icon: ShoppingBag, label: '상품' },
+    { href: '/admin/guides', icon: Users, label: '가이드' },
+    { href: '/admin/transport', icon: Bus, label: '교통' },
+    { href: '/admin/festivals', icon: PartyPopper, label: '축제' },
+    { href: '/admin/themes', icon: Palette, label: '테마' },
+    { href: '/admin/living-guide', icon: BookOpen, label: '생활 가이드' },
   ];
 
   const menuItems = [
-    { href: '/admin', icon: LayoutDashboard, label: 'Dashboard', exact: true },
-    { href: '/admin/banners', icon: Image, label: 'Banners' },
-    { href: '/admin/events', icon: Calendar, label: 'Exhibitions' },
-    { type: 'submenu' as const, icon: FileText, label: 'Content', items: contentSubItems },
-    { href: '/admin/bookings', icon: ClipboardList, label: 'Bookings' },
-    { href: '/admin/reviews', icon: Star, label: 'Reviews' },
-    { href: '/admin/coupons', icon: Ticket, label: 'Coupons' },
-    { href: '/admin/languages', icon: Globe, label: 'Languages' },
-    { href: '/admin/users', icon: UserCog, label: 'Users' },
-    { href: '/admin/chat', icon: MessageCircle, label: 'Chat Monitor' },
-    { href: '/admin/map-settings', icon: MapPin, label: 'Map Settings' },
-    { href: '/admin/analytics', icon: BarChart3, label: 'Analytics' },
-    { href: '/admin/b2b', icon: Briefcase, label: 'B2B Partners' },
+    { href: '/admin', icon: LayoutDashboard, label: '대시보드', exact: true },
+    { href: '/admin/banners', icon: Image, label: '배너' },
+    { href: '/admin/events', icon: Calendar, label: '전시회' },
+    { type: 'submenu' as const, icon: FileText, label: '콘텐츠', items: contentSubItems },
+    { href: '/admin/bookings', icon: ClipboardList, label: '예약' },
+    { href: '/admin/reviews', icon: Star, label: '리뷰' },
+    { href: '/admin/coupons', icon: Ticket, label: '쿠폰' },
+    { href: '/admin/languages', icon: Globe, label: '언어 관리' },
+    { href: '/admin/users', icon: UserCog, label: '회원 관리' },
+    { href: '/admin/chat', icon: MessageCircle, label: '채팅 모니터' },
+    { href: '/admin/map-settings', icon: MapPin, label: '지도 설정' },
+    { href: '/admin/analytics', icon: BarChart3, label: '분석' },
+    { href: '/admin/b2b', icon: Briefcase, label: 'B2B 파트너' },
   ];
 
   const isActive = (href: string, exact?: boolean) => {
@@ -79,11 +79,11 @@ export default function AdminSidebar({ t, onLogout }: AdminSidebarProps) {
   const isContentActive = contentSubItems.some((item) => pathname.startsWith(item.href));
 
   const mobileItems = [
-    { href: '/admin', icon: LayoutDashboard, label: 'Dashboard', exact: true },
-    { href: '/admin/banners', icon: Image, label: 'Banners' },
-    { href: '/admin/events', icon: Calendar, label: 'Events' },
-    { href: '/admin/bookings', icon: ClipboardList, label: 'Bookings' },
-    { href: '/admin/analytics', icon: BarChart3, label: 'Analytics' },
+    { href: '/admin', icon: LayoutDashboard, label: '대시보드', exact: true },
+    { href: '/admin/banners', icon: Image, label: '배너' },
+    { href: '/admin/events', icon: Calendar, label: '전시회' },
+    { href: '/admin/bookings', icon: ClipboardList, label: '예약' },
+    { href: '/admin/analytics', icon: BarChart3, label: '분석' },
   ];
 
   return (
@@ -92,7 +92,7 @@ export default function AdminSidebar({ t, onLogout }: AdminSidebarProps) {
       <aside className="hidden md:flex flex-col w-64 bg-white dark:bg-dark-sidebar border-r border-gray-200 dark:border-gray-500/40 min-h-screen flex-shrink-0">
         <div className="flex items-center gap-2 px-6 py-5 border-b border-gray-200 dark:border-gray-500/40">
           <Compass className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
-          <span className="text-base font-bold text-gray-900 dark:text-white">Admin Panel</span>
+          <span className="text-base font-bold text-gray-900 dark:text-white">관리자 패널</span>
         </div>
 
         <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
@@ -171,7 +171,7 @@ export default function AdminSidebar({ t, onLogout }: AdminSidebarProps) {
             className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/[0.05] transition-colors"
           >
             <LogOut className="w-5 h-5" />
-            {t('nav.logout')}
+            로그아웃
           </button>
         </div>
       </aside>

@@ -15,7 +15,7 @@ import EmptyState from '@/components/ui/EmptyState';
 import { TransportRoute, TransportTip, SUPPORTED_LANGUAGES } from '@/types';
 
 export default function AdminTransportPage() {
-  const { t, lt } = useLanguage();
+  const { lt } = useLanguage();
   const [activeTab, setActiveTab] = useState('routes');
   const [loading, setLoading] = useState(true);
   const [routes, setRoutes] = useState<TransportRoute[]>([]);
@@ -76,42 +76,42 @@ export default function AdminTransportPage() {
         else await api.post('/api/admin/transport/tips', payload);
       }
       setShowModal(false); fetchData();
-    } catch { alert('Failed to save'); }
+    } catch { alert('저장에 실패했습니다'); }
     setSaving(false);
   };
 
   const handleDelete = async (type: string, id: number) => {
-    if (!confirm(t('admin.confirm_delete'))) return;
+    if (!confirm('정말 삭제하시겠습니까?')) return;
     try {
       await api.delete(`/api/admin/transport/${type}/${id}`);
       fetchData();
-    } catch { alert('Failed'); }
+    } catch { alert('삭제에 실패했습니다'); }
   };
 
   const langTabs = SUPPORTED_LANGUAGES.map((l) => ({ id: l.code, label: l.name }));
-  const tabs = [{ id: 'routes', label: t('transport.routes') }, { id: 'tips', label: t('transport.tips') }];
+  const tabs = [{ id: 'routes', label: '노선' }, { id: 'tips', label: '교통 팁' }];
 
   if (loading) return <LoadingSpinner fullPage />;
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t('admin.transport')}</h1>
-        <Button onClick={openCreateModal}><Plus className="w-4 h-4" />{t('admin.add_new')}</Button>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">교통</h1>
+        <Button onClick={openCreateModal}><Plus className="w-4 h-4" />추가</Button>
       </div>
 
       <Tabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} className="mb-6" />
 
       {activeTab === 'routes' && (
-        routes.length === 0 ? <EmptyState icon={Bus} title={t('common.no_results')} actionLabel={t('admin.add_new')} onAction={openCreateModal} /> :
+        routes.length === 0 ? <EmptyState icon={Bus} title="결과가 없습니다" actionLabel="추가" onAction={openCreateModal} /> :
         <Card className="overflow-hidden">
           <div className="overflow-x-auto"><table className="w-full">
             <thead className="bg-gray-50 dark:bg-dark-input"><tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('transport.from')}</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('transport.to')}</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('admin.status')}</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('admin.actions')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">출발</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">도착</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">상태</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">작업</th>
             </tr></thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-500/40">
               {routes.map((r) => (
@@ -119,7 +119,7 @@ export default function AdminTransportPage() {
                   <td className="px-6 py-4 text-sm text-gray-500">{r.id}</td>
                   <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">{lt(r.from)}</td>
                   <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">{lt(r.to)}</td>
-                  <td className="px-6 py-4"><Badge variant={r.is_active ? 'success' : 'error'}>{r.is_active ? t('admin.active') : t('admin.inactive')}</Badge></td>
+                  <td className="px-6 py-4"><Badge variant={r.is_active ? 'success' : 'error'}>{r.is_active ? '활성' : '비활성'}</Badge></td>
                   <td className="px-6 py-4"><div className="flex gap-2">
                     <button onClick={() => handleDelete('routes', r.id)} className="p-1 hover:bg-red-50 rounded"><Trash2 className="w-4 h-4 text-red-500" /></button>
                   </div></td>
@@ -131,7 +131,7 @@ export default function AdminTransportPage() {
       )}
 
       {activeTab === 'tips' && (
-        tips.length === 0 ? <EmptyState icon={Bus} title={t('common.no_results')} actionLabel={t('admin.add_new')} onAction={openCreateModal} /> :
+        tips.length === 0 ? <EmptyState icon={Bus} title="결과가 없습니다" actionLabel="추가" onAction={openCreateModal} /> :
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {tips.map((tip) => (
             <Card key={tip.id} className="p-4">
@@ -148,31 +148,31 @@ export default function AdminTransportPage() {
         </div>
       )}
 
-      <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={t('admin.add_new')} size="lg">
+      <Modal isOpen={showModal} onClose={() => setShowModal(false)} title="추가" size="lg">
         <div className="space-y-4">
           {activeTab === 'tips' && (
-            <Input label="Category" value={formData.category || ''} onChange={(e) => setFormData((p) => ({ ...p, category: e.target.value }))} />
+            <Input label="카테고리" value={formData.category || ''} onChange={(e) => setFormData((p) => ({ ...p, category: e.target.value }))} />
           )}
           <div className="pt-2">
             <Tabs tabs={langTabs} activeTab={formLangTab} onChange={setFormLangTab} className="mb-4" />
             <div className="space-y-3">
               {activeTab === 'routes' ? (
                 <>
-                  <Input label={`${t('transport.from')} (${formLangTab})`} value={formData[`from_${formLangTab}`] || ''} onChange={(e) => setFormData((p) => ({ ...p, [`from_${formLangTab}`]: e.target.value }))} />
-                  <Input label={`${t('transport.to')} (${formLangTab})`} value={formData[`to_${formLangTab}`] || ''} onChange={(e) => setFormData((p) => ({ ...p, [`to_${formLangTab}`]: e.target.value }))} />
+                  <Input label={`출발 (${formLangTab})`} value={formData[`from_${formLangTab}`] || ''} onChange={(e) => setFormData((p) => ({ ...p, [`from_${formLangTab}`]: e.target.value }))} />
+                  <Input label={`도착 (${formLangTab})`} value={formData[`to_${formLangTab}`] || ''} onChange={(e) => setFormData((p) => ({ ...p, [`to_${formLangTab}`]: e.target.value }))} />
                 </>
               ) : (
                 <>
-                  <Input label={`Title (${formLangTab})`} value={formData[`title_${formLangTab}`] || ''} onChange={(e) => setFormData((p) => ({ ...p, [`title_${formLangTab}`]: e.target.value }))} />
-                  <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Description ({formLangTab})</label>
+                  <Input label={`제목 (${formLangTab})`} value={formData[`title_${formLangTab}`] || ''} onChange={(e) => setFormData((p) => ({ ...p, [`title_${formLangTab}`]: e.target.value }))} />
+                  <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">설명 ({formLangTab})</label>
                   <textarea className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-transparent outline-none transition focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 dark:border-gray-500/40 dark:bg-[#2a2a2a] dark:text-gray-100 min-h-[80px] resize-y" value={formData[`description_${formLangTab}`] || ''} onChange={(e) => setFormData((p) => ({ ...p, [`description_${formLangTab}`]: e.target.value }))} /></div>
                 </>
               )}
             </div>
           </div>
           <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-500/40">
-            <Button variant="outline" onClick={() => setShowModal(false)}>{t('common.cancel')}</Button>
-            <Button onClick={handleSave} disabled={saving}>{saving ? t('common.loading') : t('common.save')}</Button>
+            <Button variant="outline" onClick={() => setShowModal(false)}>취소</Button>
+            <Button onClick={handleSave} disabled={saving}>{saving ? '로딩 중...' : '저장'}</Button>
           </div>
         </div>
       </Modal>

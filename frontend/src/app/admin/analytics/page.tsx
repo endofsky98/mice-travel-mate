@@ -10,7 +10,6 @@ import {
   Search,
   Calendar,
 } from 'lucide-react';
-import { useLanguage } from '@/hooks/useLanguage';
 import api from '@/lib/api';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
@@ -57,7 +56,6 @@ interface EventComparison {
 }
 
 export default function AdminAnalyticsPage() {
-  const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState('7d');
   const [visitorStats, setVisitorStats] = useState<VisitorStats>({
@@ -102,13 +100,13 @@ export default function AdminAnalyticsPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Analytics Dashboard</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">분석 대시보드</h1>
         <Select
           options={[
-            { value: '1d', label: 'Today' },
-            { value: '7d', label: 'Last 7 Days' },
-            { value: '30d', label: 'Last 30 Days' },
-            { value: '90d', label: 'Last 90 Days' },
+            { value: '1d', label: '오늘' },
+            { value: '7d', label: '최근 7일' },
+            { value: '30d', label: '최근 30일' },
+            { value: '90d', label: '최근 90일' },
           ]}
           value={period}
           onChange={(e) => setPeriod(e.target.value)}
@@ -123,7 +121,7 @@ export default function AdminAnalyticsPage() {
             <div className="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
               <Eye className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
             </div>
-            <span className="text-xs text-gray-500 dark:text-gray-400">Today</span>
+            <span className="text-xs text-gray-500 dark:text-gray-400">오늘</span>
           </div>
           <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{visitorStats.today.toLocaleString()}</p>
         </Card>
@@ -132,7 +130,7 @@ export default function AdminAnalyticsPage() {
             <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
               <Users className="w-4 h-4 text-blue-600 dark:text-blue-400" />
             </div>
-            <span className="text-xs text-gray-500 dark:text-gray-400">Yesterday</span>
+            <span className="text-xs text-gray-500 dark:text-gray-400">어제</span>
           </div>
           <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{visitorStats.yesterday.toLocaleString()}</p>
         </Card>
@@ -141,7 +139,7 @@ export default function AdminAnalyticsPage() {
             <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
               <TrendingUp className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
             </div>
-            <span className="text-xs text-gray-500 dark:text-gray-400">This Week</span>
+            <span className="text-xs text-gray-500 dark:text-gray-400">이번 주</span>
           </div>
           <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{visitorStats.this_week.toLocaleString()}</p>
         </Card>
@@ -150,7 +148,7 @@ export default function AdminAnalyticsPage() {
             <div className="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
               <Calendar className="w-4 h-4 text-amber-600 dark:text-amber-400" />
             </div>
-            <span className="text-xs text-gray-500 dark:text-gray-400">This Month</span>
+            <span className="text-xs text-gray-500 dark:text-gray-400">이번 달</span>
           </div>
           <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{visitorStats.this_month.toLocaleString()}</p>
         </Card>
@@ -158,13 +156,13 @@ export default function AdminAnalyticsPage() {
 
       {/* Chart Placeholder */}
       <Card className="p-6 mb-6">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Visitor Trend</h2>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">방문자 추이</h2>
         <div className="h-64 bg-gray-50 dark:bg-dark-input rounded-xl flex items-center justify-center">
           <div className="text-center">
             <BarChart3 className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-2" />
-            <p className="text-sm text-gray-500 dark:text-gray-400">Chart visualization</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">차트 시각화</p>
             <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-              {visitorStats.trend_percent >= 0 ? '+' : ''}{visitorStats.trend_percent}% vs previous period
+              이전 기간 대비 {visitorStats.trend_percent >= 0 ? '+' : ''}{visitorStats.trend_percent}%
             </p>
           </div>
         </div>
@@ -176,12 +174,12 @@ export default function AdminAnalyticsPage() {
           <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-500/40">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
               <Search className="w-5 h-5 text-indigo-500" />
-              Search Keywords
+              검색 키워드
             </h2>
           </div>
           <div className="divide-y divide-gray-200 dark:divide-gray-500/40">
             {searchKeywords.length === 0 ? (
-              <div className="px-6 py-8 text-center text-sm text-gray-500 dark:text-gray-400">No search data</div>
+              <div className="px-6 py-8 text-center text-sm text-gray-500 dark:text-gray-400">검색 데이터 없음</div>
             ) : (
               searchKeywords.map((kw, idx) => (
                 <div key={kw.keyword} className="flex items-center justify-between px-6 py-3">
@@ -194,7 +192,7 @@ export default function AdminAnalyticsPage() {
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium text-gray-500 dark:text-gray-400">{kw.count.toLocaleString()}</span>
                     <Badge variant={kw.trend === 'up' ? 'success' : kw.trend === 'down' ? 'error' : 'default'} className="text-[10px]">
-                      {kw.trend === 'up' ? 'UP' : kw.trend === 'down' ? 'DOWN' : '-'}
+                      {kw.trend === 'up' ? '상승' : kw.trend === 'down' ? '하락' : '-'}
                     </Badge>
                   </div>
                 </div>
@@ -208,22 +206,22 @@ export default function AdminAnalyticsPage() {
           <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-500/40">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
               <ShoppingBag className="w-5 h-5 text-violet-500" />
-              Content Popularity
+              콘텐츠 인기도
             </h2>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50 dark:bg-dark-input">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Type</th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Views</th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Reviews</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">이름</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">유형</th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">조회수</th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">리뷰</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-500/40">
                 {contentPopularity.length === 0 ? (
-                  <tr><td colSpan={4} className="px-6 py-8 text-center text-sm text-gray-500 dark:text-gray-400">No data</td></tr>
+                  <tr><td colSpan={4} className="px-6 py-8 text-center text-sm text-gray-500 dark:text-gray-400">데이터 없음</td></tr>
                 ) : (
                   contentPopularity.map((item) => (
                     <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-white/[0.02]">
@@ -242,34 +240,34 @@ export default function AdminAnalyticsPage() {
 
       {/* Booking Stats */}
       <Card className="p-6 mb-6">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Booking Summary</h2>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">예약 요약</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <div className="text-center p-3 bg-gray-50 dark:bg-dark-input rounded-xl">
             <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{bookingStats.total_bookings.toLocaleString()}</p>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Total Bookings</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">총 예약</p>
           </div>
           <div className="text-center p-3 bg-gray-50 dark:bg-dark-input rounded-xl">
             <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">${bookingStats.total_revenue.toLocaleString()}</p>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Total Revenue</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">총 매출</p>
           </div>
           <div className="text-center p-3 bg-gray-50 dark:bg-dark-input rounded-xl">
             <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">${bookingStats.avg_order_value.toFixed(0)}</p>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Avg Order Value</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">평균 주문액</p>
           </div>
           <div className="text-center p-3 bg-gray-50 dark:bg-dark-input rounded-xl">
             <p className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{bookingStats.conversion_rate}%</p>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Conversion Rate</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">전환율</p>
           </div>
         </div>
         {bookingStats.top_products.length > 0 && (
           <div>
-            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Top Products</h3>
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">인기 상품</h3>
             <div className="space-y-2">
               {bookingStats.top_products.map((product, idx) => (
                 <div key={idx} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-dark-input rounded-lg">
                   <span className="text-sm text-gray-900 dark:text-gray-100">{product.name}</span>
                   <div className="flex items-center gap-4 text-sm">
-                    <span className="text-gray-500">{product.count} bookings</span>
+                    <span className="text-gray-500">{product.count}건 예약</span>
                     <span className="font-medium text-emerald-600 dark:text-emerald-400">${product.revenue.toLocaleString()}</span>
                   </div>
                 </div>
@@ -282,22 +280,22 @@ export default function AdminAnalyticsPage() {
       {/* Event Comparison */}
       <Card className="overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-500/40">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Event Comparison</h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">이벤트 비교</h2>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50 dark:bg-dark-input">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Event</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Visitors</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Bookings</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Revenue</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Avg Rating</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">이벤트</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">방문자</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">예약</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">매출</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">평균 별점</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-500/40">
               {eventComparison.length === 0 ? (
-                <tr><td colSpan={5} className="px-6 py-8 text-center text-sm text-gray-500 dark:text-gray-400">No event data</td></tr>
+                <tr><td colSpan={5} className="px-6 py-8 text-center text-sm text-gray-500 dark:text-gray-400">이벤트 데이터 없음</td></tr>
               ) : (
                 eventComparison.map((event, idx) => (
                   <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-white/[0.02]">

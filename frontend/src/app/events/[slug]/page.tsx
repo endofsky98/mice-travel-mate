@@ -28,14 +28,14 @@ export default function EventPage() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const eventData = await api.get<Event>(`/api/events/${slug}`);
+        const eventData = await api.get<Event>(`/api/v1/events/${slug}`);
         setEvent(eventData);
 
         const [restData, courseData, prodData, guideData] = await Promise.all([
-          api.get<{ items: Restaurant[] }>('/api/restaurants', { event_id: eventData.id, per_page: 6 }).catch(() => ({ items: [] })),
-          api.get<{ items: Course[] }>('/api/courses', { event_id: eventData.id, per_page: 6 }).catch(() => ({ items: [] })),
-          api.get<{ items: Product[] }>('/api/products', { event_id: eventData.id, per_page: 6 }).catch(() => ({ items: [] })),
-          api.get<{ items: Guide[] }>('/api/guides', { event_id: eventData.id, per_page: 6 }).catch(() => ({ items: [] })),
+          api.get<{ items: Restaurant[] }>('/api/v1/restaurants', { event_id: eventData.id, per_page: 6 }).catch(() => ({ items: [] })),
+          api.get<{ items: Course[] }>('/api/v1/courses', { event_id: eventData.id, per_page: 6 }).catch(() => ({ items: [] })),
+          api.get<{ items: Product[] }>('/api/v1/products', { event_id: eventData.id, per_page: 6 }).catch(() => ({ items: [] })),
+          api.get<{ items: Guide[] }>('/api/v1/guides', { event_id: eventData.id, per_page: 6 }).catch(() => ({ items: [] })),
         ]);
         setRestaurants(restData.items || []);
         setCourses(courseData.items || []);

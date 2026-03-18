@@ -18,7 +18,7 @@ import { Festival, SUPPORTED_LANGUAGES } from '@/types';
 import { formatDateRange } from '@/lib/utils';
 
 export default function AdminFestivalsPage() {
-  const { t, lt } = useLanguage();
+  const { lt } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [items, setItems] = useState<Festival[]>([]);
   const [totalPages, setTotalPages] = useState(1);
@@ -121,41 +121,41 @@ export default function AdminFestivalsPage() {
       }
       setShowModal(false);
       fetchItems();
-    } catch { alert('Failed to save'); }
+    } catch { alert('저장에 실패했습니다'); }
     setSaving(false);
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm(t('admin.confirm_delete'))) return;
-    try { await api.delete(`/api/admin/festivals/${id}`); fetchItems(); } catch { alert('Failed to delete'); }
+    if (!confirm('정말 삭제하시겠습니까?')) return;
+    try { await api.delete(`/api/admin/festivals/${id}`); fetchItems(); } catch { alert('삭제에 실패했습니다'); }
   };
 
   const langTabs = SUPPORTED_LANGUAGES.map((l) => ({ id: l.code, label: l.name }));
   const categoryOptions = [
-    { value: 'cultural', label: 'Cultural' },
-    { value: 'music', label: 'Music' },
-    { value: 'food', label: 'Food' },
-    { value: 'traditional', label: 'Traditional' },
-    { value: 'seasonal', label: 'Seasonal' },
-    { value: 'art', label: 'Art' },
-    { value: 'sports', label: 'Sports' },
-    { value: 'other', label: 'Other' },
+    { value: 'cultural', label: '문화' },
+    { value: 'music', label: '음악' },
+    { value: 'food', label: '음식' },
+    { value: 'traditional', label: '전통' },
+    { value: 'seasonal', label: '계절' },
+    { value: 'art', label: '예술' },
+    { value: 'sports', label: '스포츠' },
+    { value: 'other', label: '기타' },
   ];
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Festival Management</h1>
-        <Button onClick={openCreateModal}><Plus className="w-4 h-4" />Add Festival</Button>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">축제 관리</h1>
+        <Button onClick={openCreateModal}><Plus className="w-4 h-4" />축제 추가</Button>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 mb-4">
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-          <Input placeholder="Search festivals..." value={search} onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }} className="pl-10" />
+          <Input placeholder="축제 검색..." value={search} onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }} className="pl-10" />
         </div>
         <Select
-          options={[{ value: '', label: 'All Categories' }, ...categoryOptions]}
+          options={[{ value: '', label: '전체 카테고리' }, ...categoryOptions]}
           value={filterCategory}
           onChange={(e) => { setFilterCategory(e.target.value); setCurrentPage(1); }}
           className="w-48"
@@ -163,7 +163,7 @@ export default function AdminFestivalsPage() {
       </div>
 
       {loading ? <LoadingSpinner fullPage /> : items.length === 0 ? (
-        <EmptyState icon={PartyPopper} title="No festivals found" actionLabel="Add Festival" onAction={openCreateModal} />
+        <EmptyState icon={PartyPopper} title="축제가 없습니다" actionLabel="축제 추가" onAction={openCreateModal} />
       ) : (
         <Card className="overflow-hidden">
           <div className="overflow-x-auto">
@@ -171,11 +171,11 @@ export default function AdminFestivalsPage() {
               <thead className="bg-gray-50 dark:bg-dark-input">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">ID</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Category</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Dates</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Actions</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">이름</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">카테고리</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">기간</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">상태</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">작업</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-500/40">
@@ -188,7 +188,7 @@ export default function AdminFestivalsPage() {
                       <Calendar className="w-3.5 h-3.5" />
                       {formatDateRange(item.start_date, item.end_date)}
                     </td>
-                    <td className="px-6 py-4"><Badge variant={item.is_active ? 'success' : 'error'}>{item.is_active ? 'Active' : 'Inactive'}</Badge></td>
+                    <td className="px-6 py-4"><Badge variant={item.is_active ? 'success' : 'error'}>{item.is_active ? '활성' : '비활성'}</Badge></td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
                         <button onClick={() => openEditModal(item)} className="p-1 hover:bg-gray-100 dark:hover:bg-white/[0.08] rounded"><Pencil className="w-4 h-4 text-gray-500" /></button>
@@ -206,37 +206,37 @@ export default function AdminFestivalsPage() {
         </Card>
       )}
 
-      <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={editingItem ? 'Edit Festival' : 'Add Festival'} size="lg">
+      <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={editingItem ? '축제 수정' : '축제 추가'} size="lg">
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            <Select label="Category" options={categoryOptions} value={formData.category || ''} onChange={(e) => setFormData((p) => ({ ...p, category: e.target.value }))} />
+            <Select label="카테고리" options={categoryOptions} value={formData.category || ''} onChange={(e) => setFormData((p) => ({ ...p, category: e.target.value }))} />
             <Select
-              label="Status"
-              options={[{ value: 'true', label: 'Active' }, { value: 'false', label: 'Inactive' }]}
+              label="상태"
+              options={[{ value: 'true', label: '활성' }, { value: 'false', label: '비활성' }]}
               value={formData.is_active || 'true'}
               onChange={(e) => setFormData((p) => ({ ...p, is_active: e.target.value }))}
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <Input label="Start Date" type="date" value={formData.start_date || ''} onChange={(e) => setFormData((p) => ({ ...p, start_date: e.target.value }))} />
-            <Input label="End Date" type="date" value={formData.end_date || ''} onChange={(e) => setFormData((p) => ({ ...p, end_date: e.target.value }))} />
+            <Input label="시작일" type="date" value={formData.start_date || ''} onChange={(e) => setFormData((p) => ({ ...p, start_date: e.target.value }))} />
+            <Input label="종료일" type="date" value={formData.end_date || ''} onChange={(e) => setFormData((p) => ({ ...p, end_date: e.target.value }))} />
           </div>
-          <Input label="Venue Name" value={formData.venue_name || ''} onChange={(e) => setFormData((p) => ({ ...p, venue_name: e.target.value }))} />
-          <Input label="Address" value={formData.address || ''} onChange={(e) => setFormData((p) => ({ ...p, address: e.target.value }))} />
+          <Input label="장소명" value={formData.venue_name || ''} onChange={(e) => setFormData((p) => ({ ...p, venue_name: e.target.value }))} />
+          <Input label="주소" value={formData.address || ''} onChange={(e) => setFormData((p) => ({ ...p, address: e.target.value }))} />
           <div className="grid grid-cols-2 gap-4">
-            <Input label="Latitude" type="number" step="any" value={formData.latitude || ''} onChange={(e) => setFormData((p) => ({ ...p, latitude: e.target.value }))} />
-            <Input label="Longitude" type="number" step="any" value={formData.longitude || ''} onChange={(e) => setFormData((p) => ({ ...p, longitude: e.target.value }))} />
+            <Input label="위도" type="number" step="any" value={formData.latitude || ''} onChange={(e) => setFormData((p) => ({ ...p, latitude: e.target.value }))} />
+            <Input label="경도" type="number" step="any" value={formData.longitude || ''} onChange={(e) => setFormData((p) => ({ ...p, longitude: e.target.value }))} />
           </div>
-          <Input label="Image URL" value={formData.image_url || ''} onChange={(e) => setFormData((p) => ({ ...p, image_url: e.target.value }))} />
-          <Input label="Website URL" value={formData.website_url || ''} onChange={(e) => setFormData((p) => ({ ...p, website_url: e.target.value }))} />
+          <Input label="이미지 URL" value={formData.image_url || ''} onChange={(e) => setFormData((p) => ({ ...p, image_url: e.target.value }))} />
+          <Input label="웹사이트 URL" value={formData.website_url || ''} onChange={(e) => setFormData((p) => ({ ...p, website_url: e.target.value }))} />
 
           <div className="pt-4">
-            <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Multilingual Content</p>
+            <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">다국어 콘텐츠</p>
             <Tabs tabs={langTabs} activeTab={formLangTab} onChange={setFormLangTab} className="mb-4" />
             <div className="space-y-3">
-              <Input label={`Name (${formLangTab})`} value={formData[`name_${formLangTab}`] || ''} onChange={(e) => setFormData((p) => ({ ...p, [`name_${formLangTab}`]: e.target.value }))} />
+              <Input label={`이름 (${formLangTab})`} value={formData[`name_${formLangTab}`] || ''} onChange={(e) => setFormData((p) => ({ ...p, [`name_${formLangTab}`]: e.target.value }))} />
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Description ({formLangTab})</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">설명 ({formLangTab})</label>
                 <textarea
                   className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-transparent outline-none transition focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 dark:border-gray-500/40 dark:bg-[#2a2a2a] dark:text-gray-100 min-h-[100px] resize-y"
                   value={formData[`description_${formLangTab}`] || ''}
@@ -247,8 +247,8 @@ export default function AdminFestivalsPage() {
           </div>
 
           <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-500/40">
-            <Button variant="outline" onClick={() => setShowModal(false)}>{t('common.cancel')}</Button>
-            <Button onClick={handleSave} disabled={saving}>{saving ? t('common.loading') : t('common.save')}</Button>
+            <Button variant="outline" onClick={() => setShowModal(false)}>취소</Button>
+            <Button onClick={handleSave} disabled={saving}>{saving ? '로딩 중...' : '저장'}</Button>
           </div>
         </div>
       </Modal>
