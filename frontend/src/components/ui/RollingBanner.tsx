@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import Link from 'next/link';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { RollingBanner as BannerType } from '@/types';
 import { cn } from '@/lib/utils';
@@ -66,14 +67,25 @@ export default function RollingBanner({ banners, lt, interval = 4000 }: RollingB
       </div>
 
       {/* Content */}
-      <div className="relative h-full flex flex-col justify-end p-6 md:p-12 max-w-7xl mx-auto">
-        <h2 className="text-2xl md:text-4xl font-bold text-white mb-2 drop-shadow-lg">
-          {lt(banner.title)}
-        </h2>
-        <p className="text-base md:text-lg text-white/90 max-w-xl drop-shadow">
-          {lt(banner.subtitle)}
-        </p>
-      </div>
+      {banner.link_url ? (
+        <Link href={banner.link_url} className="relative h-full flex flex-col justify-end p-6 md:p-12 max-w-7xl mx-auto cursor-pointer">
+          <h2 className="text-2xl md:text-4xl font-bold text-white mb-2 drop-shadow-lg">
+            {lt(banner.title)}
+          </h2>
+          <p className="text-base md:text-lg text-white/90 max-w-xl drop-shadow">
+            {lt(banner.subtitle)}
+          </p>
+        </Link>
+      ) : (
+        <div className="relative h-full flex flex-col justify-end p-6 md:p-12 max-w-7xl mx-auto">
+          <h2 className="text-2xl md:text-4xl font-bold text-white mb-2 drop-shadow-lg">
+            {lt(banner.title)}
+          </h2>
+          <p className="text-base md:text-lg text-white/90 max-w-xl drop-shadow">
+            {lt(banner.subtitle)}
+          </p>
+        </div>
+      )}
 
       {/* Navigation Arrows */}
       {banners.length > 1 && (

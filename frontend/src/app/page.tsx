@@ -16,6 +16,7 @@ import {
   AlertTriangle,
   BookOpen,
   Calendar,
+  Heart,
 } from 'lucide-react';
 import { useLanguage } from '@/hooks/useLanguage';
 import api from '@/lib/api';
@@ -57,6 +58,10 @@ export default function HomePage() {
   const [userLat, setUserLat] = useState(37.5665);
   const [userLng, setUserLng] = useState(126.978);
   const [restaurantFilter, setRestaurantFilter] = useState('');
+  const [courseFilter, setCourseFilter] = useState('');
+  const [productFilter, setProductFilter] = useState('');
+  const [guideFilter, setGuideFilter] = useState('');
+  const [festivalFilter, setFestivalFilter] = useState('');
 
   const eventSlug = searchParams.get('event');
 
@@ -133,9 +138,70 @@ export default function HomePage() {
     { href: '/living-guide?cat=etiquette', icon: BookOpen, label: t('living_guide.etiquette') || 'Etiquette' },
   ];
 
+  const courseCategoryChips = [
+    { key: '', label: t('common.all') || 'All' },
+    { key: 'half_day', label: t('category.half_day') || 'Half Day' },
+    { key: 'full_day', label: t('category.full_day') || 'Full Day' },
+    { key: 'history', label: t('category.history') || 'History' },
+    { key: 'nature', label: t('category.nature') || 'Nature' },
+    { key: 'nightview', label: t('category.nightview') || 'Night View' },
+    { key: 'shopping', label: t('category.shopping') || 'Shopping' },
+    { key: 'food', label: t('category.food') || 'Food' },
+    { key: 'kpop', label: t('category.kpop') || 'K-Pop' },
+  ];
+
+  const productCategoryChips = [
+    { key: '', label: t('common.all') || 'All' },
+    { key: 'tour', label: t('category.tour') || 'Tour' },
+    { key: 'experience', label: t('category.experience') || 'Experience' },
+    { key: 'show', label: t('category.show') || 'Show' },
+    { key: 'activity', label: t('category.activity') || 'Activity' },
+    { key: 'food_cooking', label: t('category.food_cooking') || 'Food & Cooking' },
+    { key: 'wellness', label: t('category.wellness') || 'Wellness' },
+  ];
+
+  const guideCategoryChips = [
+    { key: '', label: t('common.all') || 'All' },
+    { key: 'english', label: t('category.english') || 'English' },
+    { key: 'chinese', label: t('category.chinese') || 'Chinese' },
+    { key: 'japanese', label: t('category.japanese') || 'Japanese' },
+    { key: 'history', label: t('category.history') || 'History' },
+    { key: 'food', label: t('category.food') || 'Food' },
+    { key: 'shopping', label: t('category.shopping') || 'Shopping' },
+    { key: 'kpop', label: t('category.kpop') || 'K-Pop' },
+  ];
+
+  const festivalCategoryChips = [
+    { key: '', label: t('common.all') || 'All' },
+    { key: 'festival', label: t('category.festival') || 'Festival' },
+    { key: 'concert', label: t('category.concert') || 'Concert' },
+    { key: 'market', label: t('category.market') || 'Market' },
+    { key: 'exhibition', label: t('category.exhibition') || 'Exhibition' },
+  ];
+
   const filteredRestaurants = restaurantFilter
     ? restaurants.filter((r) => r.category === restaurantFilter)
     : restaurants;
+
+  const filteredCourses = courseFilter
+    ? courses.filter((c) => c.duration_type === courseFilter || c.theme === courseFilter)
+    : courses;
+
+  const filteredProducts = productFilter
+    ? products.filter((p) => p.category === productFilter)
+    : products;
+
+  const filteredGuides = guideFilter
+    ? guides.filter((g) => {
+        const langMatch = g.languages?.some((l) => l.language.toLowerCase() === guideFilter);
+        const specMatch = g.specialties?.some((s) => s.toLowerCase() === guideFilter);
+        return langMatch || specMatch;
+      })
+    : guides;
+
+  const filteredFestivals = festivalFilter
+    ? festivals.filter((f) => f.category === festivalFilter)
+    : festivals;
 
   return (
     <div className="pb-20 md:pb-0">
@@ -155,37 +221,48 @@ export default function HomePage() {
       <SearchBar t={t} language={language} />
 
       {/* 4. Nearby Restaurants Section */}
-      {filteredRestaurants.length > 0 && (
-        <section className="py-6">
-          <div className="max-w-7xl mx-auto px-4">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white">
-                {t('home.nearby_restaurants') || 'Nearby Restaurants'}
-              </h2>
-              <Link
-                href="/restaurants"
-                className="flex items-center gap-1 text-sm text-indigo-600 dark:text-indigo-400 hover:underline"
-              >
-                {t('common.view_all') || 'View All'}
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
-            <FilterChips
-              chips={restaurantCategoryChips}
-              selected={restaurantFilter}
-              onSelect={setRestaurantFilter}
-              className="mb-4"
-            />
+      <section className="py-6">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+              {t('home.nearby_restaurants') || 'Nearby Restaurants'}
+            </h2>
+            <Link
+              href="/restaurants"
+              className="flex items-center gap-1 text-sm text-indigo-600 dark:text-indigo-400 hover:underline"
+            >
+              {t('common.view_all') || 'View All'}
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+          <FilterChips
+            chips={restaurantCategoryChips}
+            selected={restaurantFilter}
+            onSelect={setRestaurantFilter}
+            className="mb-4"
+          />
+          {filteredRestaurants.length > 0 ? (
             <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
               {filteredRestaurants.slice(0, 8).map((r) => (
-                <div key={r.id} className="w-[260px] flex-shrink-0">
+                <div key={r.id} className="w-[260px] flex-shrink-0 relative">
                   <RestaurantCard restaurant={r} lt={lt} />
+                  <button
+                    className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-white/80 dark:bg-black/50 backdrop-blur-sm flex items-center justify-center hover:bg-white dark:hover:bg-black/70 transition-colors"
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                    aria-label="Bookmark"
+                  >
+                    <Heart className="w-4 h-4 text-gray-500 dark:text-gray-300" />
+                  </button>
                 </div>
               ))}
             </div>
-          </div>
-        </section>
-      )}
+          ) : (
+            <div className="flex items-center justify-center py-8 text-gray-400 dark:text-gray-500 text-sm">
+              {t('common.no_items') || 'No items found'}
+            </div>
+          )}
+        </div>
+      </section>
 
       {/* 5. Mini Map Section */}
       <section className="py-4 bg-gray-50 dark:bg-[#1a1a1a]">
@@ -216,90 +293,147 @@ export default function HomePage() {
       </section>
 
       {/* 6. Recommended Courses Section */}
-      {courses.length > 0 && (
-        <section className="py-6">
-          <div className="max-w-7xl mx-auto px-4">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white">
-                {t('home.recommended_courses') || 'Recommended Courses'}
-              </h2>
-              <Link href="/courses" className="flex items-center gap-1 text-sm text-indigo-600 dark:text-indigo-400 hover:underline">
-                {t('common.view_all') || 'View All'} <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
+      <section className="py-6">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+              {t('home.recommended_courses') || 'Recommended Courses'}
+            </h2>
+            <Link href="/courses" className="flex items-center gap-1 text-sm text-indigo-600 dark:text-indigo-400 hover:underline">
+              {t('common.view_all') || 'View All'} <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+          <FilterChips
+            chips={courseCategoryChips}
+            selected={courseFilter}
+            onSelect={setCourseFilter}
+            className="mb-4"
+          />
+          {filteredCourses.length > 0 ? (
             <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
-              {courses.map((c) => (
-                <div key={c.id} className="w-[280px] flex-shrink-0">
+              {filteredCourses.map((c) => (
+                <div key={c.id} className="w-[280px] flex-shrink-0 relative">
                   <CourseCard course={c} lt={lt} />
+                  <button
+                    className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-white/80 dark:bg-black/50 backdrop-blur-sm flex items-center justify-center hover:bg-white dark:hover:bg-black/70 transition-colors"
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                    aria-label="Bookmark"
+                  >
+                    <Heart className="w-4 h-4 text-gray-500 dark:text-gray-300" />
+                  </button>
                 </div>
               ))}
             </div>
-          </div>
-        </section>
-      )}
+          ) : (
+            <div className="flex items-center justify-center py-8 text-gray-400 dark:text-gray-500 text-sm">
+              {t('common.no_items') || 'No items found'}
+            </div>
+          )}
+        </div>
+      </section>
 
       {/* 7. Travel Products Section */}
-      {products.length > 0 && (
-        <section className="py-6 bg-gray-50 dark:bg-[#1a1a1a]">
-          <div className="max-w-7xl mx-auto px-4">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white">
-                {t('home.travel_products') || 'Tours & Activities'}
-              </h2>
-              <Link href="/products" className="flex items-center gap-1 text-sm text-indigo-600 dark:text-indigo-400 hover:underline">
-                {t('common.view_all') || 'View All'} <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
+      <section className="py-6 bg-gray-50 dark:bg-[#1a1a1a]">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+              {t('home.travel_products') || 'Tours & Activities'}
+            </h2>
+            <Link href="/products" className="flex items-center gap-1 text-sm text-indigo-600 dark:text-indigo-400 hover:underline">
+              {t('common.view_all') || 'View All'} <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+          <FilterChips
+            chips={productCategoryChips}
+            selected={productFilter}
+            onSelect={setProductFilter}
+            className="mb-4"
+          />
+          {filteredProducts.length > 0 ? (
             <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
-              {products.map((p) => (
-                <div key={p.id} className="w-[280px] flex-shrink-0">
+              {filteredProducts.map((p) => (
+                <div key={p.id} className="w-[280px] flex-shrink-0 relative">
                   <ProductCard product={p} lt={lt} />
+                  <button
+                    className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-white/80 dark:bg-black/50 backdrop-blur-sm flex items-center justify-center hover:bg-white dark:hover:bg-black/70 transition-colors"
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                    aria-label="Bookmark"
+                  >
+                    <Heart className="w-4 h-4 text-gray-500 dark:text-gray-300" />
+                  </button>
                 </div>
               ))}
             </div>
-          </div>
-        </section>
-      )}
+          ) : (
+            <div className="flex items-center justify-center py-8 text-gray-400 dark:text-gray-500 text-sm">
+              {t('common.no_items') || 'No items found'}
+            </div>
+          )}
+        </div>
+      </section>
 
       {/* 8. Guide Recommendations Section */}
-      {guides.length > 0 && (
-        <section className="py-6">
-          <div className="max-w-7xl mx-auto px-4">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white">
-                {t('home.guide_recommendations') || 'Recommended Guides'}
-              </h2>
-              <Link href="/guides" className="flex items-center gap-1 text-sm text-indigo-600 dark:text-indigo-400 hover:underline">
-                {t('common.view_all') || 'View All'} <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
+      <section className="py-6">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+              {t('home.guide_recommendations') || 'Recommended Guides'}
+            </h2>
+            <Link href="/guides" className="flex items-center gap-1 text-sm text-indigo-600 dark:text-indigo-400 hover:underline">
+              {t('common.view_all') || 'View All'} <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+          <FilterChips
+            chips={guideCategoryChips}
+            selected={guideFilter}
+            onSelect={setGuideFilter}
+            className="mb-4"
+          />
+          {filteredGuides.length > 0 ? (
             <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
-              {guides.map((g) => (
-                <div key={g.id} className="w-[260px] flex-shrink-0">
+              {filteredGuides.map((g) => (
+                <div key={g.id} className="w-[260px] flex-shrink-0 relative">
                   <GuideCard guide={g} lt={lt} />
+                  <button
+                    className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-white/80 dark:bg-black/50 backdrop-blur-sm flex items-center justify-center hover:bg-white dark:hover:bg-black/70 transition-colors"
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                    aria-label="Bookmark"
+                  >
+                    <Heart className="w-4 h-4 text-gray-500 dark:text-gray-300" />
+                  </button>
                 </div>
               ))}
             </div>
-          </div>
-        </section>
-      )}
+          ) : (
+            <div className="flex items-center justify-center py-8 text-gray-400 dark:text-gray-500 text-sm">
+              {t('common.no_items') || 'No items found'}
+            </div>
+          )}
+        </div>
+      </section>
 
       {/* 9. Festivals & Events Section */}
-      {festivals.length > 0 && (
-        <section className="py-6 bg-gray-50 dark:bg-[#1a1a1a]">
-          <div className="max-w-7xl mx-auto px-4">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-                {t('home.festivals_events') || 'Festivals & Events'}
-              </h2>
-              <Link href="/festivals" className="flex items-center gap-1 text-sm text-indigo-600 dark:text-indigo-400 hover:underline">
-                {t('common.view_all') || 'View All'} <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
+      <section className="py-6 bg-gray-50 dark:bg-[#1a1a1a]">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+              {t('home.festivals_events') || 'Festivals & Events'}
+            </h2>
+            <Link href="/festivals" className="flex items-center gap-1 text-sm text-indigo-600 dark:text-indigo-400 hover:underline">
+              {t('common.view_all') || 'View All'} <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+          <FilterChips
+            chips={festivalCategoryChips}
+            selected={festivalFilter}
+            onSelect={setFestivalFilter}
+            className="mb-4"
+          />
+          {filteredFestivals.length > 0 ? (
             <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
-              {festivals.map((f) => (
-                <Link key={f.id} href={`/festivals/${f.id}`} className="w-[260px] flex-shrink-0">
+              {filteredFestivals.map((f) => (
+                <Link key={f.id} href={`/festivals/${f.id}`} className="w-[260px] flex-shrink-0 relative">
                   <Card hoverable className="h-full">
                     <div className="relative aspect-[16/10] overflow-hidden">
                       {f.image_url ? (
@@ -317,12 +451,23 @@ export default function HomePage() {
                       </p>
                     </div>
                   </Card>
+                  <button
+                    className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-white/80 dark:bg-black/50 backdrop-blur-sm flex items-center justify-center hover:bg-white dark:hover:bg-black/70 transition-colors"
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                    aria-label="Bookmark"
+                  >
+                    <Heart className="w-4 h-4 text-gray-500 dark:text-gray-300" />
+                  </button>
                 </Link>
               ))}
             </div>
-          </div>
-        </section>
-      )}
+          ) : (
+            <div className="flex items-center justify-center py-8 text-gray-400 dark:text-gray-500 text-sm">
+              {t('common.no_items') || 'No items found'}
+            </div>
+          )}
+        </div>
+      </section>
 
       {/* 10. AI Course Generation Banner */}
       <section className="py-6">

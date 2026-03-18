@@ -9,8 +9,9 @@ from models.b2b import B2BPartner
 from models.event import Event
 from models.booking import Booking
 from models.user import User
-from auth.dependencies import get_current_user
+from auth.dependencies import get_current_user, get_current_user_optional
 from utils.helpers import get_multilingual_field
+from models.analytics import VisitorLog
 
 router = APIRouter(prefix="/api/b2b", tags=["B2B Partners"])
 
@@ -27,6 +28,50 @@ async def get_partner_for_user(user: User, db: AsyncSession) -> B2BPartner:
     if not partner:
         raise HTTPException(status_code=403, detail="B2B partner access required")
     return partner
+
+
+@router.get("/dashboard/stats")
+async def partner_dashboard_stats(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Get simplified B2B dashboard stats for frontend."""
+    try:
+        partner = await get_partner_for_user(current_user, db)
+        assigned_event_ids = partner.assigned_events or []
+
+        total_bookings = 0
+        total_revenue = 0.0
+        total_visits = 0
+        active_promotions = 0
+
+        if assigned_event_ids:
+            bookings_result = await db.execute(
+                select(func.count(Booking.id)).where(Booking.event_id.in_(assigned_event_ids))
+            )
+            total_bookings = bookings_result.scalar() or 0
+
+            revenue_result = await db.execute(
+                select(func.sum(Booking.total_amount_usd)).where(
+                    Booking.event_id.in_(assigned_event_ids),
+                    Booking.status.in_(["confirmed", "completed"]),
+                )
+            )
+            total_revenue = float(revenue_result.scalar() or 0)
+
+        return {
+            "total_visits": total_visits,
+            "total_bookings": total_bookings,
+            "total_revenue": round(total_revenue, 2),
+            "active_promotions": active_promotions,
+        }
+    except Exception:
+        return {
+            "total_visits": 0,
+            "total_bookings": 0,
+            "total_revenue": 0,
+            "active_promotions": 0,
+        }
 
 
 @router.get("/dashboard")

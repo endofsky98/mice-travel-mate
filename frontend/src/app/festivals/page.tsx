@@ -13,6 +13,59 @@ import { formatDateRange } from '@/lib/utils';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 
+function CalendarView({ festivals, lt, t }: { festivals: Festival[]; lt: (v: any) => string; t: (key: string) => string }) {
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const year = currentMonth.getFullYear();
+  const month = currentMonth.getMonth();
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const days = Array.from({ length: firstDay + daysInMonth }, (_, i) => i < firstDay ? null : i - firstDay + 1);
+  const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+  const getFestivalsForDay = (day: number) => {
+    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    return festivals.filter(f => {
+      if (!f.start_date || !f.end_date) return false;
+      return dateStr >= f.start_date.slice(0, 10) && dateStr <= f.end_date.slice(0, 10);
+    });
+  };
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-4">
+        <button onClick={() => setCurrentMonth(new Date(year, month - 1, 1))} className="p-2 hover:bg-gray-100 dark:hover:bg-white/[0.05] rounded-lg text-gray-600 dark:text-gray-300">&lt;</button>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+          {currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+        </h2>
+        <button onClick={() => setCurrentMonth(new Date(year, month + 1, 1))} className="p-2 hover:bg-gray-100 dark:hover:bg-white/[0.05] rounded-lg text-gray-600 dark:text-gray-300">&gt;</button>
+      </div>
+      <div className="grid grid-cols-7 gap-px bg-gray-200 dark:bg-gray-700 rounded-xl overflow-hidden">
+        {weekDays.map(d => (
+          <div key={d} className="bg-gray-50 dark:bg-[#1a1a1a] p-2 text-center text-xs font-medium text-gray-500 dark:text-gray-400">{d}</div>
+        ))}
+        {days.map((day, i) => {
+          const dayFestivals = day ? getFestivalsForDay(day) : [];
+          return (
+            <div key={i} className={cn('bg-white dark:bg-[#1e1e1e] min-h-[80px] p-1', !day && 'bg-gray-50 dark:bg-[#141414]')}>
+              {day && (
+                <>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">{day}</span>
+                  {dayFestivals.slice(0, 2).map(f => (
+                    <Link key={f.id} href={`/festivals/${f.id}`} className="block mt-0.5 px-1 py-0.5 text-[10px] bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 rounded truncate hover:bg-pink-200 dark:hover:bg-pink-900/50">
+                      {lt(f.name)}
+                    </Link>
+                  ))}
+                  {dayFestivals.length > 2 && <span className="text-[10px] text-gray-400 pl-1">+{dayFestivals.length - 2}</span>}
+                </>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export default function FestivalsPage() {
   const { t, lt, language } = useLanguage();
   const [festivals, setFestivals] = useState<Festival[]>([]);
@@ -65,6 +118,9 @@ export default function FestivalsPage() {
 
       {loading ? <LoadingSpinner fullPage /> : festivals.length === 0 ? (
         <EmptyState icon={Calendar} title={t('common.no_results') || 'No festivals found'} />
+      ) : viewMode === 'calendar' ? (
+        /* Calendar View */
+        <CalendarView festivals={festivals} lt={lt} t={t} />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {festivals.map((f) => (

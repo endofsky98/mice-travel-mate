@@ -25,7 +25,7 @@ export default function RestaurantsPage() {
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('');
   const [priceRange, setPriceRange] = useState('');
-  const [sortBy, setSortBy] = useState('distance');
+  const [sortBy, setSortBy] = useState('recommended');
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
 
   const eventId = searchParams.get('event_id');

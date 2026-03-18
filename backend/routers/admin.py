@@ -1,10 +1,13 @@
 import uuid
-from datetime import datetime
-from fastapi import APIRouter, Depends, HTTPException, Query
+from datetime import datetime, date, timedelta
+from decimal import Decimal
+from fastapi import APIRouter, Depends, HTTPException, Query, Body
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
-from typing import Optional
+from sqlalchemy import select, func, cast, Date
+from typing import Optional, List
+from pydantic import BaseModel
 
+from config import settings
 from database import get_db
 from auth.dependencies import get_current_admin
 from models.user import User, Bookmark
@@ -16,6 +19,9 @@ from models.product import Product, ProductInventory
 from models.guide import Guide, GuideAvailability
 from models.booking import Booking
 from models.language import Language, UITranslation
+from models.review import Review
+from models.analytics import SearchLog, VisitorLog
+from models.banner import RollingBanner
 
 from schemas.event import EventCreate, EventUpdate, EventLinkIds
 from schemas.restaurant import RestaurantCreate, RestaurantUpdate
@@ -30,9 +36,12 @@ from utils.helpers import (
     serialize_event, serialize_restaurant, serialize_course, serialize_product,
     serialize_guide, serialize_booking, serialize_transport_route, serialize_transport_tip,
     serialize_course_spot, serialize_course_spot_transition,
+    get_multilingual_field,
 )
 
-router = APIRouter(prefix="/api/v1/admin", tags=["Admin"])
+router = APIRouter(prefix="/api/admin", tags=["Admin"])
+
+SUPPORTED_LANG_CODES = ["en", "ko", "zh_cn", "zh_tw", "ja", "es", "th", "vi", "fr"]
 
 
 # ─────────────────────── Dashboard ───────────────────────
@@ -73,24 +82,134 @@ async def dashboard(
     }
 
 
+@router.get("/dashboard/stats")
+async def dashboard_stats(
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Dashboard stats in the format expected by the frontend."""
+    today = date.today()
+    yesterday = today - timedelta(days=1)
+
+    # Today's bookings count
+    today_bookings_result = await db.execute(
+        select(func.count(Booking.id)).where(
+            func.date(Booking.created_at) == today
+        )
+    )
+    today_bookings = today_bookings_result.scalar() or 0
+
+    # Today's booking amount
+    today_amount_result = await db.execute(
+        select(func.coalesce(func.sum(Booking.total_amount_usd), 0)).where(
+            func.date(Booking.created_at) == today
+        )
+    )
+    today_booking_amount = float(today_amount_result.scalar() or 0)
+
+    # Total content counts
+    total_restaurants = (await db.execute(select(func.count(Restaurant.id)))).scalar() or 0
+    total_courses = (await db.execute(select(func.count(Course.id)))).scalar() or 0
+    total_products = (await db.execute(select(func.count(Product.id)))).scalar() or 0
+    total_guides = (await db.execute(select(func.count(Guide.id)))).scalar() or 0
+
+    # Today's visitors (unique sessions)
+    today_visitors_result = await db.execute(
+        select(func.count(func.distinct(VisitorLog.session_id))).where(
+            func.date(VisitorLog.created_at) == today
+        )
+    )
+    today_visitors = today_visitors_result.scalar() or 0
+
+    # Yesterday's visitors for trend calculation
+    yesterday_visitors_result = await db.execute(
+        select(func.count(func.distinct(VisitorLog.session_id))).where(
+            func.date(VisitorLog.created_at) == yesterday
+        )
+    )
+    yesterday_visitors = yesterday_visitors_result.scalar() or 0
+
+    # Visitor trend (percentage change)
+    if yesterday_visitors > 0:
+        visitor_trend = round(((today_visitors - yesterday_visitors) / yesterday_visitors) * 100, 1)
+    else:
+        visitor_trend = 0
+
+    # Untranslated count: count items that have English text but missing other languages
+    # Simple heuristic: count UITranslation keys that exist for 'en' but not for all active languages
+    active_langs_result = await db.execute(
+        select(Language.code).where(Language.is_active == True)
+    )
+    active_langs = [row[0] for row in active_langs_result.all()]
+
+    en_keys_result = await db.execute(
+        select(func.count(func.distinct(UITranslation.key))).where(
+            UITranslation.language_code == "en"
+        )
+    )
+    en_key_count = en_keys_result.scalar() or 0
+
+    untranslated_count = 0
+    for lang_code in active_langs:
+        if lang_code == "en":
+            continue
+        lang_keys_result = await db.execute(
+            select(func.count(func.distinct(UITranslation.key))).where(
+                UITranslation.language_code == lang_code
+            )
+        )
+        lang_key_count = lang_keys_result.scalar() or 0
+        if lang_key_count < en_key_count:
+            untranslated_count += (en_key_count - lang_key_count)
+
+    return {
+        "today_bookings": today_bookings,
+        "today_booking_amount": today_booking_amount,
+        "total_restaurants": total_restaurants,
+        "total_courses": total_courses,
+        "total_products": total_products,
+        "total_guides": total_guides,
+        "today_visitors": today_visitors,
+        "visitor_trend": visitor_trend,
+        "untranslated_count": untranslated_count,
+    }
+
+
 # ─────────────────────── Events CRUD ───────────────────────
 
 @router.get("/events")
 async def admin_list_events(
-    limit: int = Query(20, ge=1, le=100),
-    offset: int = Query(0, ge=0),
+    page: int = Query(1, ge=1),
+    per_page: int = Query(20, ge=1, le=100),
+    search: Optional[str] = Query(None),
+    limit: Optional[int] = Query(None, ge=1, le=100),
+    offset: Optional[int] = Query(None, ge=0),
     admin: User = Depends(get_current_admin),
     db: AsyncSession = Depends(get_db),
 ):
-    count_result = await db.execute(select(Event))
-    total = len(count_result.scalars().all())
+    query = select(Event)
+    count_query = select(func.count(Event.id))
 
-    result = await db.execute(
-        select(Event).order_by(Event.created_at.desc()).offset(offset).limit(limit)
-    )
+    if search:
+        search_filter = Event.venue_name.ilike(f"%{search}%")
+        query = query.where(search_filter)
+        count_query = count_query.where(search_filter)
+
+    count_result = await db.execute(count_query)
+    total = count_result.scalar() or 0
+
+    if offset is not None and limit is not None:
+        query = query.order_by(Event.created_at.desc()).offset(offset).limit(limit)
+    else:
+        actual_offset = (page - 1) * per_page
+        query = query.order_by(Event.created_at.desc()).offset(actual_offset).limit(per_page)
+
+    result = await db.execute(query)
     events = result.scalars().all()
 
-    return {"items": [serialize_event(e) for e in events], "total": total}
+    pages = (total + per_page - 1) // per_page if per_page else 1
+
+    return {"items": [serialize_event(e) for e in events], "total": total, "pages": pages}
 
 
 @router.post("/events")
@@ -211,19 +330,37 @@ async def admin_link_event_items(
 
 @router.get("/restaurants")
 async def admin_list_restaurants(
-    limit: int = Query(20, ge=1, le=100),
-    offset: int = Query(0, ge=0),
+    page: int = Query(1, ge=1),
+    per_page: int = Query(20, ge=1, le=100),
+    search: Optional[str] = Query(None),
+    limit: Optional[int] = Query(None, ge=1, le=100),
+    offset: Optional[int] = Query(None, ge=0),
     admin: User = Depends(get_current_admin),
     db: AsyncSession = Depends(get_db),
 ):
-    count_result = await db.execute(select(Restaurant))
-    total = len(count_result.scalars().all())
+    query = select(Restaurant)
+    count_query = select(func.count(Restaurant.id))
 
-    result = await db.execute(
-        select(Restaurant).order_by(Restaurant.created_at.desc()).offset(offset).limit(limit)
-    )
+    if search:
+        search_filter = Restaurant.address.ilike(f"%{search}%")
+        query = query.where(search_filter)
+        count_query = count_query.where(search_filter)
+
+    count_result = await db.execute(count_query)
+    total = count_result.scalar() or 0
+
+    if offset is not None and limit is not None:
+        query = query.order_by(Restaurant.created_at.desc()).offset(offset).limit(limit)
+    else:
+        actual_offset = (page - 1) * per_page
+        query = query.order_by(Restaurant.created_at.desc()).offset(actual_offset).limit(per_page)
+
+    result = await db.execute(query)
     restaurants = result.scalars().all()
-    return {"items": [serialize_restaurant(r) for r in restaurants], "total": total}
+
+    pages = (total + per_page - 1) // per_page if per_page else 1
+
+    return {"items": [serialize_restaurant(r) for r in restaurants], "total": total, "pages": pages}
 
 
 @router.post("/restaurants")
@@ -293,19 +430,37 @@ async def admin_delete_restaurant(
 
 @router.get("/courses")
 async def admin_list_courses(
-    limit: int = Query(20, ge=1, le=100),
-    offset: int = Query(0, ge=0),
+    page: int = Query(1, ge=1),
+    per_page: int = Query(20, ge=1, le=100),
+    search: Optional[str] = Query(None),
+    limit: Optional[int] = Query(None, ge=1, le=100),
+    offset: Optional[int] = Query(None, ge=0),
     admin: User = Depends(get_current_admin),
     db: AsyncSession = Depends(get_db),
 ):
-    count_result = await db.execute(select(Course))
-    total = len(count_result.scalars().all())
+    query = select(Course)
+    count_query = select(func.count(Course.id))
 
-    result = await db.execute(
-        select(Course).order_by(Course.created_at.desc()).offset(offset).limit(limit)
-    )
+    if search:
+        search_filter = Course.theme.ilike(f"%{search}%")
+        query = query.where(search_filter)
+        count_query = count_query.where(search_filter)
+
+    count_result = await db.execute(count_query)
+    total = count_result.scalar() or 0
+
+    if offset is not None and limit is not None:
+        query = query.order_by(Course.created_at.desc()).offset(offset).limit(limit)
+    else:
+        actual_offset = (page - 1) * per_page
+        query = query.order_by(Course.created_at.desc()).offset(actual_offset).limit(per_page)
+
+    result = await db.execute(query)
     courses = result.scalars().all()
-    return {"items": [serialize_course(c) for c in courses], "total": total}
+
+    pages = (total + per_page - 1) // per_page if per_page else 1
+
+    return {"items": [serialize_course(c) for c in courses], "total": total, "pages": pages}
 
 
 @router.post("/courses")
@@ -485,19 +640,37 @@ async def admin_delete_course_transition(
 
 @router.get("/products")
 async def admin_list_products(
-    limit: int = Query(20, ge=1, le=100),
-    offset: int = Query(0, ge=0),
+    page: int = Query(1, ge=1),
+    per_page: int = Query(20, ge=1, le=100),
+    search: Optional[str] = Query(None),
+    limit: Optional[int] = Query(None, ge=1, le=100),
+    offset: Optional[int] = Query(None, ge=0),
     admin: User = Depends(get_current_admin),
     db: AsyncSession = Depends(get_db),
 ):
-    count_result = await db.execute(select(Product))
-    total = len(count_result.scalars().all())
+    query = select(Product)
+    count_query = select(func.count(Product.id))
 
-    result = await db.execute(
-        select(Product).order_by(Product.created_at.desc()).offset(offset).limit(limit)
-    )
+    if search:
+        search_filter = Product.category.ilike(f"%{search}%")
+        query = query.where(search_filter)
+        count_query = count_query.where(search_filter)
+
+    count_result = await db.execute(count_query)
+    total = count_result.scalar() or 0
+
+    if offset is not None and limit is not None:
+        query = query.order_by(Product.created_at.desc()).offset(offset).limit(limit)
+    else:
+        actual_offset = (page - 1) * per_page
+        query = query.order_by(Product.created_at.desc()).offset(actual_offset).limit(per_page)
+
+    result = await db.execute(query)
     products = result.scalars().all()
-    return {"items": [serialize_product(p) for p in products], "total": total}
+
+    pages = (total + per_page - 1) // per_page if per_page else 1
+
+    return {"items": [serialize_product(p) for p in products], "total": total, "pages": pages}
 
 
 @router.post("/products")
@@ -606,19 +779,37 @@ async def admin_set_product_inventory(
 
 @router.get("/guides")
 async def admin_list_guides(
-    limit: int = Query(20, ge=1, le=100),
-    offset: int = Query(0, ge=0),
+    page: int = Query(1, ge=1),
+    per_page: int = Query(20, ge=1, le=100),
+    search: Optional[str] = Query(None),
+    limit: Optional[int] = Query(None, ge=1, le=100),
+    offset: Optional[int] = Query(None, ge=0),
     admin: User = Depends(get_current_admin),
     db: AsyncSession = Depends(get_db),
 ):
-    count_result = await db.execute(select(Guide))
-    total = len(count_result.scalars().all())
+    query = select(Guide)
+    count_query = select(func.count(Guide.id))
 
-    result = await db.execute(
-        select(Guide).order_by(Guide.created_at.desc()).offset(offset).limit(limit)
-    )
+    if search:
+        search_filter = Guide.status.ilike(f"%{search}%")
+        query = query.where(search_filter)
+        count_query = count_query.where(search_filter)
+
+    count_result = await db.execute(count_query)
+    total = count_result.scalar() or 0
+
+    if offset is not None and limit is not None:
+        query = query.order_by(Guide.created_at.desc()).offset(offset).limit(limit)
+    else:
+        actual_offset = (page - 1) * per_page
+        query = query.order_by(Guide.created_at.desc()).offset(actual_offset).limit(per_page)
+
+    result = await db.execute(query)
     guides = result.scalars().all()
-    return {"items": [serialize_guide(g) for g in guides], "total": total}
+
+    pages = (total + per_page - 1) // per_page if per_page else 1
+
+    return {"items": [serialize_guide(g) for g in guides], "total": total, "pages": pages}
 
 
 @router.post("/guides")
@@ -855,8 +1046,11 @@ async def admin_delete_transport_tip(
 @router.get("/bookings")
 async def admin_list_bookings(
     status: Optional[str] = Query(None),
-    limit: int = Query(20, ge=1, le=100),
-    offset: int = Query(0, ge=0),
+    sort: Optional[str] = Query(None),
+    page: int = Query(1, ge=1),
+    per_page: int = Query(20, ge=1, le=100),
+    limit: Optional[int] = Query(None, ge=1, le=100),
+    offset: Optional[int] = Query(None, ge=0),
     admin: User = Depends(get_current_admin),
     db: AsyncSession = Depends(get_db),
 ):
@@ -864,14 +1058,30 @@ async def admin_list_bookings(
     if status:
         query = query.where(Booking.status == status)
 
-    count_result = await db.execute(query)
-    total = len(count_result.scalars().all())
+    count_result = await db.execute(select(func.count(Booking.id)).where(
+        Booking.status == status if status else True
+    ))
+    total = count_result.scalar() or 0
 
-    query = query.order_by(Booking.created_at.desc()).offset(offset).limit(limit)
+    # Sort order
+    if sort == "oldest":
+        query = query.order_by(Booking.created_at.asc())
+    else:
+        query = query.order_by(Booking.created_at.desc())
+
+    # Support both offset/limit and page/per_page
+    if offset is not None and limit is not None:
+        query = query.offset(offset).limit(limit)
+    else:
+        actual_offset = (page - 1) * per_page
+        query = query.offset(actual_offset).limit(per_page)
+
     result = await db.execute(query)
     bookings = result.scalars().all()
 
-    return {"items": [serialize_booking(b) for b in bookings], "total": total}
+    pages = (total + per_page - 1) // per_page if per_page else 1
+
+    return {"items": [serialize_booking(b) for b in bookings], "total": total, "pages": pages}
 
 
 @router.put("/bookings/{booking_id}/status")
@@ -943,26 +1153,579 @@ async def admin_refund_booking(
         raise HTTPException(status_code=500, detail=f"Refund error: {str(e)}")
 
 
+@router.patch("/bookings/{booking_id}")
+async def admin_patch_booking(
+    booking_id: str,
+    data: dict = Body(...),
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Patch a booking (e.g. update status via PATCH)."""
+    result = await db.execute(select(Booking).where(Booking.id == booking_id))
+    booking = result.scalar_one_or_none()
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+
+    if "status" in data:
+        valid_statuses = ["pending", "confirmed", "cancelled", "completed"]
+        if data["status"] not in valid_statuses:
+            raise HTTPException(status_code=400, detail=f"Invalid status. Must be one of: {valid_statuses}")
+        booking.status = data["status"]
+        if data["status"] == "cancelled":
+            booking.cancelled_at = datetime.utcnow()
+        elif data["status"] == "confirmed":
+            booking.paid_at = booking.paid_at or datetime.utcnow()
+
+    booking.updated_at = datetime.utcnow()
+    await db.flush()
+    await db.refresh(booking)
+    return serialize_booking(booking)
+
+
+# ─────────────────────── Reviews (Admin) ───────────────────────
+
+@router.get("/reviews")
+async def admin_list_reviews(
+    status: Optional[str] = Query(None),
+    page: int = Query(1, ge=1),
+    per_page: int = Query(20, ge=1, le=100),
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """List reviews for admin dashboard, optionally filtered by status."""
+    query = select(Review)
+    if status:
+        query = query.where(Review.status == status)
+
+    count_result = await db.execute(
+        select(func.count(Review.id)).where(
+            Review.status == status if status else True
+        )
+    )
+    total = count_result.scalar() or 0
+
+    offset = (page - 1) * per_page
+    query = query.order_by(Review.created_at.desc()).offset(offset).limit(per_page)
+    result = await db.execute(query)
+    reviews = result.scalars().all()
+
+    # Fetch user names
+    user_ids = list({r.user_id for r in reviews})
+    users_map = {}
+    if user_ids:
+        users_result = await db.execute(select(User).where(User.id.in_(user_ids)))
+        for u in users_result.scalars().all():
+            users_map[u.id] = u
+
+    # Fetch target names (best effort)
+    items = []
+    for r in reviews:
+        target_name = ""
+        if r.target_type == "restaurant":
+            t = (await db.execute(select(Restaurant).where(Restaurant.id == r.target_id))).scalar_one_or_none()
+            if t:
+                target_name = get_multilingual_field(t, "name", "en") or ""
+        elif r.target_type == "product":
+            t = (await db.execute(select(Product).where(Product.id == r.target_id))).scalar_one_or_none()
+            if t:
+                target_name = get_multilingual_field(t, "name", "en") or ""
+        elif r.target_type == "course":
+            t = (await db.execute(select(Course).where(Course.id == r.target_id))).scalar_one_or_none()
+            if t:
+                target_name = get_multilingual_field(t, "name", "en") or ""
+        elif r.target_type == "guide":
+            t = (await db.execute(select(Guide).where(Guide.id == r.target_id))).scalar_one_or_none()
+            if t:
+                target_name = get_multilingual_field(t, "name", "en") or ""
+
+        items.append({
+            "id": r.id,
+            "user_id": r.user_id,
+            "user_name": users_map.get(r.user_id, None) and users_map[r.user_id].name,
+            "target_type": r.target_type,
+            "target_id": r.target_id,
+            "target_name": target_name,
+            "rating": r.rating,
+            "content": r.content,
+            "images": r.images,
+            "status": r.status,
+            "is_reported": r.is_reported,
+            "report_count": r.report_count,
+            "created_at": r.created_at.isoformat() if r.created_at else None,
+        })
+
+    pages = (total + per_page - 1) // per_page if per_page else 1
+
+    return {"items": items, "total": total, "pages": pages}
+
+
+@router.patch("/reviews/{review_id}")
+async def admin_patch_review(
+    review_id: str,
+    data: dict = Body(...),
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Approve or delete a review."""
+    result = await db.execute(select(Review).where(Review.id == review_id))
+    review = result.scalar_one_or_none()
+    if not review:
+        raise HTTPException(status_code=404, detail="Review not found")
+
+    if "status" in data:
+        valid_statuses = ["pending", "approved", "deleted"]
+        if data["status"] not in valid_statuses:
+            raise HTTPException(status_code=400, detail=f"Invalid status. Must be one of: {valid_statuses}")
+        review.status = data["status"]
+
+    review.updated_at = datetime.utcnow()
+    await db.flush()
+    await db.refresh(review)
+
+    return {
+        "id": review.id,
+        "status": review.status,
+        "updated_at": review.updated_at.isoformat() if review.updated_at else None,
+    }
+
+
+# ─────────────────────── Analytics (Admin) ───────────────────────
+
+@router.get("/analytics/searches")
+async def admin_analytics_searches(
+    per_page: int = Query(10, ge=1, le=100),
+    period: int = Query(30, ge=1, le=365),
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Get popular search keywords for admin dashboard."""
+    since = datetime.utcnow() - timedelta(days=period)
+
+    top_queries_result = await db.execute(
+        select(
+            SearchLog.query,
+            func.count(SearchLog.id).label("count"),
+        )
+        .where(SearchLog.created_at >= since)
+        .group_by(SearchLog.query)
+        .order_by(func.count(SearchLog.id).desc())
+        .limit(per_page)
+    )
+    items = [
+        {"keyword": row[0], "count": row[1]}
+        for row in top_queries_result.all()
+    ]
+
+    return {"items": items}
+
+
+@router.get("/analytics/visitors")
+async def admin_analytics_visitors(
+    period: int = Query(30, ge=1, le=365),
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Get visitor statistics for admin analytics page."""
+    since = datetime.utcnow() - timedelta(days=period)
+
+    total_result = await db.execute(
+        select(func.count(VisitorLog.id)).where(VisitorLog.created_at >= since)
+    )
+    total_visits = total_result.scalar() or 0
+
+    unique_result = await db.execute(
+        select(func.count(func.distinct(VisitorLog.session_id))).where(VisitorLog.created_at >= since)
+    )
+    unique_sessions = unique_result.scalar() or 0
+
+    # By language
+    lang_result = await db.execute(
+        select(VisitorLog.language, func.count(VisitorLog.id))
+        .where(VisitorLog.created_at >= since)
+        .group_by(VisitorLog.language)
+        .order_by(func.count(VisitorLog.id).desc())
+        .limit(20)
+    )
+    by_language = [{"language": row[0] or "unknown", "count": row[1]} for row in lang_result.all()]
+
+    # By nationality
+    nat_result = await db.execute(
+        select(VisitorLog.nationality, func.count(VisitorLog.id))
+        .where(VisitorLog.created_at >= since)
+        .group_by(VisitorLog.nationality)
+        .order_by(func.count(VisitorLog.id).desc())
+        .limit(20)
+    )
+    by_nationality = [{"nationality": row[0] or "unknown", "count": row[1]} for row in nat_result.all()]
+
+    # Top pages
+    page_result = await db.execute(
+        select(VisitorLog.page_path, func.count(VisitorLog.id))
+        .where(VisitorLog.created_at >= since)
+        .group_by(VisitorLog.page_path)
+        .order_by(func.count(VisitorLog.id).desc())
+        .limit(20)
+    )
+    top_pages = [{"page": row[0] or "/", "count": row[1]} for row in page_result.all()]
+
+    return {
+        "period_days": period,
+        "total_visits": total_visits,
+        "unique_sessions": unique_sessions,
+        "by_language": by_language,
+        "by_nationality": by_nationality,
+        "top_pages": top_pages,
+    }
+
+
+@router.get("/analytics/content")
+async def admin_analytics_content(
+    period: int = Query(30, ge=1, le=365),
+    per_page: int = Query(10, ge=1, le=100),
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Get content view statistics for admin analytics page."""
+    from models.analytics import ContentView
+
+    since = datetime.utcnow() - timedelta(days=period)
+
+    top_items_result = await db.execute(
+        select(
+            ContentView.target_type,
+            ContentView.target_id,
+            func.count(ContentView.id).label("view_count"),
+        )
+        .where(ContentView.created_at >= since)
+        .group_by(ContentView.target_type, ContentView.target_id)
+        .order_by(func.count(ContentView.id).desc())
+        .limit(per_page)
+    )
+    items = [
+        {"target_type": row[0], "target_id": row[1], "view_count": row[2]}
+        for row in top_items_result.all()
+    ]
+
+    return {"items": items}
+
+
+@router.get("/analytics/bookings")
+async def admin_analytics_bookings(
+    period: int = Query(30, ge=1, le=365),
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Get booking statistics for admin analytics page."""
+    since = datetime.utcnow() - timedelta(days=period)
+
+    total_result = await db.execute(
+        select(func.count(Booking.id)).where(Booking.created_at >= since)
+    )
+    total_bookings = total_result.scalar() or 0
+
+    total_revenue_result = await db.execute(
+        select(func.coalesce(func.sum(Booking.total_amount_usd), 0)).where(
+            Booking.created_at >= since, Booking.status.in_(["confirmed", "completed"])
+        )
+    )
+    total_revenue = float(total_revenue_result.scalar() or 0)
+
+    pending_result = await db.execute(
+        select(func.count(Booking.id)).where(
+            Booking.created_at >= since, Booking.status == "pending"
+        )
+    )
+    pending = pending_result.scalar() or 0
+
+    confirmed_result = await db.execute(
+        select(func.count(Booking.id)).where(
+            Booking.created_at >= since, Booking.status == "confirmed"
+        )
+    )
+    confirmed = confirmed_result.scalar() or 0
+
+    cancelled_result = await db.execute(
+        select(func.count(Booking.id)).where(
+            Booking.created_at >= since, Booking.status == "cancelled"
+        )
+    )
+    cancelled = cancelled_result.scalar() or 0
+
+    return {
+        "total_bookings": total_bookings,
+        "total_revenue": total_revenue,
+        "pending": pending,
+        "confirmed": confirmed,
+        "cancelled": cancelled,
+    }
+
+
+@router.get("/analytics/events")
+async def admin_analytics_events(
+    period: int = Query(30, ge=1, le=365),
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Get event comparison data for admin analytics page."""
+    since = datetime.utcnow() - timedelta(days=period)
+
+    # Get events with their booking counts
+    events_result = await db.execute(select(Event))
+    events = events_result.scalars().all()
+
+    items = []
+    for event in events:
+        booking_count_result = await db.execute(
+            select(func.count(Booking.id)).where(
+                Booking.event_id == event.id,
+                Booking.created_at >= since,
+            )
+        )
+        booking_count = booking_count_result.scalar() or 0
+
+        revenue_result = await db.execute(
+            select(func.coalesce(func.sum(Booking.total_amount_usd), 0)).where(
+                Booking.event_id == event.id,
+                Booking.created_at >= since,
+                Booking.status.in_(["confirmed", "completed"]),
+            )
+        )
+        revenue = float(revenue_result.scalar() or 0)
+
+        items.append({
+            "id": event.id,
+            "name": get_multilingual_field(event, "name", "en"),
+            "bookings": booking_count,
+            "revenue": revenue,
+        })
+
+    items.sort(key=lambda x: x["bookings"], reverse=True)
+    return {"items": items}
+
+
+# ─────────────────────── Banners (Admin) ───────────────────────
+
+def serialize_banner_admin(b: RollingBanner) -> dict:
+    """Serialize banner for admin (returns all language fields as dicts)."""
+    title = {}
+    subtitle = {}
+    for lang in SUPPORTED_LANG_CODES:
+        t = getattr(b, f"title_{lang}", None)
+        if t:
+            title[lang] = t
+        s = getattr(b, f"subtitle_{lang}", None)
+        if s:
+            subtitle[lang] = s
+
+    return {
+        "id": b.id,
+        "title": title,
+        "subtitle": subtitle,
+        "image_url": b.image_url,
+        "link_url": b.link_url,
+        "display_order": b.display_order,
+        "is_active": b.is_active,
+        "event_id": b.event_id,
+        "rolling_interval": b.rolling_interval,
+        "created_at": b.created_at.isoformat() if b.created_at else None,
+        "updated_at": b.updated_at.isoformat() if b.updated_at else None,
+    }
+
+
+@router.get("/banners")
+async def admin_list_banners(
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """List all banners for admin management."""
+    result = await db.execute(select(RollingBanner).order_by(RollingBanner.display_order))
+    banners = result.scalars().all()
+    return {"items": [serialize_banner_admin(b) for b in banners]}
+
+
+@router.post("/banners")
+async def admin_create_banner(
+    data: dict = Body(...),
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Create a new banner."""
+    banner = RollingBanner(
+        id=str(uuid.uuid4()),
+        image_url=data.get("image_url"),
+        link_url=data.get("link_url"),
+        display_order=data.get("display_order", 0),
+        is_active=data.get("is_active", True),
+        event_id=data.get("event_id") or None,
+        rolling_interval=data.get("rolling_interval", 4),
+    )
+    # Set multilingual title/subtitle fields
+    title = data.get("title", {})
+    subtitle = data.get("subtitle", {})
+    if isinstance(title, dict):
+        for lang in SUPPORTED_LANG_CODES:
+            if lang in title:
+                setattr(banner, f"title_{lang}", title[lang])
+    if isinstance(subtitle, dict):
+        for lang in SUPPORTED_LANG_CODES:
+            if lang in subtitle:
+                setattr(banner, f"subtitle_{lang}", subtitle[lang])
+
+    # Ensure at least title_en is set
+    if not banner.title_en:
+        banner.title_en = title.get("en", "")
+
+    db.add(banner)
+    await db.flush()
+    await db.refresh(banner)
+    return serialize_banner_admin(banner)
+
+
+@router.put("/banners/reorder")
+async def admin_reorder_banners(
+    data: dict = Body(...),
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Reorder banners by updating display_order."""
+    items = data.get("items", [])
+    for item in items:
+        result = await db.execute(select(RollingBanner).where(RollingBanner.id == item["id"]))
+        banner = result.scalar_one_or_none()
+        if banner:
+            banner.display_order = item["display_order"]
+
+    await db.flush()
+    return {"message": "Banners reordered"}
+
+
+@router.put("/banners/{banner_id}")
+async def admin_update_banner(
+    banner_id: str,
+    data: dict = Body(...),
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Update a banner."""
+    result = await db.execute(select(RollingBanner).where(RollingBanner.id == banner_id))
+    banner = result.scalar_one_or_none()
+    if not banner:
+        raise HTTPException(status_code=404, detail="Banner not found")
+
+    if "image_url" in data:
+        banner.image_url = data["image_url"]
+    if "link_url" in data:
+        banner.link_url = data["link_url"]
+    if "display_order" in data:
+        banner.display_order = data["display_order"]
+    if "is_active" in data:
+        banner.is_active = data["is_active"]
+    if "event_id" in data:
+        banner.event_id = data["event_id"] or None
+    if "rolling_interval" in data:
+        banner.rolling_interval = data["rolling_interval"]
+
+    title = data.get("title")
+    if isinstance(title, dict):
+        for lang in SUPPORTED_LANG_CODES:
+            if lang in title:
+                setattr(banner, f"title_{lang}", title[lang])
+
+    subtitle = data.get("subtitle")
+    if isinstance(subtitle, dict):
+        for lang in SUPPORTED_LANG_CODES:
+            if lang in subtitle:
+                setattr(banner, f"subtitle_{lang}", subtitle[lang])
+
+    banner.updated_at = datetime.utcnow()
+    await db.flush()
+    await db.refresh(banner)
+    return serialize_banner_admin(banner)
+
+
+@router.patch("/banners/{banner_id}")
+async def admin_patch_banner(
+    banner_id: str,
+    data: dict = Body(...),
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Partially update a banner (e.g., toggle is_active)."""
+    result = await db.execute(select(RollingBanner).where(RollingBanner.id == banner_id))
+    banner = result.scalar_one_or_none()
+    if not banner:
+        raise HTTPException(status_code=404, detail="Banner not found")
+
+    if "is_active" in data:
+        banner.is_active = data["is_active"]
+    if "display_order" in data:
+        banner.display_order = data["display_order"]
+
+    banner.updated_at = datetime.utcnow()
+    await db.flush()
+    await db.refresh(banner)
+    return serialize_banner_admin(banner)
+
+
+@router.delete("/banners/{banner_id}")
+async def admin_delete_banner(
+    banner_id: str,
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Delete a banner."""
+    result = await db.execute(select(RollingBanner).where(RollingBanner.id == banner_id))
+    banner = result.scalar_one_or_none()
+    if not banner:
+        raise HTTPException(status_code=404, detail="Banner not found")
+
+    await db.delete(banner)
+    await db.flush()
+    return {"message": "Banner deleted"}
+
+
 # ─────────────────────── Users (Admin) ───────────────────────
 
 @router.get("/users")
 async def admin_list_users(
     role: Optional[str] = Query(None),
-    limit: int = Query(20, ge=1, le=100),
-    offset: int = Query(0, ge=0),
+    search: Optional[str] = Query(None),
+    page: int = Query(1, ge=1),
+    per_page: int = Query(20, ge=1, le=100),
+    limit: Optional[int] = Query(None, ge=1, le=100),
+    offset: Optional[int] = Query(None, ge=0),
     admin: User = Depends(get_current_admin),
     db: AsyncSession = Depends(get_db),
 ):
     query = select(User)
+    count_query = select(func.count(User.id))
+
     if role:
         query = query.where(User.role == role)
+        count_query = count_query.where(User.role == role)
 
-    count_result = await db.execute(query)
-    total = len(count_result.scalars().all())
+    if search:
+        search_filter = (
+            User.name.ilike(f"%{search}%") |
+            User.email.ilike(f"%{search}%")
+        )
+        query = query.where(search_filter)
+        count_query = count_query.where(search_filter)
 
-    query = query.order_by(User.created_at.desc()).offset(offset).limit(limit)
+    count_result = await db.execute(count_query)
+    total = count_result.scalar() or 0
+
+    # Support both offset/limit and page/per_page
+    if offset is not None and limit is not None:
+        query = query.order_by(User.created_at.desc()).offset(offset).limit(limit)
+    else:
+        actual_offset = (page - 1) * per_page
+        query = query.order_by(User.created_at.desc()).offset(actual_offset).limit(per_page)
+
     result = await db.execute(query)
     users = result.scalars().all()
+
+    pages = (total + per_page - 1) // per_page if per_page else 1
 
     return {
         "items": [
@@ -975,11 +1738,14 @@ async def admin_list_users(
                 "provider": u.provider,
                 "role": u.role,
                 "is_active": u.is_active,
+                "is_admin": u.role == "admin",
                 "created_at": u.created_at.isoformat() if u.created_at else None,
+                "updated_at": u.updated_at.isoformat() if u.updated_at else None,
             }
             for u in users
         ],
         "total": total,
+        "pages": pages,
     }
 
 
@@ -1013,6 +1779,43 @@ async def admin_update_user(
         "name": user.name,
         "role": user.role,
         "is_active": user.is_active,
+        "is_admin": user.role == "admin",
+    }
+
+
+@router.patch("/users/{user_id}")
+async def admin_patch_user(
+    user_id: str,
+    data: dict = Body(...),
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Patch a user (e.g., toggle admin status)."""
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    if "is_admin" in data:
+        user.role = "admin" if data["is_admin"] else "user"
+    if "name" in data:
+        user.name = data["name"]
+    if "is_active" in data:
+        user.is_active = data["is_active"]
+    if "role" in data:
+        user.role = data["role"]
+
+    user.updated_at = datetime.utcnow()
+    await db.flush()
+    await db.refresh(user)
+
+    return {
+        "id": user.id,
+        "email": user.email,
+        "name": user.name,
+        "role": user.role,
+        "is_active": user.is_active,
+        "is_admin": user.role == "admin",
     }
 
 
@@ -1047,6 +1850,7 @@ async def admin_list_languages(
         "items": [
             {
                 "code": lang.code,
+                "name": lang.name_en,
                 "name_en": lang.name_en,
                 "name_native": lang.name_native,
                 "is_active": lang.is_active,
@@ -1106,6 +1910,40 @@ async def admin_update_language(
     }
 
 
+@router.patch("/languages/{code}")
+async def admin_patch_language(
+    code: str,
+    data: dict = Body(...),
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Patch a language (e.g., toggle is_active)."""
+    result = await db.execute(select(Language).where(Language.code == code))
+    language = result.scalar_one_or_none()
+    if not language:
+        raise HTTPException(status_code=404, detail="Language not found")
+
+    if "is_active" in data:
+        language.is_active = data["is_active"]
+    if "name_en" in data:
+        language.name_en = data["name_en"]
+    if "name_native" in data:
+        language.name_native = data["name_native"]
+    if "display_order" in data:
+        language.display_order = data["display_order"]
+
+    await db.flush()
+    await db.refresh(language)
+    return {
+        "code": language.code,
+        "name": language.name_en,
+        "name_en": language.name_en,
+        "name_native": language.name_native,
+        "is_active": language.is_active,
+        "display_order": language.display_order,
+    }
+
+
 @router.delete("/languages/{code}")
 async def admin_delete_language(
     code: str,
@@ -1126,54 +1964,85 @@ async def admin_delete_language(
 
 @router.get("/translations")
 async def admin_list_translations(
+    lang: Optional[str] = Query(None),
     language_code: Optional[str] = Query(None),
-    limit: int = Query(100, ge=1, le=500),
+    limit: int = Query(500, ge=1, le=2000),
     offset: int = Query(0, ge=0),
     admin: User = Depends(get_current_admin),
     db: AsyncSession = Depends(get_db),
 ):
-    query = select(UITranslation)
-    if language_code:
-        query = query.where(UITranslation.language_code == language_code)
+    """List translations. Supports both 'lang' and 'language_code' params.
+    Returns items grouped by key with values dict for each language."""
+    # Support both param names
+    filter_lang = lang or language_code
 
-    count_result = await db.execute(query)
-    total = len(count_result.scalars().all())
+    # Get all distinct keys
+    all_keys_result = await db.execute(
+        select(func.distinct(UITranslation.key)).order_by(UITranslation.key).offset(offset).limit(limit)
+    )
+    all_keys = [row[0] for row in all_keys_result.all()]
 
-    query = query.order_by(UITranslation.key).offset(offset).limit(limit)
-    result = await db.execute(query)
-    translations = result.scalars().all()
+    # Get translations for these keys (all languages)
+    if all_keys:
+        translations_result = await db.execute(
+            select(UITranslation).where(UITranslation.key.in_(all_keys))
+        )
+        translations = translations_result.scalars().all()
+    else:
+        translations = []
 
-    return {
-        "items": [
-            {
-                "id": t.id,
-                "language_code": t.language_code,
-                "key": t.key,
-                "value": t.value,
-            }
-            for t in translations
-        ],
-        "total": total,
-    }
+    # Group by key
+    key_values = {}
+    for t in translations:
+        if t.key not in key_values:
+            key_values[t.key] = {}
+        key_values[t.key][t.language_code] = t.value
+
+    items = [
+        {"key": key, "values": key_values.get(key, {})}
+        for key in all_keys
+    ]
+
+    total_keys_result = await db.execute(select(func.count(func.distinct(UITranslation.key))))
+    total = total_keys_result.scalar() or 0
+
+    return {"items": items, "total": total}
 
 
 @router.post("/translations")
 async def admin_create_translation(
-    data: UITranslationCreate,
+    data: dict = Body(None),
     admin: User = Depends(get_current_admin),
     db: AsyncSession = Depends(get_db),
 ):
+    """Create a translation. Accepts either {key, value, lang} or UITranslationCreate format."""
+    if data and "lang" in data:
+        # Frontend format: {key, value, lang}
+        key = data.get("key")
+        value = data.get("value")
+        language_code = data.get("lang")
+    elif data and "language_code" in data:
+        # Original schema format
+        key = data.get("key")
+        value = data.get("value")
+        language_code = data.get("language_code")
+    else:
+        raise HTTPException(status_code=400, detail="Invalid translation data")
+
+    if not key or not value or not language_code:
+        raise HTTPException(status_code=400, detail="key, value, and lang are required")
+
     # Check if key already exists for this language
     existing = await db.execute(
         select(UITranslation).where(
-            UITranslation.language_code == data.language_code,
-            UITranslation.key == data.key,
+            UITranslation.language_code == language_code,
+            UITranslation.key == key,
         )
     )
     if existing.scalar_one_or_none():
         raise HTTPException(status_code=400, detail="Translation key already exists for this language")
 
-    translation = UITranslation(**data.model_dump())
+    translation = UITranslation(language_code=language_code, key=key, value=value)
     db.add(translation)
     await db.flush()
     await db.refresh(translation)
@@ -1213,7 +2082,7 @@ async def admin_bulk_create_translations(
 
 
 @router.put("/translations/{translation_id}")
-async def admin_update_translation(
+async def admin_update_translation_by_id(
     translation_id: str,
     data: UITranslationUpdate,
     admin: User = Depends(get_current_admin),
@@ -1227,6 +2096,46 @@ async def admin_update_translation(
     translation.value = data.value
     await db.flush()
     await db.refresh(translation)
+    return {
+        "id": translation.id,
+        "language_code": translation.language_code,
+        "key": translation.key,
+        "value": translation.value,
+    }
+
+
+@router.put("/translations")
+async def admin_update_translation_by_key(
+    data: dict = Body(...),
+    admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Update a translation by key + lang (frontend format)."""
+    key = data.get("key")
+    value = data.get("value")
+    language_code = data.get("lang") or data.get("language_code")
+
+    if not key or value is None or not language_code:
+        raise HTTPException(status_code=400, detail="key, value, and lang are required")
+
+    result = await db.execute(
+        select(UITranslation).where(
+            UITranslation.language_code == language_code,
+            UITranslation.key == key,
+        )
+    )
+    translation = result.scalar_one_or_none()
+    if not translation:
+        # Create if not exists (upsert behavior)
+        translation = UITranslation(language_code=language_code, key=key, value=value)
+        db.add(translation)
+        await db.flush()
+        await db.refresh(translation)
+    else:
+        translation.value = value
+        await db.flush()
+        await db.refresh(translation)
+
     return {
         "id": translation.id,
         "language_code": translation.language_code,

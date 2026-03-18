@@ -133,7 +133,38 @@
     "status_confirmed": "已确认",
     "status_cancelled": "已取消",
     "status_completed": "已完成",
-    "cancellation_policy": "取消政策"
+    "cancellation_policy": "取消政策",
+    "step_coupon": "优惠券",
+    "coupon_title": "有优惠券吗？",
+    "coupon_applied": "已应用",
+    "coupon_invalid": "无效的优惠券代码",
+    "price_summary": "价格摘要"
+  },
+  "button": {
+    "book_now": "立即预订",
+    "view_details": "查看详情",
+    "write_review": "写评价",
+    "generate_course": "生成路线",
+    "retry": "重新生成",
+    "send_message": "发送消息",
+    "apply_coupon": "应用",
+    "contact_guide": "联系导游",
+    "share": "分享"
+  },
+  "label": {
+    "price": "价格",
+    "duration": "时长",
+    "difficulty": "难度",
+    "category": "分类",
+    "region": "地区",
+    "rating": "评分",
+    "reviews": "评价",
+    "coupon_code": "优惠券代码",
+    "festival_period": "节日期间",
+    "languages": "语言",
+    "spots": "景点",
+    "half_day": "半天",
+    "full_day": "一天"
   },
   "restaurant": {
     "category": "分类",

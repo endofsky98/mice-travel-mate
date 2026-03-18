@@ -133,7 +133,38 @@
     "status_confirmed": "確認済み",
     "status_cancelled": "キャンセル済み",
     "status_completed": "完了",
-    "cancellation_policy": "キャンセルポリシー"
+    "cancellation_policy": "キャンセルポリシー",
+    "step_coupon": "クーポン",
+    "coupon_title": "クーポンをお持ちですか？",
+    "coupon_applied": "適用済み",
+    "coupon_invalid": "無効なクーポンコードです",
+    "price_summary": "料金概要"
+  },
+  "button": {
+    "book_now": "予約する",
+    "view_details": "詳細を見る",
+    "write_review": "レビューを書く",
+    "generate_course": "コースを生成",
+    "retry": "再生成",
+    "send_message": "メッセージを送る",
+    "apply_coupon": "適用",
+    "contact_guide": "ガイドに連絡",
+    "share": "共有"
+  },
+  "label": {
+    "price": "価格",
+    "duration": "所要時間",
+    "difficulty": "難易度",
+    "category": "カテゴリー",
+    "region": "地域",
+    "rating": "評価",
+    "reviews": "レビュー",
+    "coupon_code": "クーポンコード",
+    "festival_period": "祭り期間",
+    "languages": "言語",
+    "spots": "スポット",
+    "half_day": "半日",
+    "full_day": "1日"
   },
   "restaurant": {
     "category": "カテゴリー",

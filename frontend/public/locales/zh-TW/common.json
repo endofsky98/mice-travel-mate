@@ -133,7 +133,38 @@
     "status_confirmed": "已確認",
     "status_cancelled": "已取消",
     "status_completed": "已完成",
-    "cancellation_policy": "取消政策"
+    "cancellation_policy": "取消政策",
+    "step_coupon": "優惠券",
+    "coupon_title": "有優惠券嗎？",
+    "coupon_applied": "已套用",
+    "coupon_invalid": "無效的優惠券代碼",
+    "price_summary": "價格摘要"
+  },
+  "button": {
+    "book_now": "立即預訂",
+    "view_details": "查看詳情",
+    "write_review": "撰寫評價",
+    "generate_course": "生成路線",
+    "retry": "重新生成",
+    "send_message": "傳送訊息",
+    "apply_coupon": "套用",
+    "contact_guide": "聯絡導遊",
+    "share": "分享"
+  },
+  "label": {
+    "price": "價格",
+    "duration": "時長",
+    "difficulty": "難度",
+    "category": "分類",
+    "region": "地區",
+    "rating": "評分",
+    "reviews": "評價",
+    "coupon_code": "優惠券代碼",
+    "festival_period": "節日期間",
+    "languages": "語言",
+    "spots": "景點",
+    "half_day": "半天",
+    "full_day": "一天"
   },
   "restaurant": {
     "category": "分類",

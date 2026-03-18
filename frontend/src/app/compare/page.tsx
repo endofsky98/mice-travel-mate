@@ -91,12 +91,102 @@ export default function ComparePage() {
                   </td>
                 ))}
               </tr>
-              {/* Category */}
+              {/* Category / Theme / Specialty */}
               <tr className="border-t border-gray-100 dark:border-gray-500/40">
                 <td className="p-3 text-sm text-gray-500">{t('label.category') || 'Category'}</td>
                 {items.map((item) => (
                   <td key={item.id} className="p-3 text-center text-sm text-gray-700 dark:text-gray-300 capitalize">
                     {item.category || item.theme || (item.specialties || []).join(', ') || '-'}
+                  </td>
+                ))}
+              </tr>
+              {/* Type-specific rows */}
+              {type === 'restaurant' && (
+                <tr className="border-t border-gray-100 dark:border-gray-500/40">
+                  <td className="p-3 text-sm text-gray-500">{t('label.distance') || 'Distance'}</td>
+                  {items.map((item) => (
+                    <td key={item.id} className="p-3 text-center text-sm text-gray-700 dark:text-gray-300">
+                      {item.distance_from_venue ? `${(item.distance_from_venue / 1000).toFixed(1)}km` : '-'}
+                    </td>
+                  ))}
+                </tr>
+              )}
+              {type === 'course' && (<>
+                <tr className="border-t border-gray-100 dark:border-gray-500/40">
+                  <td className="p-3 text-sm text-gray-500">{t('label.duration') || 'Duration'}</td>
+                  {items.map((item) => (
+                    <td key={item.id} className="p-3 text-center text-sm text-gray-700 dark:text-gray-300">
+                      {item.total_duration_minutes ? `${Math.round(item.total_duration_minutes / 60)}h` : item.duration || '-'}
+                    </td>
+                  ))}
+                </tr>
+                <tr className="border-t border-gray-100 dark:border-gray-500/40">
+                  <td className="p-3 text-sm text-gray-500">{t('label.difficulty') || 'Difficulty'}</td>
+                  {items.map((item) => (
+                    <td key={item.id} className="p-3 text-center text-sm text-gray-700 dark:text-gray-300 capitalize">
+                      {item.difficulty || '-'}
+                    </td>
+                  ))}
+                </tr>
+                <tr className="border-t border-gray-100 dark:border-gray-500/40">
+                  <td className="p-3 text-sm text-gray-500">{t('label.spots') || 'Spots'}</td>
+                  {items.map((item) => (
+                    <td key={item.id} className="p-3 text-center text-sm text-gray-700 dark:text-gray-300">
+                      {item.spots?.length || '-'}
+                    </td>
+                  ))}
+                </tr>
+              </>)}
+              {type === 'product' && (<>
+                <tr className="border-t border-gray-100 dark:border-gray-500/40">
+                  <td className="p-3 text-sm text-gray-500">{t('label.duration') || 'Duration'}</td>
+                  {items.map((item) => (
+                    <td key={item.id} className="p-3 text-center text-sm text-gray-700 dark:text-gray-300">
+                      {item.duration_hours ? `${item.duration_hours}h` : item.duration || '-'}
+                    </td>
+                  ))}
+                </tr>
+                <tr className="border-t border-gray-100 dark:border-gray-500/40">
+                  <td className="p-3 text-sm text-gray-500">{t('label.participants') || 'Participants'}</td>
+                  {items.map((item) => (
+                    <td key={item.id} className="p-3 text-center text-sm text-gray-700 dark:text-gray-300">
+                      {item.min_participants && item.max_participants ? `${item.min_participants}-${item.max_participants}` : '-'}
+                    </td>
+                  ))}
+                </tr>
+              </>)}
+              {type === 'guide' && (<>
+                <tr className="border-t border-gray-100 dark:border-gray-500/40">
+                  <td className="p-3 text-sm text-gray-500">{t('label.languages') || 'Languages'}</td>
+                  {items.map((item) => (
+                    <td key={item.id} className="p-3 text-center text-sm text-gray-700 dark:text-gray-300">
+                      {(item.languages || []).map((l: any) => l.language || l).join(', ') || '-'}
+                    </td>
+                  ))}
+                </tr>
+                <tr className="border-t border-gray-100 dark:border-gray-500/40">
+                  <td className="p-3 text-sm text-gray-500">{t('label.half_day') || 'Half Day'}</td>
+                  {items.map((item) => (
+                    <td key={item.id} className="p-3 text-center text-sm font-medium text-indigo-600 dark:text-indigo-400">
+                      {item.price_half_day_usd ? `$${item.price_half_day_usd}` : item.half_day_rate ? `$${item.half_day_rate}` : '-'}
+                    </td>
+                  ))}
+                </tr>
+                <tr className="border-t border-gray-100 dark:border-gray-500/40">
+                  <td className="p-3 text-sm text-gray-500">{t('label.full_day') || 'Full Day'}</td>
+                  {items.map((item) => (
+                    <td key={item.id} className="p-3 text-center text-sm font-medium text-indigo-600 dark:text-indigo-400">
+                      {item.price_full_day_usd ? `$${item.price_full_day_usd}` : item.full_day_rate ? `$${item.full_day_rate}` : '-'}
+                    </td>
+                  ))}
+                </tr>
+              </>)}
+              {/* Review count */}
+              <tr className="border-t border-gray-100 dark:border-gray-500/40">
+                <td className="p-3 text-sm text-gray-500">{t('label.reviews') || 'Reviews'}</td>
+                {items.map((item) => (
+                  <td key={item.id} className="p-3 text-center text-sm text-gray-700 dark:text-gray-300">
+                    {item.review_count || 0}
                   </td>
                 ))}
               </tr>

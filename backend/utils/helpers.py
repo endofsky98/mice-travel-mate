@@ -209,22 +209,32 @@ def serialize_guide(guide, lang: str = "en") -> dict:
 
 
 def serialize_booking(booking) -> dict:
+    booking_date_str = str(booking.booking_date) if booking.booking_date else None
+    total_amount = float(booking.total_amount_usd) if booking.total_amount_usd else None
     return {
         "id": booking.id,
         "booking_number": booking.booking_number,
         "user_id": booking.user_id,
         "booking_type": booking.booking_type,
+        "type": booking.booking_type,
         "product_id": booking.product_id,
         "guide_id": booking.guide_id,
         "event_id": booking.event_id,
-        "booking_date": str(booking.booking_date) if booking.booking_date else None,
+        "booking_date": booking_date_str,
+        "date": booking_date_str,
         "num_participants": booking.num_participants,
+        "participants": booking.num_participants,
         "options": booking.options,
         "guest_name": booking.guest_name,
+        "booker_name": booking.guest_name,
         "guest_email": booking.guest_email,
+        "booker_email": booking.guest_email,
         "guest_phone": booking.guest_phone,
+        "booker_phone": booking.guest_phone,
         "guest_nationality": booking.guest_nationality,
-        "total_amount_usd": float(booking.total_amount_usd) if booking.total_amount_usd else None,
+        "booker_nationality": booking.guest_nationality,
+        "total_amount_usd": total_amount,
+        "total_price": total_amount,
         "currency": booking.currency,
         "status": booking.status,
         "stripe_payment_intent_id": booking.stripe_payment_intent_id,

@@ -42,10 +42,12 @@ export default function RestaurantFilters({
   ];
 
   const sortOptions = [
+    { value: 'recommended', label: t('common.recommended') || 'Recommended' },
     { value: 'distance', label: t('common.distance') },
-    { value: 'name', label: t('common.name') },
+    { value: 'rating', label: t('common.rating') || 'Rating' },
     { value: 'price_low', label: t('common.price_low') },
     { value: 'price_high', label: t('common.price_high') },
+    { value: 'name', label: t('common.name') },
   ];
 
   return (

@@ -13,6 +13,53 @@ from auth.dependencies import get_current_user_optional
 router = APIRouter(prefix="/api/coupons", tags=["Coupons"])
 
 
+@router.get("/validate")
+async def validate_coupon_get(
+    code: str = "",
+    current_user: Optional[User] = Depends(get_current_user_optional),
+    db: AsyncSession = Depends(get_db),
+):
+    """Quick coupon validation via GET (for frontend coupon input)."""
+    if not code:
+        return {"is_valid": False, "error_message": "No coupon code provided"}
+
+    result = await db.execute(select(Coupon).where(Coupon.code == code))
+    coupon = result.scalar_one_or_none()
+
+    if not coupon:
+        return {"is_valid": False, "error_message": "Invalid coupon code"}
+    if not coupon.is_active:
+        return {"is_valid": False, "error_message": "This coupon is no longer active"}
+
+    today = date.today()
+    if coupon.start_date and today < coupon.start_date:
+        return {"is_valid": False, "error_message": "This coupon is not yet valid"}
+    if coupon.end_date and today > coupon.end_date:
+        return {"is_valid": False, "error_message": "This coupon has expired"}
+    if coupon.total_limit is not None and coupon.used_count >= coupon.total_limit:
+        return {"is_valid": False, "error_message": "This coupon has reached its usage limit"}
+
+    if current_user and coupon.per_user_limit:
+        user_usage_result = await db.execute(
+            select(func.count(CouponUsage.id)).where(
+                CouponUsage.coupon_id == coupon.id,
+                CouponUsage.user_id == current_user.id,
+            )
+        )
+        user_usage_count = user_usage_result.scalar() or 0
+        if user_usage_count >= coupon.per_user_limit:
+            return {"is_valid": False, "error_message": "You have already used this coupon"}
+
+    return {
+        "is_valid": True,
+        "discount_type": coupon.discount_type,
+        "discount_value": float(coupon.discount_value),
+        "max_discount_usd": float(coupon.max_discount_usd) if coupon.max_discount_usd else None,
+        "min_order_usd": float(coupon.min_order_usd) if coupon.min_order_usd else None,
+        "coupon_name": coupon.name,
+    }
+
+
 class CouponValidateRequest(BaseModel):
     code: str
     order_amount_usd: Optional[float] = None

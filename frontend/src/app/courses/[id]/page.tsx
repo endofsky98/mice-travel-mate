@@ -2,14 +2,17 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, Clock, MapPin, Bookmark, BookmarkCheck, ArrowDown, Bus, Footprints, Car, Train } from 'lucide-react';
+import { ArrowLeft, Clock, MapPin, Bookmark, BookmarkCheck, ArrowDown, Bus, Footprints, Car, Train, Share2 } from 'lucide-react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useBookmarks } from '@/hooks/useBookmarks';
+import { useAuth } from '@/hooks/useAuth';
 import api from '@/lib/api';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import ImageGallery from '@/components/ui/ImageGallery';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import StarRating from '@/components/ui/StarRating';
+import ReviewSection from '@/components/ui/ReviewSection';
 import MapView from '@/components/map/MapView';
 import { Course } from '@/types';
 import { cn, generatePlaceholderGradient } from '@/lib/utils';
@@ -26,6 +29,7 @@ export default function CourseDetailPage() {
   const router = useRouter();
   const { t, lt, language } = useLanguage();
   const { isBookmarked, toggleBookmark } = useBookmarks();
+  const { isLoggedIn } = useAuth();
   const [loading, setLoading] = useState(true);
   const [course, setCourse] = useState<Course | null>(null);
 
@@ -55,12 +59,24 @@ export default function CourseDetailPage() {
   const name = lt(course.name);
   const bookmarked = isBookmarked(course.id, 'course');
   const spots = course.spots || [];
+
+  const handleShare = async () => {
+    const url = window.location.href;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: name, url });
+      } catch { /* user cancelled */ }
+    } else {
+      await navigator.clipboard.writeText(url);
+      alert('Link copied!');
+    }
+  };
   const markers = spots
     .filter((s) => s.lat && s.lng)
     .map((s) => ({ id: s.id, lat: s.lat!, lng: s.lng!, title: lt(s.name) }));
 
   return (
-    <div className="page-container max-w-4xl">
+    <div className="page-container max-w-4xl pb-20 md:pb-8">
       <button
         onClick={() => router.back()}
         className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 mb-4"
@@ -75,6 +91,16 @@ export default function CourseDetailPage() {
       <div className="flex items-start justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">{name}</h1>
+          {course.avg_rating && course.avg_rating > 0 && (
+            <div className="mb-2">
+              <StarRating
+                rating={course.avg_rating}
+                size="sm"
+                showValue
+                reviewCount={course.review_count}
+              />
+            </div>
+          )}
           <div className="flex flex-wrap gap-2">
             <Badge>{course.duration}</Badge>
             <Badge variant="info">{course.theme}</Badge>
@@ -83,13 +109,22 @@ export default function CourseDetailPage() {
             </Badge>
           </div>
         </div>
-        <Button
-          variant={bookmarked ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => toggleBookmark(course.id, 'course')}
-        >
-          {bookmarked ? <BookmarkCheck className="w-4 h-4" /> : <Bookmark className="w-4 h-4" />}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleShare}
+          >
+            <Share2 className="w-4 h-4" />
+          </Button>
+          <Button
+            variant={bookmarked ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => toggleBookmark(course.id, 'course')}
+          >
+            {bookmarked ? <BookmarkCheck className="w-4 h-4" /> : <Bookmark className="w-4 h-4" />}
+          </Button>
+        </div>
       </div>
 
       {/* Overview */}
@@ -189,6 +224,14 @@ export default function CourseDetailPage() {
           <MapView markers={markers} t={t} className="h-64" />
         </div>
       )}
+
+      {/* Reviews Section */}
+      <ReviewSection
+        targetType="course"
+        targetId={String(id)}
+        t={t}
+        isLoggedIn={isLoggedIn}
+      />
     </div>
   );
 }

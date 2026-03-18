@@ -133,7 +133,38 @@
     "status_confirmed": "Confirmado",
     "status_cancelled": "Cancelado",
     "status_completed": "Completado",
-    "cancellation_policy": "Política de cancelación"
+    "cancellation_policy": "Política de cancelación",
+    "step_coupon": "Cupón",
+    "coupon_title": "¿Tienes un cupón?",
+    "coupon_applied": "aplicado",
+    "coupon_invalid": "Código de cupón inválido",
+    "price_summary": "Resumen de precios"
+  },
+  "button": {
+    "book_now": "Reservar ahora",
+    "view_details": "Ver detalles",
+    "write_review": "Escribir reseña",
+    "generate_course": "Generar ruta",
+    "retry": "Regenerar",
+    "send_message": "Enviar mensaje",
+    "apply_coupon": "Aplicar",
+    "contact_guide": "Contactar guía",
+    "share": "Compartir"
+  },
+  "label": {
+    "price": "Precio",
+    "duration": "Duración",
+    "difficulty": "Dificultad",
+    "category": "Categoría",
+    "region": "Región",
+    "rating": "Calificación",
+    "reviews": "reseñas",
+    "coupon_code": "Código de cupón",
+    "festival_period": "Período del festival",
+    "languages": "Idiomas",
+    "spots": "Lugares",
+    "half_day": "Medio día",
+    "full_day": "Día completo"
   },
   "restaurant": {
     "category": "Categoría",

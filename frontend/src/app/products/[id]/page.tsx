@@ -3,14 +3,17 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Clock, Users, MapPin, Bookmark, BookmarkCheck, Check, X, CircleDot } from 'lucide-react';
+import { ArrowLeft, Clock, Users, MapPin, Bookmark, BookmarkCheck, Check, X, CircleDot, Share2 } from 'lucide-react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useBookmarks } from '@/hooks/useBookmarks';
+import { useAuth } from '@/hooks/useAuth';
 import api from '@/lib/api';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import ImageGallery from '@/components/ui/ImageGallery';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import StarRating from '@/components/ui/StarRating';
+import ReviewSection from '@/components/ui/ReviewSection';
 import MapView from '@/components/map/MapView';
 import { Product } from '@/types';
 import { formatCurrency } from '@/lib/utils';
@@ -20,6 +23,7 @@ export default function ProductDetailPage() {
   const router = useRouter();
   const { t, lt, language } = useLanguage();
   const { isBookmarked, toggleBookmark } = useBookmarks();
+  const { isLoggedIn } = useAuth();
   const [loading, setLoading] = useState(true);
   const [product, setProduct] = useState<Product | null>(null);
 
@@ -45,6 +49,18 @@ export default function ProductDetailPage() {
       </div>
     );
   }
+
+  const handleShare = async () => {
+    const url = window.location.href;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: lt(product.name), url });
+      } catch { /* user cancelled */ }
+    } else {
+      await navigator.clipboard.writeText(url);
+      alert('Link copied!');
+    }
+  };
 
   const name = lt(product.name);
   const bookmarked = isBookmarked(product.id, 'product');
@@ -77,14 +93,33 @@ export default function ProductDetailPage() {
             </span>
             <span className="text-sm text-gray-400">/ {t('product.per_person')}</span>
           </div>
+          {product.avg_rating && product.avg_rating > 0 && (
+            <div className="mt-2">
+              <StarRating
+                rating={product.avg_rating}
+                size="sm"
+                showValue
+                reviewCount={product.review_count}
+              />
+            </div>
+          )}
         </div>
-        <Button
-          variant={bookmarked ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => toggleBookmark(product.id, 'product')}
-        >
-          {bookmarked ? <BookmarkCheck className="w-4 h-4" /> : <Bookmark className="w-4 h-4" />}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleShare}
+          >
+            <Share2 className="w-4 h-4" />
+          </Button>
+          <Button
+            variant={bookmarked ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => toggleBookmark(product.id, 'product')}
+          >
+            {bookmarked ? <BookmarkCheck className="w-4 h-4" /> : <Bookmark className="w-4 h-4" />}
+          </Button>
+        </div>
       </div>
 
       {/* Quick Info */}
@@ -218,6 +253,14 @@ export default function ProductDetailPage() {
           <MapView markers={markers} t={t} className="h-64" />
         </div>
       )}
+
+      {/* Reviews Section */}
+      <ReviewSection
+        targetType="product"
+        targetId={String(id)}
+        t={t}
+        isLoggedIn={isLoggedIn}
+      />
 
       {/* Book Now */}
       <div className="sticky bottom-20 md:bottom-4 bg-white dark:bg-dark-main border-t border-gray-200 dark:border-gray-500/40 -mx-4 px-4 py-4 md:border md:rounded-xl md:mx-0">
