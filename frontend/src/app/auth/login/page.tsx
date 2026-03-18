@@ -3,11 +3,12 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Compass, Mail, Lock } from 'lucide-react';
+import { Mail, Lock } from 'lucide-react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useAuth } from '@/hooks/useAuth';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
+import Logo from '@/components/ui/Logo';
 
 export default function LoginPage() {
   const { t } = useLanguage();
@@ -37,9 +38,8 @@ export default function LoginPage() {
       {/* Left Panel - Gradient */}
       <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-700 p-12 flex-col justify-between">
         <div>
-          <div className="flex items-center gap-3 mb-12">
-            <Compass className="w-10 h-10 text-white" />
-            <span className="text-2xl font-bold text-white">{t('auth.brand_title')}</span>
+          <div className="mb-12">
+            <Logo size="xl" variant="white" />
           </div>
           <h1 className="text-4xl font-bold text-white mb-4 leading-tight">
             {t('auth.brand_subtitle')}
@@ -55,9 +55,8 @@ export default function LoginPage() {
       {/* Right Panel - Form */}
       <div className="flex-1 flex items-center justify-center p-6 bg-white dark:bg-dark-main">
         <div className="w-full max-w-md">
-          <div className="lg:hidden flex items-center gap-2 mb-8">
-            <Compass className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
-            <span className="text-xl font-bold text-gray-900 dark:text-white">{t('auth.brand_title')}</span>
+          <div className="lg:hidden mb-8">
+            <Logo size="lg" />
           </div>
 
           <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">{t('auth.login')}</h2>

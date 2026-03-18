@@ -22,6 +22,34 @@ interface TranslationEntry {
   values: Record<string, string>;
 }
 
+function TranslationRow({ entry, lang, onUpdate }: { entry: TranslationEntry; lang: string; onUpdate: (key: string, value: string) => void }) {
+  const [value, setValue] = useState(entry.values[lang] || '');
+
+  useEffect(() => {
+    setValue(entry.values[lang] || '');
+  }, [lang, entry.values]);
+
+  return (
+    <tr className="hover:bg-gray-50 dark:hover:bg-white/[0.02]">
+      <td className="px-6 py-3 text-sm font-mono text-gray-500 dark:text-gray-400">{entry.key}</td>
+      <td className="px-6 py-3">
+        <input
+          type="text"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          onBlur={(e) => onUpdate(entry.key, e.target.value)}
+          className="w-full text-sm px-2 py-1 rounded border border-transparent hover:border-gray-200 focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600/20 outline-none bg-transparent dark:text-gray-100"
+        />
+      </td>
+      <td className="px-6 py-3">
+        {!value && (
+          <Badge variant="warning"><AlertTriangle className="w-3 h-3 mr-1" />미번역</Badge>
+        )}
+      </td>
+    </tr>
+  );
+}
+
 export default function AdminLanguagesPage() {
   const [loading, setLoading] = useState(true);
   const [languages, setLanguages] = useState<LanguageSetting[]>([]);
@@ -157,23 +185,12 @@ export default function AdminLanguagesPage() {
                 {translations.length === 0 ? (
                   <tr><td colSpan={3} className="px-6 py-8 text-center text-sm text-gray-500">결과가 없습니다</td></tr>
                 ) : translations.map((entry) => (
-                  <tr key={`${entry.key}-${selectedLang}`} className="hover:bg-gray-50 dark:hover:bg-white/[0.02]">
-                    <td className="px-6 py-3 text-sm font-mono text-gray-500 dark:text-gray-400">{entry.key}</td>
-                    <td className="px-6 py-3">
-                      <input
-                        type="text"
-                        key={`${entry.key}-${selectedLang}`}
-                        defaultValue={entry.values[selectedLang] || ''}
-                        onBlur={(e) => handleUpdateTranslation(entry.key, e.target.value)}
-                        className="w-full text-sm px-2 py-1 rounded border border-transparent hover:border-gray-200 focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600/20 outline-none bg-transparent dark:text-gray-100"
-                      />
-                    </td>
-                    <td className="px-6 py-3">
-                      {!entry.values[selectedLang] && (
-                        <Badge variant="warning"><AlertTriangle className="w-3 h-3 mr-1" />미번역</Badge>
-                      )}
-                    </td>
-                  </tr>
+                  <TranslationRow
+                    key={`${entry.key}-${selectedLang}`}
+                    entry={entry}
+                    lang={selectedLang}
+                    onUpdate={handleUpdateTranslation}
+                  />
                 ))}
               </tbody>
             </table></div>

@@ -32,19 +32,15 @@ export default function LanguageSwitcher({ currentLanguage, onLanguageChange, co
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          'flex items-center gap-2 rounded-lg transition-colors',
+          'flex items-center gap-1.5 rounded-lg transition-colors',
           compact
-            ? 'p-2 hover:bg-gray-100 dark:hover:bg-white/[0.08]'
+            ? 'px-2 py-1.5 hover:bg-gray-100 dark:hover:bg-white/[0.08]'
             : 'px-3 py-2 border border-gray-200 dark:border-gray-500/40 hover:bg-gray-50 dark:hover:bg-[#2a2a2a]'
         )}
       >
         <Globe className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-        {!compact && (
-          <>
-            <span className="text-sm text-gray-700 dark:text-gray-300">{currentLang.name}</span>
-            <ChevronDown className="w-3 h-3 text-gray-400" />
-          </>
-        )}
+        <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{currentLang.name}</span>
+        <ChevronDown className={cn('w-3 h-3 text-gray-400 transition-transform', isOpen && 'rotate-180')} />
       </button>
 
       {isOpen && (

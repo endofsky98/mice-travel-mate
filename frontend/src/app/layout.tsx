@@ -18,10 +18,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   const router = useRouter();
 
   const isAdminRoute = pathname.startsWith('/admin');
-  const isAuthRoute = pathname.startsWith('/auth');
   const isGuideDashboard = pathname.startsWith('/guide-dashboard');
   const isB2B = pathname.startsWith('/b2b');
-  const hideMainNav = isAdminRoute || isAuthRoute || isGuideDashboard || isB2B;
+  const hideMainNav = isAdminRoute || isGuideDashboard || isB2B;
 
   const handleLogout = async () => {
     await logout();
@@ -32,8 +31,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang={language} className={inter.className}>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-        <title>MICE Travel Mate</title>
-        <meta name="description" content="Your curated travel companion for MICE exhibition visitors" />
+        <title>Exporum Travel Mate</title>
+        <meta name="description" content="Your curated travel companion for MICE exhibition visitors in Korea" />
+        <meta property="og:title" content="Exporum Travel Mate" />
+        <meta property="og:description" content="Your curated travel companion for MICE exhibition visitors in Korea" />
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
       </head>
       <body className="min-h-screen flex flex-col">
         {!isLoaded ? (

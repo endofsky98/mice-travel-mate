@@ -15,7 +15,6 @@ import {
   Globe,
   UserCog,
   LogOut,
-  Compass,
   Image,
   PartyPopper,
   Palette,
@@ -31,6 +30,7 @@ import {
   FileText,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import Logo from '@/components/ui/Logo';
 
 interface AdminSidebarProps {
   t: (key: string) => string;
@@ -90,9 +90,9 @@ export default function AdminSidebar({ t, onLogout }: AdminSidebarProps) {
     <>
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex flex-col w-64 bg-white dark:bg-dark-sidebar border-r border-gray-200 dark:border-gray-500/40 min-h-screen flex-shrink-0">
-        <div className="flex items-center gap-2 px-6 py-5 border-b border-gray-200 dark:border-gray-500/40">
-          <Compass className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
-          <span className="text-base font-bold text-gray-900 dark:text-white">관리자 패널</span>
+        <div className="flex items-center gap-2 px-4 py-4 border-b border-gray-200 dark:border-gray-500/40">
+          <Logo size="sm" showText={false} />
+          <span className="text-sm font-bold text-gray-900 dark:text-white">Exporum 관리자</span>
         </div>
 
         <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">

@@ -1,7 +1,8 @@
 """
-MICE Travel Mate - Seed Data Script
+Exporum Travel Mate - Seed Data Script
 Run: python seed_data.py
 Inserts sample data into the database (restaurants, courses, products, guides, etc.)
+Now seeds 100+ items per category for restaurants, courses, guides, and festivals.
 """
 import asyncio
 import sys
@@ -54,35 +55,58 @@ async def clear_existing_data(session):
 
 
 async def seed_restaurants(session):
-    """Seed 30 restaurants."""
+    """Seed 100 restaurants (30 base + 70 extra)."""
     from seed.restaurants import get_restaurants
-    data = get_restaurants()
-    for item in data:
-        r = Restaurant(**item)
-        session.add(r)
+    from seed.generate_extra import generate_restaurants
+
+    base_data = get_restaurants()
+    extra_data = generate_restaurants()
+
+    for item in base_data:
+        session.add(Restaurant(**item))
     await session.commit()
-    logger.info(f"  Seeded {len(data)} restaurants")
-    return data
+
+    for item in extra_data:
+        session.add(Restaurant(**item))
+    await session.commit()
+
+    total = len(base_data) + len(extra_data)
+    logger.info(f"  Seeded {total} restaurants ({len(base_data)} base + {len(extra_data)} extra)")
+    return base_data
 
 
 async def seed_courses(session):
-    """Seed 30 courses with spots and transitions."""
+    """Seed 100 courses (30 base + 70 extra) with spots and transitions."""
     from seed.courses import get_courses
-    courses, spots, transitions = get_courses()
+    from seed.generate_extra import generate_courses
 
+    # Base courses
+    courses, spots, transitions = get_courses()
     for item in courses:
         session.add(Course(**item))
     await session.commit()
-
     for item in spots:
         session.add(CourseSpot(**item))
     await session.commit()
-
     for item in transitions:
         session.add(CourseSpotTransition(**item))
     await session.commit()
 
-    logger.info(f"  Seeded {len(courses)} courses, {len(spots)} spots, {len(transitions)} transitions")
+    # Extra courses
+    extra_courses, extra_spots, extra_transitions = generate_courses()
+    for item in extra_courses:
+        session.add(Course(**item))
+    await session.commit()
+    for item in extra_spots:
+        session.add(CourseSpot(**item))
+    await session.commit()
+    for item in extra_transitions:
+        session.add(CourseSpotTransition(**item))
+    await session.commit()
+
+    total_courses = len(courses) + len(extra_courses)
+    total_spots = len(spots) + len(extra_spots)
+    logger.info(f"  Seeded {total_courses} courses, {total_spots} spots")
     return courses
 
 
@@ -98,14 +122,24 @@ async def seed_products(session):
 
 
 async def seed_guides(session):
-    """Seed 30 guides."""
+    """Seed 100 guides (30 base + 70 extra)."""
     from seed.guides import get_guides
-    data = get_guides()
-    for item in data:
+    from seed.generate_extra import generate_guides
+
+    base_data = get_guides()
+    extra_data = generate_guides()
+
+    for item in base_data:
         session.add(Guide(**item))
     await session.commit()
-    logger.info(f"  Seeded {len(data)} guides")
-    return data
+
+    for item in extra_data:
+        session.add(Guide(**item))
+    await session.commit()
+
+    total = len(base_data) + len(extra_data)
+    logger.info(f"  Seeded {total} guides ({len(base_data)} base + {len(extra_data)} extra)")
+    return base_data
 
 
 async def seed_banners(session):
@@ -129,13 +163,23 @@ async def seed_events(session):
 
 
 async def seed_festivals(session):
-    """Seed 12 festivals."""
+    """Seed 100 festivals (12 base + 88 extra)."""
     from seed.supplementary import get_festivals
-    data = get_festivals()
-    for item in data:
+    from seed.generate_extra import generate_festivals
+
+    base_data = get_festivals()
+    extra_data = generate_festivals()
+
+    for item in base_data:
         session.add(Festival(**item))
     await session.commit()
-    logger.info(f"  Seeded {len(data)} festivals")
+
+    for item in extra_data:
+        session.add(Festival(**item))
+    await session.commit()
+
+    total = len(base_data) + len(extra_data)
+    logger.info(f"  Seeded {total} festivals ({len(base_data)} base + {len(extra_data)} extra)")
 
 
 async def seed_transport(session):
@@ -180,7 +224,7 @@ async def seed_living_guide(session):
 async def run_seed():
     """Main seed function."""
     logger.info("=" * 60)
-    logger.info("MICE Travel Mate - Seeding Database")
+    logger.info("Exporum Travel Mate - Seeding Database")
     logger.info("=" * 60)
 
     # Create tables if they don't exist
@@ -193,16 +237,16 @@ async def run_seed():
         await clear_existing_data(session)
 
         # Seed in order
-        logger.info("\n[2/10] Seeding restaurants...")
+        logger.info("\n[2/10] Seeding restaurants (100)...")
         await seed_restaurants(session)
 
-        logger.info("\n[3/10] Seeding courses...")
+        logger.info("\n[3/10] Seeding courses (100)...")
         await seed_courses(session)
 
         logger.info("\n[4/10] Seeding products...")
         await seed_products(session)
 
-        logger.info("\n[5/10] Seeding guides...")
+        logger.info("\n[5/10] Seeding guides (100)...")
         await seed_guides(session)
 
         logger.info("\n[6/10] Seeding banners...")
@@ -211,7 +255,7 @@ async def run_seed():
         logger.info("\n[7/10] Seeding events...")
         await seed_events(session)
 
-        logger.info("\n[8/10] Seeding festivals...")
+        logger.info("\n[8/10] Seeding festivals (100)...")
         await seed_festivals(session)
 
         logger.info("\n[9/10] Seeding transport...")
@@ -222,7 +266,7 @@ async def run_seed():
         await seed_living_guide(session)
 
     logger.info("\n" + "=" * 60)
-    logger.info("Seeding complete!")
+    logger.info("Seeding complete! Total: 100 restaurants, 100 courses, 30 products, 100 guides, 100 festivals")
     logger.info("=" * 60)
 
 

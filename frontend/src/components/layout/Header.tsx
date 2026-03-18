@@ -2,9 +2,10 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Menu, X, User, LogOut, Compass, Shield } from 'lucide-react';
+import { Menu, X, User, LogOut, Shield } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import LanguageSwitcher from '@/components/ui/LanguageSwitcher';
+import Logo from '@/components/ui/Logo';
 import { Language, User as UserType } from '@/types';
 
 interface HeaderProps {
@@ -33,12 +34,8 @@ export default function Header({ t, language, onLanguageChange, isLoggedIn, onLo
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center gap-8">
-            <Link href="/" className="flex items-center gap-2">
-              <Compass className="w-7 h-7 text-indigo-600 dark:text-indigo-400" />
-              <span className="text-lg font-bold text-gray-900 dark:text-white hidden sm:block">
-                MICE Travel Mate
-              </span>
-            </Link>
+            <Logo href="/" size="md" showText className="hidden sm:flex" />
+            <Logo href="/" size="sm" showText={false} className="sm:hidden" />
 
             <nav className="hidden md:flex items-center gap-1">
               {navLinks.map((link) => (
