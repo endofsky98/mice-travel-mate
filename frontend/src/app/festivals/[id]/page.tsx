@@ -195,7 +195,7 @@ export default function FestivalDetailPage() {
             {t('common.location') || 'Location'}
           </h2>
           <div className="h-[300px] rounded-xl overflow-hidden border border-gray-200 dark:border-gray-500/40">
-            <MapView markers={markers} zoom={15} />
+            <MapView markers={markers} zoom={15} t={t} />
           </div>
           {festival.address && (
             <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
