@@ -69,6 +69,7 @@ function CalendarView({ festivals, lt, t }: { festivals: Festival[]; lt: (v: any
 export default function FestivalsPage() {
   const { t, lt, language } = useLanguage();
   const [festivals, setFestivals] = useState<Festival[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
   const [categoryFilter, setCategoryFilter] = useState('');
@@ -85,11 +86,12 @@ export default function FestivalsPage() {
     const fetch = async () => {
       setLoading(true);
       try {
-        const data = await api.get<{ items: Festival[] }>('/api/festivals', {
+        const data = await api.get<{ items: Festival[]; total: number }>('/api/festivals', {
           category: categoryFilter || undefined,
-          per_page: 50,
+          per_page: 100,
         });
         setFestivals(data.items || []);
+        setTotalCount(data.total || 0);
       } catch {
         setFestivals([]);
       }
@@ -101,9 +103,16 @@ export default function FestivalsPage() {
   return (
     <div className="page-container">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-          {t('home.festivals_events') || 'Festivals & Events'}
-        </h1>
+        <div className="flex items-center gap-3">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+            {t('home.festivals_events') || 'Festivals & Events'}
+          </h1>
+          {!loading && totalCount > 0 && (
+            <span className="text-sm text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-white/[0.08] px-2 py-0.5 rounded-full">
+              {totalCount.toLocaleString()} items
+            </span>
+          )}
+        </div>
         <div className="flex rounded-lg border border-gray-200 dark:border-gray-500/40 overflow-hidden">
           <button onClick={() => setViewMode('list')} className={cn('flex items-center gap-1 px-3 py-1.5 text-sm', viewMode === 'list' ? 'bg-indigo-600 text-white' : 'bg-white dark:bg-[#1e1e1e] text-gray-600 dark:text-gray-300')}>
             <List className="w-4 h-4" />

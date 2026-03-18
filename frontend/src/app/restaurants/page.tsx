@@ -21,6 +21,7 @@ export default function RestaurantsPage() {
   const [loading, setLoading] = useState(true);
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('');
@@ -43,8 +44,9 @@ export default function RestaurantsPage() {
           sort: sortBy || undefined,
           event_id: eventId || undefined,
         };
-        const data = await api.get<{ items: Restaurant[]; pages: number }>('/api/v1/restaurants', params);
+        const data = await api.get<{ items: Restaurant[]; pages: number; total: number }>('/api/v1/restaurants', params);
         setRestaurants(data.items || []);
+        setTotalCount(data.total || 0);
         setTotalPages(data.pages || 1);
       } catch {
         setRestaurants([]);
@@ -68,7 +70,14 @@ export default function RestaurantsPage() {
   return (
     <div className="page-container">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t('nav.restaurants')}</h1>
+        <div className="flex items-center gap-3">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t('nav.restaurants')}</h1>
+          {!loading && totalCount > 0 && (
+            <span className="text-sm text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-white/[0.08] px-2 py-0.5 rounded-full">
+              {totalCount.toLocaleString()} items
+            </span>
+          )}
+        </div>
         {/* View Toggle */}
         <div className="flex rounded-lg border border-gray-200 dark:border-gray-500/40 overflow-hidden">
           <button

@@ -17,6 +17,7 @@ export default function GuidesPage() {
   const [loading, setLoading] = useState(true);
   const [guides, setGuides] = useState<Guide[]>([]);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [search, setSearch] = useState('');
   const [filterLanguage, setFilterLanguage] = useState('');
@@ -27,7 +28,7 @@ export default function GuidesPage() {
     const fetchGuides = async () => {
       setLoading(true);
       try {
-        const data = await api.get<{ items: Guide[]; pages: number }>('/api/v1/guides', {
+        const data = await api.get<{ items: Guide[]; pages: number; total: number }>('/api/v1/guides', {
           page: currentPage,
           per_page: 12,
           search: search || undefined,
@@ -36,6 +37,7 @@ export default function GuidesPage() {
           sort: sortBy || undefined,
         });
         setGuides(data.items || []);
+        setTotalCount(data.total || 0);
         setTotalPages(data.pages || 1);
       } catch {
         setGuides([]);
@@ -47,7 +49,14 @@ export default function GuidesPage() {
 
   return (
     <div className="page-container">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">{t('nav.guides')}</h1>
+      <div className="flex items-center gap-3 mb-6">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t('nav.guides')}</h1>
+        {!loading && totalCount > 0 && (
+          <span className="text-sm text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-white/[0.08] px-2 py-0.5 rounded-full">
+            {totalCount.toLocaleString()} items
+          </span>
+        )}
+      </div>
 
       <div className="mb-4">
         <div className="relative">

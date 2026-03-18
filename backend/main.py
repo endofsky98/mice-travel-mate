@@ -1561,11 +1561,20 @@ async def lifespan(app: FastAPI):
     async with engine.begin() as conn:
         await run_migrations(conn)
 
+    # Seed admin user (independent transaction to prevent rollback)
+    async with async_session() as session:
+        try:
+            await seed_admin_user(session)
+            await session.commit()
+            logger.info("Admin user seed completed")
+        except Exception as e:
+            logger.error("Admin seed error: %s", str(e))
+            await session.rollback()
+
     # Seed data
     async with async_session() as session:
         try:
             await seed_languages(session)
-            await seed_admin_user(session)
             await seed_rolling_banners(session)
             await seed_festivals(session)
             await seed_living_guide(session)
