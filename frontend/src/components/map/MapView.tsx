@@ -35,12 +35,21 @@ export default function MapView({ center, zoom, markers = [], polyline, classNam
   const mainLng = center?.lng || markers[0]?.lng || 126.978;
   const mainTitle = markers[0]?.title || '';
 
-  // Load mapbox token from settings
+  // Load mapbox token from public settings API or env var
   useEffect(() => {
     const loadToken = async () => {
+      // Try env var first
+      const envToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+      if (envToken && envToken !== 'pk.placeholder') {
+        setMapboxToken(envToken);
+        setTokenLoaded(true);
+        return;
+      }
+
+      // Fetch from public API
       try {
-        const settings = await api.get<MapSettings>('/api/admin/settings/map');
-        if (settings.mapbox_api_key) {
+        const settings = await api.get<MapSettings>('/api/v1/map-settings');
+        if (settings.mapbox_api_key && settings.mapbox_api_key !== 'pk.placeholder') {
           setMapboxToken(settings.mapbox_api_key);
         }
       } catch {

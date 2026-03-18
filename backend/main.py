@@ -1637,6 +1637,31 @@ async def health():
     return {"status": "ok"}
 
 
+@app.get("/api/v1/map-settings")
+async def public_map_settings():
+    """Public endpoint to get map settings (no auth required)."""
+    from models.map_setting import MapSetting
+
+    async with async_session() as session:
+        result = await session.execute(select(MapSetting).limit(1))
+        setting = result.scalar_one_or_none()
+
+    if not setting:
+        return {
+            "mapbox_api_key": "",
+            "default_center_lat": 37.5665,
+            "default_center_lng": 126.978,
+            "default_zoom": 12,
+        }
+
+    return {
+        "mapbox_api_key": setting.mapbox_api_key or "",
+        "default_center_lat": setting.default_latitude or 37.5665,
+        "default_center_lng": setting.default_longitude or 126.978,
+        "default_zoom": setting.default_zoom or 12,
+    }
+
+
 @app.post("/api/seed")
 async def seed_database():
     """Trigger database seeding via API."""
