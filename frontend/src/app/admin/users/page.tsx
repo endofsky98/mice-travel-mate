@@ -88,7 +88,7 @@ export default function AdminUsersPage() {
                   <td className="px-6 py-4 text-sm text-gray-500">{formatDate(user.created_at)}</td>
                   <td className="px-6 py-4">
                     <button
-                      onClick={() => toggleAdmin(user.id, user.is_admin)}
+                      onClick={() => toggleAdmin(Number(user.id), user.is_admin)}
                       className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
                         user.is_admin ? 'bg-indigo-600' : 'bg-gray-300 dark:bg-gray-600'
                       }`}
