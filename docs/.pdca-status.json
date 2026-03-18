@@ -1,6 +1,6 @@
 {
   "version": "2.0",
-  "lastUpdated": "2026-03-18T14:28:39.335Z",
+  "lastUpdated": "2026-03-18T15:06:15.563Z",
   "activeFeatures": [
     "backend",
     "frontend",
@@ -60,9 +60,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-03-18T04:06:01.830Z",
-        "lastUpdated": "2026-03-18T14:14:36.620Z"
+        "lastUpdated": "2026-03-18T15:06:15.563Z"
       },
-      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/backend/routers/auth.py"
+      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/backend/routers/admin.py"
     },
     "frontend": {
       "phase": "do",
@@ -73,9 +73,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-03-18T04:07:19.250Z",
-        "lastUpdated": "2026-03-18T14:28:39.335Z"
+        "lastUpdated": "2026-03-18T14:57:41.485Z"
       },
-      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/frontend/src/lib/api.ts"
+      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/frontend/src/app/layout.tsx"
     },
     "auth": {
       "phase": "do",
@@ -99,9 +99,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-03-18T04:09:09.221Z",
-        "lastUpdated": "2026-03-18T04:10:28.428Z"
+        "lastUpdated": "2026-03-18T14:58:06.481Z"
       },
-      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/backend/schemas/language.py"
+      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/backend/schemas/user.py"
     },
     "ui": {
       "phase": "do",
@@ -125,9 +125,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-03-18T04:14:54.468Z",
-        "lastUpdated": "2026-03-18T06:40:35.261Z"
+        "lastUpdated": "2026-03-18T14:57:33.404Z"
       },
-      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/frontend/src/components/layout/AdminSidebar.tsx"
+      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/frontend/src/components/layout/Header.tsx"
     },
     "restaurant": {
       "phase": "do",
@@ -385,9 +385,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-03-18T04:25:23.925Z",
-        "lastUpdated": "2026-03-18T06:31:27.427Z"
+        "lastUpdated": "2026-03-18T14:57:59.504Z"
       },
-      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/frontend/src/app/admin/page.tsx"
+      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/frontend/src/app/admin/layout.tsx"
     },
     "events": {
       "phase": "do",
@@ -437,7 +437,7 @@
       "documents": {},
       "timestamps": {
         "started": "2026-03-18T04:30:41.347Z",
-        "lastUpdated": "2026-03-18T04:30:41.347Z"
+        "lastUpdated": "2026-03-18T15:04:19.432Z"
       },
       "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/frontend/src/app/admin/users/page.tsx"
     },
@@ -658,7 +658,7 @@
   "session": {
     "startedAt": "2026-03-18T04:03:46.194Z",
     "onboardingCompleted": false,
-    "lastActivity": "2026-03-18T14:28:39.335Z"
+    "lastActivity": "2026-03-18T15:06:15.563Z"
   },
   "history": [
     {
@@ -2332,6 +2332,102 @@
     {
       "timestamp": "2026-03-18T14:28:39.335Z",
       "feature": "frontend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T14:57:07.328Z",
+      "feature": "layout",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T14:57:10.855Z",
+      "feature": "layout",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T14:57:21.535Z",
+      "feature": "layout",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T14:57:33.404Z",
+      "feature": "layout",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T14:57:37.353Z",
+      "feature": "frontend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T14:57:41.485Z",
+      "feature": "frontend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T14:57:59.504Z",
+      "feature": "admin",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T14:58:06.481Z",
+      "feature": "schemas",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T14:58:27.338Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T14:59:57.933Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T15:03:05.050Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T15:04:19.432Z",
+      "feature": "users",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T15:05:17.444Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T15:05:36.963Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T15:06:10.248Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-18T15:06:15.563Z",
+      "feature": "backend",
       "phase": "do",
       "action": "updated"
     }
