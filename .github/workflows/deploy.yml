@@ -1,0 +1,64 @@
+name: Deploy mice-travel-mate
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build Next.js standalone
+        working-directory: frontend
+        env:
+          NEXT_PUBLIC_API_URL: http://3.36.108.114:8007
+        run: npm run build
+
+      - name: Copy static & public into standalone
+        working-directory: frontend
+        run: |
+          cp -r .next/static .next/standalone/.next/static
+          cp -r public .next/standalone/public
+
+      - name: Stop services & clean
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: 3.36.108.114
+          username: Administrator
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 31222
+          script: set PM2_HOME=C:\Users\Administrator\.pm2 && (pm2 delete mice-travel-mate-frontend || echo skip) && (pm2 delete mice-travel-mate-backend || echo skip) && cd C:/Users/Administrator/Documents/aiproject/mice-travel-mate && (if exist frontend\standalone rmdir /s /q frontend\standalone) && mkdir frontend\standalone
+
+      - name: Upload standalone
+        uses: appleboy/scp-action@v1.0.0
+        with:
+          host: 3.36.108.114
+          username: Administrator
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 31222
+          source: frontend/.next/standalone/*
+          target: C:/Users/Administrator/Documents/aiproject/mice-travel-mate/frontend/standalone
+          strip_components: 3
+
+      - name: Start services
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: 3.36.108.114
+          username: Administrator
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 31222
+          script: set PM2_HOME=C:\Users\Administrator\.pm2 && cd C:/Users/Administrator/Documents/aiproject/mice-travel-mate/backend && git pull origin main && pip install -r requirements.txt && cd .. && pm2 start C:\Users\Administrator\Documents\aiproject\mice-travel-mate\pm2.frontend.json && pm2 start C:\Users\Administrator\Documents\aiproject\mice-travel-mate\pm2.backend.json && pm2 save
