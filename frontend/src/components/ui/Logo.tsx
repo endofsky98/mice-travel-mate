@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { cn } from '@/lib/utils';
 
 interface LogoProps {
@@ -13,33 +12,47 @@ interface LogoProps {
 }
 
 const sizeMap = {
-  sm: { icon: 28, text: 'text-sm' },
-  md: { icon: 32, text: 'text-base' },
-  lg: { icon: 40, text: 'text-xl' },
-  xl: { icon: 52, text: 'text-2xl' },
+  sm: { full: 28, icon: 28 },
+  md: { full: 32, icon: 32 },
+  lg: { full: 40, icon: 40 },
+  xl: { full: 48, icon: 48 },
 };
 
 export default function Logo({ size = 'md', className, showText = true, href, variant = 'default' }: LogoProps) {
   const s = sizeMap[size];
-  const textColor = variant === 'white' ? 'text-white' : 'text-gray-900 dark:text-white';
 
   const content = (
     <span className={cn('flex items-center gap-2', className)}>
-      <Image
-        src="/logo.svg"
-        alt="Exporum Travel Mate"
-        width={s.icon}
-        height={s.icon}
-        className={cn('flex-shrink-0', variant === 'white' && 'brightness-0 invert')}
-        priority
-      />
-      {showText && (
-        <span className={cn('font-bold tracking-tight', s.text, textColor)}>
-          Exporum{' '}
-          <span className={cn('font-normal', variant === 'white' ? 'text-white/80' : 'text-indigo-600 dark:text-indigo-400')}>
-            Travel Mate
-          </span>
-        </span>
+      {showText ? (
+        <>
+          {/* Color logo for light mode */}
+          <img
+            src={variant === 'white' ? '/logo-white.svg' : '/logo.svg'}
+            alt="Exporum Travel Mate"
+            style={{ height: s.full }}
+            className={cn(
+              'w-auto flex-shrink-0',
+              variant === 'default' && 'block dark:hidden'
+            )}
+          />
+          {/* White logo for dark mode (only when variant is default) */}
+          {variant === 'default' && (
+            <img
+              src="/logo-white.svg"
+              alt="Exporum Travel Mate"
+              style={{ height: s.full }}
+              className="w-auto flex-shrink-0 hidden dark:block"
+            />
+          )}
+        </>
+      ) : (
+        <img
+          src="/favicon.svg"
+          alt="Exporum Travel Mate"
+          width={s.icon}
+          height={s.icon}
+          className="flex-shrink-0"
+        />
       )}
     </span>
   );

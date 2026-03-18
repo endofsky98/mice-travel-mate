@@ -1,0 +1,28 @@
+<svg width="240" height="48" viewBox="0 0 240 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="iconBgW" x1="4" y1="4" x2="44" y2="44" gradientUnits="userSpaceOnUse">
+      <stop stop-color="white" stop-opacity="0.25"/>
+      <stop offset="1" stop-color="white" stop-opacity="0.15"/>
+    </linearGradient>
+  </defs>
+  <!-- Icon background -->
+  <rect x="4" y="4" width="40" height="40" rx="10" fill="url(#iconBgW)" stroke="white" stroke-opacity="0.2" stroke-width="1"/>
+  <!-- Globe circle -->
+  <circle cx="24" cy="24" r="13" stroke="white" stroke-width="1.4" fill="none" opacity="0.4"/>
+  <!-- Meridian -->
+  <ellipse cx="24" cy="24" rx="7.5" ry="13" stroke="white" stroke-width="1" fill="none" opacity="0.3"/>
+  <!-- Parallels -->
+  <line x1="11" y1="19" x2="37" y2="19" stroke="white" stroke-width="0.8" opacity="0.25"/>
+  <line x1="11" y1="29" x2="37" y2="29" stroke="white" stroke-width="0.8" opacity="0.25"/>
+  <!-- Location pin -->
+  <path d="M24 10.5c-4.2 0-7.5 3.3-7.5 7.5 0 7.5 7.5 15 7.5 15s7.5-7.5 7.5-15c0-4.2-3.3-7.5-7.5-7.5z" fill="white" fill-opacity="0.95"/>
+  <circle cx="24" cy="18" r="3" fill="#818cf8"/>
+  <!-- Small airplane -->
+  <g transform="translate(35, 9) rotate(-25)">
+    <path d="M0-2.5 1.8 0 5 1 1.8 2.2 0 5.5-1.8 2.2-5 1-1.8 0z" fill="white" opacity="0.7"/>
+  </g>
+  <!-- Text: Exporum -->
+  <text x="52" y="31" font-family="Inter,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif" font-size="18" font-weight="700" fill="white" letter-spacing="-0.02em">Exporum</text>
+  <!-- Text: Travel Mate -->
+  <text x="138" y="31" font-family="Inter,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif" font-size="18" font-weight="400" fill="white" fill-opacity="0.8" letter-spacing="-0.01em">Travel Mate</text>
+</svg>

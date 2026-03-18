@@ -1,44 +1,28 @@
-<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg width="240" height="48" viewBox="0 0 240 48" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="globeGrad" x1="30" y1="30" x2="170" y2="170" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#6366f1"/>
-      <stop offset="100%" stop-color="#8b5cf6"/>
+    <linearGradient id="iconBg" x1="4" y1="4" x2="44" y2="44" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#4f46e5"/>
+      <stop offset="1" stop-color="#6366f1"/>
     </linearGradient>
-    <linearGradient id="pinGrad" x1="100" y1="20" x2="100" y2="100" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#f43f5e"/>
-      <stop offset="100%" stop-color="#e11d48"/>
-    </linearGradient>
-    <linearGradient id="planeGrad" x1="140" y1="20" x2="180" y2="60" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#06b6d4"/>
-      <stop offset="100%" stop-color="#0ea5e9"/>
-    </linearGradient>
-    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
-      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#4f46e5" flood-opacity="0.25"/>
-    </filter>
   </defs>
-  <!-- Globe body -->
-  <circle cx="100" cy="105" r="75" fill="url(#globeGrad)" filter="url(#shadow)"/>
-  <!-- Globe highlights -->
-  <circle cx="100" cy="105" r="75" fill="none" stroke="white" stroke-width="2" opacity="0.3"/>
-  <!-- Latitude lines -->
-  <ellipse cx="100" cy="105" rx="45" ry="75" fill="none" stroke="white" stroke-width="1.8" opacity="0.25"/>
-  <ellipse cx="100" cy="105" rx="65" ry="75" fill="none" stroke="white" stroke-width="1.2" opacity="0.2"/>
-  <line x1="25" y1="80" x2="175" y2="80" stroke="white" stroke-width="1.5" opacity="0.2"/>
-  <line x1="25" y1="105" x2="175" y2="105" stroke="white" stroke-width="1.5" opacity="0.15"/>
-  <line x1="25" y1="130" x2="175" y2="130" stroke="white" stroke-width="1.5" opacity="0.2"/>
+  <!-- Icon background -->
+  <rect x="4" y="4" width="40" height="40" rx="10" fill="url(#iconBg)"/>
+  <!-- Globe circle -->
+  <circle cx="24" cy="24" r="13" stroke="white" stroke-width="1.4" fill="none" opacity="0.35"/>
+  <!-- Meridian -->
+  <ellipse cx="24" cy="24" rx="7.5" ry="13" stroke="white" stroke-width="1" fill="none" opacity="0.28"/>
+  <!-- Parallels -->
+  <line x1="11" y1="19" x2="37" y2="19" stroke="white" stroke-width="0.8" opacity="0.22"/>
+  <line x1="11" y1="29" x2="37" y2="29" stroke="white" stroke-width="0.8" opacity="0.22"/>
   <!-- Location pin -->
-  <g transform="translate(100, 55)">
-    <path d="M0 -35C-14 -35 -25 -24 -25 -10C-25 10 0 35 0 35C0 35 25 10 25 -10C25 -24 14 -35 0 -35Z" fill="url(#pinGrad)" filter="url(#shadow)"/>
-    <circle cx="0" cy="-10" r="10" fill="white"/>
-    <circle cx="0" cy="-10" r="5" fill="#e11d48"/>
+  <path d="M24 10.5c-4.2 0-7.5 3.3-7.5 7.5 0 7.5 7.5 15 7.5 15s7.5-7.5 7.5-15c0-4.2-3.3-7.5-7.5-7.5z" fill="white" fill-opacity="0.95"/>
+  <circle cx="24" cy="18" r="3" fill="#4f46e5"/>
+  <!-- Small airplane -->
+  <g transform="translate(35, 9) rotate(-25)">
+    <path d="M0-2.5 1.8 0 5 1 1.8 2.2 0 5.5-1.8 2.2-5 1-1.8 0z" fill="white" opacity="0.65"/>
   </g>
-  <!-- Airplane -->
-  <g transform="translate(155, 40) rotate(35)">
-    <path d="M0 -12L5 -2L18 4L5 7L0 18L-5 7L-18 4L-5 -2Z" fill="url(#planeGrad)" filter="url(#shadow)"/>
-    <circle cx="0" cy="4" r="3" fill="white" opacity="0.8"/>
-  </g>
-  <!-- Small stars/sparkles -->
-  <circle cx="40" cy="50" r="3" fill="white" opacity="0.6"/>
-  <circle cx="55" cy="35" r="2" fill="white" opacity="0.4"/>
-  <circle cx="160" cy="150" r="2.5" fill="white" opacity="0.5"/>
+  <!-- Text: Exporum -->
+  <text x="52" y="31" font-family="Inter,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif" font-size="18" font-weight="700" fill="#111827" letter-spacing="-0.02em">Exporum</text>
+  <!-- Text: Travel Mate -->
+  <text x="138" y="31" font-family="Inter,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif" font-size="18" font-weight="400" fill="#4f46e5" letter-spacing="-0.01em">Travel Mate</text>
 </svg>
