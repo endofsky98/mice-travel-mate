@@ -57,6 +57,7 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
     });
 
     if (response.status === 401) {
+      const errorData = await response.json().catch(() => ({}));
       if (typeof window !== 'undefined') {
         const refreshToken = localStorage.getItem('refresh_token');
         if (refreshToken) {
@@ -88,7 +89,7 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
           }
         }
       }
-      throw new Error('Unauthorized');
+      throw new Error(errorData.detail || errorData.message || 'Unauthorized');
     }
 
     if (!response.ok) {
