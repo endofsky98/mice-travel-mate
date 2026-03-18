@@ -137,7 +137,7 @@ export default function MyPage() {
 
   const handleSaveProfile = async () => {
     try {
-      await api.put('/api/auth/profile', { name: profileName, nationality: profileNationality, preferred_language: profileLanguage });
+      await api.put('/api/v1/auth/me', { name: profileName, nationality: profileNationality, preferred_language: profileLanguage });
       setEditMode(false);
     } catch { /* */ }
   };

@@ -68,10 +68,10 @@ async def register(data: UserRegister, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(User).where(User.email == data.email))
     existing = result.scalar_one_or_none()
     if existing:
-        raise HTTPException(status_code=400, detail="Email already registered")
+        raise HTTPException(status_code=400, detail="이미 등록된 이메일입니다")
 
-    if len(data.password) < 6:
-        raise HTTPException(status_code=400, detail="Password must be at least 6 characters")
+    if len(data.password) < 8:
+        raise HTTPException(status_code=400, detail="비밀번호는 최소 8자 이상이어야 합니다")
 
     user = User(
         email=data.email,
@@ -94,13 +94,13 @@ async def login(data: UserLogin, db: AsyncSession = Depends(get_db)):
     user = result.scalar_one_or_none()
 
     if not user:
-        raise HTTPException(status_code=401, detail="Invalid email or password")
+        raise HTTPException(status_code=401, detail="이메일 또는 비밀번호가 일치하지 않습니다")
 
     if not user.password_hash:
         raise HTTPException(status_code=401, detail="This account uses social login. Please sign in with Google or Apple.")
 
     if not verify_password(data.password, user.password_hash):
-        raise HTTPException(status_code=401, detail="Invalid email or password")
+        raise HTTPException(status_code=401, detail="이메일 또는 비밀번호가 일치하지 않습니다")
 
     if not user.is_active:
         raise HTTPException(status_code=403, detail="Account is deactivated")
@@ -194,8 +194,8 @@ async def reset_password(data: ResetPasswordRequest, db: AsyncSession = Depends(
     if not user:
         raise HTTPException(status_code=400, detail="User not found")
 
-    if len(data.new_password) < 6:
-        raise HTTPException(status_code=400, detail="Password must be at least 6 characters")
+    if len(data.new_password) < 8:
+        raise HTTPException(status_code=400, detail="비밀번호는 최소 8자 이상이어야 합니다")
 
     user.password_hash = hash_password(data.new_password)
     user.reset_token = None
