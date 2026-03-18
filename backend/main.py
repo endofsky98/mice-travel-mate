@@ -659,8 +659,8 @@ async def seed_map_settings(session):
 
 async def seed_sample_data(session):
     """Seed sample events, restaurants, courses, products, guides, transport."""
-    # Check if data already exists
-    result = await session.execute(select(Event))
+    # Check if data already exists (restaurants 기준으로 체크 — events만 있고 restaurants 없는 경우 방지)
+    result = await session.execute(select(Restaurant))
     if result.scalars().first():
         return
 
