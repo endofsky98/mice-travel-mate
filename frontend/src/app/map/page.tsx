@@ -1,13 +1,12 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Search, Navigation, X, Heart, ArrowRight, MapPin } from 'lucide-react';
+import { Search, Navigation, X, Heart, MapPin } from 'lucide-react';
 import { useLanguage } from '@/hooks/useLanguage';
 import api from '@/lib/api';
 import FilterChips from '@/components/ui/FilterChips';
 import Card from '@/components/ui/Card';
 import StarRating from '@/components/ui/StarRating';
-import Link from 'next/link';
 
 const SAMSUNG_STATION = { lat: 37.5088, lng: 127.0631 };
 const DEFAULT_ZOOM = 14;
@@ -39,6 +38,7 @@ export default function MapPage() {
   const markersRef = useRef<any[]>([]);
   const popupRef = useRef<any>(null);
   const selectedMarkerRef = useRef<any>(null);
+  const listContainerRef = useRef<HTMLDivElement>(null);
 
   const [categoryFilter, setCategoryFilter] = useState('restaurants');
   const [searchQuery, setSearchQuery] = useState('');
@@ -71,7 +71,7 @@ export default function MapPage() {
     return null;
   };
 
-  // Request GPS on mount
+  // B4: Request GPS on mount - fallback to Samsung Station
   useEffect(() => {
     if (!navigator.geolocation) {
       setGpsStatus('denied');
@@ -111,12 +111,12 @@ export default function MapPage() {
     loadToken();
   }, []);
 
-  // Fetch data when category changes
+  // Fetch data when category or language changes
   useEffect(() => {
     const fetchItems = async () => {
       try {
         const endpoint = categoryFilter === 'festivals' ? '/api/festivals' : `/api/v1/${categoryFilter}`;
-        const data = await api.get<{ items: PlaceItem[] }>(endpoint, { per_page: 200 });
+        const data = await api.get<{ items: PlaceItem[] }>(endpoint, { per_page: 200, lang: language });
         setItems(data.items || []);
       } catch {
         setItems([]);
@@ -125,7 +125,7 @@ export default function MapPage() {
     fetchItems();
   }, [categoryFilter, language]);
 
-  // Filter items by viewport bounds
+  // B4: Filter items by viewport bounds
   const filterByViewport = useCallback(() => {
     if (!mapRef.current) {
       setVisibleItems(items.filter(i => getCoords(i)));
@@ -180,6 +180,7 @@ export default function MapPage() {
         new mapboxgl.Marker(userEl).setLngLat([userLocation.lng, userLocation.lat]).addTo(map);
       }
 
+      // B4: moveend event for viewport-based list filtering
       map.on('moveend', () => {
         if (mapRef.current) filterByViewport();
       });
@@ -222,6 +223,7 @@ export default function MapPage() {
         el.style.cssText = 'width:32px;height:32px;background:#4f46e5;border-radius:50%;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;';
         el.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>';
 
+        // B5: Marker click -> popup + list highlight
         el.addEventListener('click', (e) => {
           e.stopPropagation();
           handleSelectItem(item, mapboxgl, map);
@@ -240,7 +242,7 @@ export default function MapPage() {
     updateMarkers();
   }, [items, mapReady, language]);
 
-  // Handle item selection (from list or marker)
+  // B5: Handle item selection (from list or marker)
   const handleSelectItem = useCallback(async (item: PlaceItem, mapboxgl?: any, map?: any) => {
     if (!mapboxgl) mapboxgl = (await import('mapbox-gl')).default;
     if (!map) map = mapRef.current;
@@ -258,7 +260,7 @@ export default function MapPage() {
       selectedMarkerRef.current.style.height = '32px';
     }
 
-    // Highlight new marker
+    // Highlight new marker with different color
     const markerEl = document.querySelector(`.map-marker[data-item-id="${item.id}"]`) as HTMLElement;
     if (markerEl) {
       markerEl.style.background = '#dc2626';
@@ -275,6 +277,7 @@ export default function MapPage() {
     const desc = lt(item.description || item.address || '');
     const detailUrl = `/${categoryFilter}/${item.id}`;
 
+    // B5: Popup with name, image, description, bookmark, detail link
     const popupHtml = `
       <div style="min-width:220px;max-width:280px;font-family:Inter,sans-serif;">
         ${image ? `<img src="${image}" style="width:100%;height:120px;object-fit:cover;border-radius:8px 8px 0 0;" alt="${name}" onerror="this.style.display='none'" />` : ''}
@@ -283,7 +286,10 @@ export default function MapPage() {
           <p style="font-size:12px;color:#666;margin:0 0 8px 0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${desc}</p>
           ${item.avg_rating ? `<div style="font-size:12px;color:#f59e0b;margin-bottom:8px;">★ ${item.avg_rating.toFixed(1)}</div>` : ''}
           <div style="display:flex;gap:6px;">
-            <a href="${detailUrl}" style="flex:1;display:inline-flex;align-items:center;justify-content:center;padding:6px 12px;background:#4f46e5;color:white;border-radius:6px;font-size:12px;font-weight:500;text-decoration:none;">상세보기</a>
+            <button onclick="event.stopPropagation()" style="padding:6px 10px;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:6px;cursor:pointer;display:flex;align-items:center;font-size:12px;" title="${t('common.bookmark') || 'Bookmark'}">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            </button>
+            <a href="${detailUrl}" style="flex:1;display:inline-flex;align-items:center;justify-content:center;padding:6px 12px;background:#4f46e5;color:white;border-radius:6px;font-size:12px;font-weight:500;text-decoration:none;">${t('common.view_detail') || '상세보기'}</a>
           </div>
         </div>
       </div>
@@ -312,9 +318,17 @@ export default function MapPage() {
     });
 
     map.flyTo({ center: [coords.lng, coords.lat], zoom: Math.max(map.getZoom(), 15), duration: 500 });
-  }, [categoryFilter, lt, language]);
 
-  // My location button handler
+    // B5: Scroll selected item into view in the list
+    setTimeout(() => {
+      const cardEl = document.querySelector(`[data-list-item-id="${item.id}"]`);
+      if (cardEl) {
+        cardEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      }
+    }, 100);
+  }, [categoryFilter, lt, language, t]);
+
+  // B2: My location button handler with GPS permission check
   const handleMyLocation = () => {
     if (!navigator.geolocation) {
       alert(t('map.gps_not_supported') || 'GPS is not supported on this device.');
@@ -324,6 +338,7 @@ export default function MapPage() {
       (pos) => {
         const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
         setUserLocation(loc);
+        setGpsStatus('granted');
         if (mapRef.current) {
           mapRef.current.flyTo({ center: [loc.lng, loc.lat], zoom: DEFAULT_ZOOM, duration: 800 });
         }
@@ -382,15 +397,20 @@ export default function MapPage() {
           </div>
         )}
 
-        {/* Bottom items list - with padding to avoid GNB overlap */}
+        {/* B3: Bottom items list with generous padding to avoid GNB overlap */}
         {displayItems.length > 0 && (
-          <div className="absolute bottom-0 left-0 right-0 z-10 pb-20 md:pb-4 px-3 pt-2">
+          <div className="absolute bottom-0 left-0 right-0 z-10 pb-24 md:pb-4 px-3 pt-2" ref={listContainerRef}>
             <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2">
               {displayItems.slice(0, 15).map((item) => (
                 <button
                   key={item.id}
+                  data-list-item-id={item.id}
                   onClick={() => handleSelectItem(item)}
-                  className={`flex-shrink-0 w-[200px] text-left transition-all ${selectedItem?.id === item.id ? 'ring-2 ring-indigo-600 rounded-xl' : ''}`}
+                  className={`flex-shrink-0 w-[200px] text-left transition-all ${
+                    selectedItem?.id === item.id
+                      ? 'ring-2 ring-red-500 rounded-xl scale-105'
+                      : ''
+                  }`}
                 >
                   <Card hoverable className="p-3">
                     <h3 className="font-medium text-sm text-gray-900 dark:text-gray-100 line-clamp-1">
@@ -415,10 +435,10 @@ export default function MapPage() {
         </div>
       </div>
 
-      {/* My Location Button - positioned above GNB */}
+      {/* B2: My Location Button - positioned above GNB */}
       <button
         onClick={handleMyLocation}
-        className="absolute bottom-24 md:bottom-8 right-4 w-12 h-12 bg-white dark:bg-[#1e1e1e] rounded-full shadow-lg flex items-center justify-center text-indigo-600 dark:text-indigo-400 z-20 hover:bg-gray-50 dark:hover:bg-[#2a2a2a] transition-colors active:scale-95"
+        className="absolute bottom-28 md:bottom-8 right-4 w-12 h-12 bg-white dark:bg-[#1e1e1e] rounded-full shadow-lg flex items-center justify-center text-indigo-600 dark:text-indigo-400 z-20 hover:bg-gray-50 dark:hover:bg-[#2a2a2a] transition-colors active:scale-95"
         title={t('map.my_location') || 'My Location'}
       >
         <Navigation className="w-5 h-5" />

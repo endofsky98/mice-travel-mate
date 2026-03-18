@@ -35,6 +35,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="description" content="Your curated travel companion for MICE exhibition visitors in Korea" />
         <meta property="og:title" content="Exporum Travel Mate" />
         <meta property="og:description" content="Your curated travel companion for MICE exhibition visitors in Korea" />
+        <meta property="og:image" content="/logo.svg" />
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
       </head>
       <body className="min-h-screen flex flex-col">

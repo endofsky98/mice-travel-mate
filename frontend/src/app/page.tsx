@@ -97,11 +97,12 @@ export default function HomePage() {
             per_page: 10,
             lat: userLat,
             lng: userLng,
+            lang: language,
           }).catch(() => ({ items: [] })),
-          api.get<{ items: Course[] }>('/api/v1/courses', { per_page: 10 }).catch(() => ({ items: [] })),
-          api.get<{ items: Product[] }>('/api/v1/products', { per_page: 10 }).catch(() => ({ items: [] })),
-          api.get<{ items: Guide[] }>('/api/v1/guides', { per_page: 10 }).catch(() => ({ items: [] })),
-          api.get<{ items: Festival[] }>('/api/festivals', { per_page: 6 }).catch(() => ({ items: [] })),
+          api.get<{ items: Course[] }>('/api/v1/courses', { per_page: 10, lang: language }).catch(() => ({ items: [] })),
+          api.get<{ items: Product[] }>('/api/v1/products', { per_page: 10, lang: language }).catch(() => ({ items: [] })),
+          api.get<{ items: Guide[] }>('/api/v1/guides', { per_page: 10, lang: language }).catch(() => ({ items: [] })),
+          api.get<{ items: Festival[] }>('/api/festivals', { per_page: 6, lang: language }).catch(() => ({ items: [] })),
         ]);
 
         setRestaurants(restData.items || []);

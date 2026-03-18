@@ -35,7 +35,7 @@ export default function Header({ t, language, onLanguageChange, isLoggedIn, onLo
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center gap-8">
             <Logo href="/" size="md" showText className="hidden sm:flex" />
-            <Logo href="/" size="sm" showText={false} className="sm:hidden" />
+            <Logo href="/" size="sm" showText className="sm:hidden" />
 
             <nav className="hidden md:flex items-center gap-1">
               {navLinks.map((link) => (
