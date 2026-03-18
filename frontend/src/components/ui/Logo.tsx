@@ -12,10 +12,10 @@ interface LogoProps {
 }
 
 const sizeMap = {
-  sm: { full: 28, icon: 28 },
-  md: { full: 32, icon: 32 },
-  lg: { full: 40, icon: 40 },
-  xl: { full: 48, icon: 48 },
+  sm: { full: 36, icon: 32 },
+  md: { full: 44, icon: 36 },
+  lg: { full: 48, icon: 40 },
+  xl: { full: 56, icon: 48 },
 };
 
 export default function Logo({ size = 'md', className, showText = true, href, variant = 'default' }: LogoProps) {

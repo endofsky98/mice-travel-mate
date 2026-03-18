@@ -37,6 +37,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta property="og:description" content="Your curated travel companion for MICE exhibition visitors in Korea" />
         <meta property="og:image" content="/logo.svg" />
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+        <link rel="icon" href="/favicon.svg" sizes="any" />
+        <link rel="apple-touch-icon" href="/favicon.svg" />
       </head>
       <body className="min-h-screen flex flex-col">
         {!isLoaded ? (
