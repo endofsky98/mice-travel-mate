@@ -15,6 +15,9 @@ class Restaurant(Base):
     name_zh_tw = Column(String(500), nullable=True)
     name_ja = Column(String(500), nullable=True)
     name_es = Column(String(500), nullable=True)
+    name_th = Column(String(500), nullable=True)
+    name_vi = Column(String(500), nullable=True)
+    name_fr = Column(String(500), nullable=True)
 
     description_en = Column(Text, nullable=True)
     description_ko = Column(Text, nullable=True)
@@ -22,9 +25,12 @@ class Restaurant(Base):
     description_zh_tw = Column(Text, nullable=True)
     description_ja = Column(Text, nullable=True)
     description_es = Column(Text, nullable=True)
+    description_th = Column(Text, nullable=True)
+    description_vi = Column(Text, nullable=True)
+    description_fr = Column(Text, nullable=True)
 
-    category = Column(String(50), nullable=True)  # korean, japanese, chinese, western, cafe, street_food, halal, vegan
-    price_range = Column(Integer, nullable=True)  # 1-4
+    category = Column(String(50), nullable=True)
+    price_range = Column(Integer, nullable=True)
 
     address = Column(String(1000), nullable=True)
     latitude = Column(Float, nullable=True)
@@ -34,6 +40,9 @@ class Restaurant(Base):
     opening_hours = Column(JSON, nullable=True)
     menu_highlights = Column(JSON, nullable=True)
     images = Column(JSON, nullable=True)
+
+    avg_rating = Column(Float, nullable=True)
+    review_count = Column(Integer, default=0)
 
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)

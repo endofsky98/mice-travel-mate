@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { MapPin } from 'lucide-react';
+import { MapPin, Star } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 import { Restaurant } from '@/types';
@@ -36,6 +36,12 @@ export default function RestaurantCard({ restaurant, lt }: RestaurantCardProps) 
           <div className="absolute top-3 left-3">
             <Badge>{restaurant.category}</Badge>
           </div>
+          {restaurant.avg_rating && restaurant.avg_rating > 0 && (
+            <div className="absolute top-3 right-3 flex items-center gap-1 bg-black/60 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-lg">
+              <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+              {restaurant.avg_rating.toFixed(1)}
+            </div>
+          )}
         </div>
         <div className="p-4 flex-1 flex flex-col">
           <div className="flex items-start justify-between gap-2 mb-1">
@@ -49,12 +55,17 @@ export default function RestaurantCard({ restaurant, lt }: RestaurantCardProps) 
               {truncateText(description, 100)}
             </p>
           )}
-          {restaurant.distance_from_venue !== undefined && restaurant.distance_from_venue !== null && (
-            <div className="flex items-center gap-1 text-xs text-gray-400 dark:text-gray-500">
-              <MapPin className="w-3 h-3" />
-              <span>{restaurant.distance_from_venue}m</span>
-            </div>
-          )}
+          <div className="flex items-center gap-3 text-xs text-gray-400 dark:text-gray-500">
+            {restaurant.review_count !== undefined && restaurant.review_count > 0 && (
+              <span>{restaurant.review_count} reviews</span>
+            )}
+            {restaurant.distance_from_venue !== undefined && restaurant.distance_from_venue !== null && (
+              <span className="flex items-center gap-1">
+                <MapPin className="w-3 h-3" />
+                {restaurant.distance_from_venue}m
+              </span>
+            )}
+          </div>
         </div>
       </Card>
     </Link>

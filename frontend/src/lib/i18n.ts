@@ -13,6 +13,9 @@ export function getStoredLanguage(): Language {
   if (browserLang === 'zh-CN' || browserLang === 'zh-Hans') return 'zh-CN';
   if (browserLang === 'zh-TW' || browserLang === 'zh-Hant' || browserLang.startsWith('zh')) return 'zh-TW';
   if (browserLang.startsWith('es')) return 'es';
+  if (browserLang.startsWith('th')) return 'th';
+  if (browserLang.startsWith('vi')) return 'vi';
+  if (browserLang.startsWith('fr')) return 'fr';
 
   return 'en';
 }

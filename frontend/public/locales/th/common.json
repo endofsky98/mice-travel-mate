@@ -1,0 +1,13 @@
+{
+  "nav": {"home": "หน้าแรก", "map": "แผนที่", "ai_course": "AI คอร์ส", "chat": "แชท", "restaurants": "ร้านอาหาร", "courses": "คอร์สท่องเที่ยว", "transport": "การเดินทาง", "products": "ทัวร์และกิจกรรม", "guides": "ไกด์", "mypage": "ของฉัน", "login": "เข้าสู่ระบบ", "logout": "ออกจากระบบ", "register": "สมัครสมาชิก", "festivals": "เทศกาล", "themes": "ธีม", "living_guide": "คู่มือชีวิต"},
+  "common": {"search": "ค้นหา", "filter": "กรอง", "sort": "เรียง", "loading": "กำลังโหลด...", "no_results": "ไม่พบผลลัพธ์", "view_all": "ดูทั้งหมด", "view_on_map": "ดูบนแผนที่", "save": "บันทึก", "cancel": "ยกเลิก", "back": "กลับ", "close": "ปิด", "confirm": "ยืนยัน", "next": "ถัดไป", "all": "ทั้งหมด", "list": "รายการ", "map": "แผนที่", "compare": "เปรียบเทียบ", "share": "แชร์", "bookmark": "บุ๊กมาร์ก", "results": "ผลลัพธ์"},
+  "home": {"hero_title": "เพื่อนร่วมเดินทางที่สมบูรณ์แบบ", "hero_subtitle": "ค้นพบร้านอาหาร ทัวร์ และประสบการณ์ที่ดีที่สุด", "nearby_restaurants": "ร้านอาหารใกล้เคียง", "recommended_courses": "คอร์สแนะนำ", "travel_products": "ทัวร์และกิจกรรม", "guide_recommendations": "ไกด์แนะนำ", "festivals_events": "เทศกาลและอีเวนต์", "ai_course_banner_title": "สร้างคอร์สที่สมบูรณ์แบบ", "ai_course_banner_desc": "บอกเราเกี่ยวกับความชอบของคุณแล้วเราจะสร้างคอร์สท่องเที่ยวเฉพาะคุณ", "living_guide_title": "คู่มือชีวิตเกาหลี", "search_placeholder": "ค้นหาร้านอาหาร คอร์ส ไกด์...", "location_nearby": "ใกล้เคียง", "venue_based": "ตามสถานที่จัดงาน"},
+  "button": {"book_now": "จองเลย", "view_details": "ดูรายละเอียด", "write_review": "เขียนรีวิว", "generate_course": "สร้างคอร์ส", "retry": "สร้างใหม่", "send_message": "ส่งข้อความ"},
+  "label": {"price": "ราคา", "duration": "ระยะเวลา", "difficulty": "ความยาก", "category": "หมวดหมู่", "region": "ภูมิภาค", "rating": "คะแนน", "reviews": "รีวิว"},
+  "review": {"write_review": "เขียนรีวิว", "rating": "คะแนน", "your_review": "เขียนรีวิวของคุณ...", "submit_review": "ส่งรีวิว", "avg_rating": "รีวิว"},
+  "chat": {"send_message": "แชท", "type_message": "พิมพ์ข้อความ...", "no_messages": "ยังไม่มีการสนทนา", "start_chat": "เริ่มแชทจากหน้าไกด์"},
+  "ai_course": {"title": "AI สร้างคอร์ส", "subtitle": "บอกเราเกี่ยวกับความชอบของคุณ", "generating": "กำลังสร้างคอร์สที่สมบูรณ์แบบ..."},
+  "living_guide": {"transportation": "การเดินทาง", "food_culture": "วัฒนธรรมอาหาร", "shopping": "ช้อปปิ้ง", "currency": "แลกเปลี่ยนเงิน", "telecom": "โทรคมนาคม", "emergency": "ฉุกเฉิน", "etiquette": "มารยาท"},
+  "mypage": {"title": "ของฉัน", "bookings": "การจอง", "bookmarks": "บุ๊กมาร์ก", "profile": "โปรไฟล์", "no_bookings": "ยังไม่มีการจอง", "no_bookmarks": "ยังไม่มีบุ๊กมาร์ก"},
+  "auth": {"login": "เข้าสู่ระบบ", "register": "สมัครสมาชิก", "email": "อีเมล", "password": "รหัสผ่าน", "name": "ชื่อเต็ม"}
+}

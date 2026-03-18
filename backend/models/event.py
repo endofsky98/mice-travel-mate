@@ -16,6 +16,9 @@ class Event(Base):
     name_zh_tw = Column(String(500), nullable=True)
     name_ja = Column(String(500), nullable=True)
     name_es = Column(String(500), nullable=True)
+    name_th = Column(String(500), nullable=True)
+    name_vi = Column(String(500), nullable=True)
+    name_fr = Column(String(500), nullable=True)
 
     description_en = Column(Text, nullable=True)
     description_ko = Column(Text, nullable=True)
@@ -23,6 +26,9 @@ class Event(Base):
     description_zh_tw = Column(Text, nullable=True)
     description_ja = Column(Text, nullable=True)
     description_es = Column(Text, nullable=True)
+    description_th = Column(Text, nullable=True)
+    description_vi = Column(Text, nullable=True)
+    description_fr = Column(Text, nullable=True)
 
     venue_name = Column(String(500), nullable=True)
     venue_address = Column(String(1000), nullable=True)

@@ -19,6 +19,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
   const isAdminRoute = pathname.startsWith('/admin');
   const isAuthRoute = pathname.startsWith('/auth');
+  const isGuideDashboard = pathname.startsWith('/guide-dashboard');
+  const isB2B = pathname.startsWith('/b2b');
+  const hideMainNav = isAdminRoute || isAuthRoute || isGuideDashboard || isB2B;
 
   const handleLogout = async () => {
     await logout();
@@ -39,7 +42,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </div>
         ) : (
           <>
-            {!isAdminRoute && !isAuthRoute && (
+            {!hideMainNav && (
               <Header
                 t={t}
                 language={language}
@@ -49,8 +52,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               />
             )}
             <main className="flex-1">{children}</main>
-            {!isAdminRoute && !isAuthRoute && <Footer t={t} />}
-            {!isAdminRoute && !isAuthRoute && <BottomNav t={t} />}
+            {!hideMainNav && <Footer t={t} />}
+            {!hideMainNav && <BottomNav t={t} />}
           </>
         )}
       </body>

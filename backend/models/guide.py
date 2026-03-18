@@ -9,12 +9,17 @@ class Guide(Base):
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
 
+    user_id = Column(String(36), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+
     name_en = Column(String(500), nullable=False)
     name_ko = Column(String(500), nullable=True)
     name_zh_cn = Column(String(500), nullable=True)
     name_zh_tw = Column(String(500), nullable=True)
     name_ja = Column(String(500), nullable=True)
     name_es = Column(String(500), nullable=True)
+    name_th = Column(String(500), nullable=True)
+    name_vi = Column(String(500), nullable=True)
+    name_fr = Column(String(500), nullable=True)
 
     bio_en = Column(Text, nullable=True)
     bio_ko = Column(Text, nullable=True)
@@ -22,11 +27,14 @@ class Guide(Base):
     bio_zh_tw = Column(Text, nullable=True)
     bio_ja = Column(Text, nullable=True)
     bio_es = Column(Text, nullable=True)
+    bio_th = Column(Text, nullable=True)
+    bio_vi = Column(Text, nullable=True)
+    bio_fr = Column(Text, nullable=True)
 
     profile_image_url = Column(String(1000), nullable=True)
-    languages = Column(JSON, nullable=True)  # [{language: "English", proficiency: "native"}, ...]
-    specialties = Column(JSON, nullable=True)  # ["history", "food", "shopping", "kpop"]
-    regions = Column(JSON, nullable=True)  # ["seoul", "busan"]
+    languages = Column(JSON, nullable=True)
+    specialties = Column(JSON, nullable=True)
+    regions = Column(JSON, nullable=True)
 
     price_per_hour_usd = Column(Numeric(10, 2), nullable=True)
     price_half_day_usd = Column(Numeric(10, 2), nullable=True)
@@ -38,8 +46,14 @@ class Guide(Base):
     services_zh_tw = Column(Text, nullable=True)
     services_ja = Column(Text, nullable=True)
     services_es = Column(Text, nullable=True)
+    services_th = Column(Text, nullable=True)
+    services_vi = Column(Text, nullable=True)
+    services_fr = Column(Text, nullable=True)
 
-    status = Column(String(20), default="active")  # active, resting, inactive
+    avg_rating = Column(Float, nullable=True)
+    review_count = Column(Integer, default=0)
+
+    status = Column(String(20), default="active")
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

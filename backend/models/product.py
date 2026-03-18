@@ -15,6 +15,9 @@ class Product(Base):
     name_zh_tw = Column(String(500), nullable=True)
     name_ja = Column(String(500), nullable=True)
     name_es = Column(String(500), nullable=True)
+    name_th = Column(String(500), nullable=True)
+    name_vi = Column(String(500), nullable=True)
+    name_fr = Column(String(500), nullable=True)
 
     description_en = Column(Text, nullable=True)
     description_ko = Column(Text, nullable=True)
@@ -22,8 +25,11 @@ class Product(Base):
     description_zh_tw = Column(Text, nullable=True)
     description_ja = Column(Text, nullable=True)
     description_es = Column(Text, nullable=True)
+    description_th = Column(Text, nullable=True)
+    description_vi = Column(Text, nullable=True)
+    description_fr = Column(Text, nullable=True)
 
-    category = Column(String(50), nullable=True)  # tour, experience, show, activity
+    category = Column(String(50), nullable=True)
     price_usd = Column(Numeric(10, 2), nullable=True)
     duration_hours = Column(Float, nullable=True)
     region = Column(String(50), nullable=True)
@@ -37,6 +43,9 @@ class Product(Base):
     includes_zh_tw = Column(JSON, nullable=True)
     includes_ja = Column(JSON, nullable=True)
     includes_es = Column(JSON, nullable=True)
+    includes_th = Column(JSON, nullable=True)
+    includes_vi = Column(JSON, nullable=True)
+    includes_fr = Column(JSON, nullable=True)
 
     excludes_en = Column(JSON, nullable=True)
     excludes_ko = Column(JSON, nullable=True)
@@ -44,6 +53,9 @@ class Product(Base):
     excludes_zh_tw = Column(JSON, nullable=True)
     excludes_ja = Column(JSON, nullable=True)
     excludes_es = Column(JSON, nullable=True)
+    excludes_th = Column(JSON, nullable=True)
+    excludes_vi = Column(JSON, nullable=True)
+    excludes_fr = Column(JSON, nullable=True)
 
     itinerary = Column(JSON, nullable=True)
 
@@ -58,9 +70,14 @@ class Product(Base):
     cancellation_policy_zh_tw = Column(Text, nullable=True)
     cancellation_policy_ja = Column(Text, nullable=True)
     cancellation_policy_es = Column(Text, nullable=True)
+    cancellation_policy_th = Column(Text, nullable=True)
+    cancellation_policy_vi = Column(Text, nullable=True)
+    cancellation_policy_fr = Column(Text, nullable=True)
 
     images = Column(JSON, nullable=True)
-    status = Column(String(20), default="active")  # active, hidden, soldout
+    avg_rating = Column(Float, nullable=True)
+    review_count = Column(Integer, default=0)
+    status = Column(String(20), default="active")
 
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

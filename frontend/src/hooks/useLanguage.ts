@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Language, Translations } from '@/types';
+import { Language, Translations, SUPPORTED_LANGUAGES } from '@/types';
 import { getStoredLanguage, setStoredLanguage, loadTranslations, getTranslation, getLocalizedText } from '@/lib/i18n';
+
+const VALID_LANGUAGES = SUPPORTED_LANGUAGES.map(l => l.code);
 
 export function useLanguage() {
   const [language, setLanguageState] = useState<Language>('en');
@@ -16,7 +18,7 @@ export function useLanguage() {
       if (typeof window !== 'undefined') {
         const urlParams = new URLSearchParams(window.location.search);
         const urlLang = urlParams.get('lang') as Language;
-        if (urlLang && ['en', 'ko', 'ja', 'zh-CN', 'zh-TW', 'es'].includes(urlLang)) {
+        if (urlLang && VALID_LANGUAGES.includes(urlLang)) {
           lang = urlLang;
           setStoredLanguage(lang);
         } else {
@@ -38,6 +40,10 @@ export function useLanguage() {
     setLanguageState(lang);
     const t = await loadTranslations(lang);
     setTranslations(t);
+    // Update html lang attribute for accessibility
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = lang;
+    }
   }, []);
 
   const t = useCallback(

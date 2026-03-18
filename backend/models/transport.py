@@ -15,6 +15,9 @@ class TransportRoute(Base):
     from_name_zh_tw = Column(String(500), nullable=True)
     from_name_ja = Column(String(500), nullable=True)
     from_name_es = Column(String(500), nullable=True)
+    from_name_th = Column(String(500), nullable=True)
+    from_name_vi = Column(String(500), nullable=True)
+    from_name_fr = Column(String(500), nullable=True)
 
     to_name_en = Column(String(500), nullable=False)
     to_name_ko = Column(String(500), nullable=True)
@@ -22,13 +25,16 @@ class TransportRoute(Base):
     to_name_zh_tw = Column(String(500), nullable=True)
     to_name_ja = Column(String(500), nullable=True)
     to_name_es = Column(String(500), nullable=True)
+    to_name_th = Column(String(500), nullable=True)
+    to_name_vi = Column(String(500), nullable=True)
+    to_name_fr = Column(String(500), nullable=True)
 
     from_latitude = Column(Float, nullable=True)
     from_longitude = Column(Float, nullable=True)
     to_latitude = Column(Float, nullable=True)
     to_longitude = Column(Float, nullable=True)
 
-    transport_modes = Column(JSON, nullable=True)  # Array of {mode, duration, cost, instructions}
+    transport_modes = Column(JSON, nullable=True)
     route_polyline = Column(Text, nullable=True)
 
     is_active = Column(Boolean, default=True)
@@ -47,6 +53,9 @@ class TransportTip(Base):
     title_zh_tw = Column(String(500), nullable=True)
     title_ja = Column(String(500), nullable=True)
     title_es = Column(String(500), nullable=True)
+    title_th = Column(String(500), nullable=True)
+    title_vi = Column(String(500), nullable=True)
+    title_fr = Column(String(500), nullable=True)
 
     content_en = Column(Text, nullable=True)
     content_ko = Column(Text, nullable=True)
@@ -54,8 +63,11 @@ class TransportTip(Base):
     content_zh_tw = Column(Text, nullable=True)
     content_ja = Column(Text, nullable=True)
     content_es = Column(Text, nullable=True)
+    content_th = Column(Text, nullable=True)
+    content_vi = Column(Text, nullable=True)
+    content_fr = Column(Text, nullable=True)
 
-    category = Column(String(20), nullable=True)  # tmoney, taxi, app, pass, general
+    category = Column(String(20), nullable=True)
     icon = Column(String(100), nullable=True)
     display_order = Column(Integer, default=0)
     is_active = Column(Boolean, default=True)

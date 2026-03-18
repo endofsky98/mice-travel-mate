@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Clock, MapPin } from 'lucide-react';
+import { Clock, MapPin, Star, Footprints } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 import { Course } from '@/types';
@@ -15,8 +15,10 @@ interface CourseCardProps {
 export default function CourseCard({ course, lt }: CourseCardProps) {
   const name = lt(course.name);
   const description = lt(course.description);
-  const image = course.images && course.images.length > 0 ? course.images[0] : null;
+  const image = course.image_url || (course.images && course.images.length > 0 ? course.images[0] : null);
   const spotCount = course.spots?.length || 0;
+  const duration = course.duration_type || course.duration || '';
+  const difficultyLabels: Record<string, string> = { easy: 'Easy', moderate: 'Moderate', hard: 'Active' };
 
   return (
     <Link href={`/courses/${course.id}`}>
@@ -35,8 +37,17 @@ export default function CourseCard({ course, lt }: CourseCardProps) {
             </div>
           )}
           <div className="absolute top-3 left-3 flex gap-2">
-            <Badge>{course.duration}</Badge>
+            <Badge>{duration}</Badge>
+            {course.difficulty && (
+              <Badge variant="info">{difficultyLabels[course.difficulty] || course.difficulty}</Badge>
+            )}
           </div>
+          {course.avg_rating && course.avg_rating > 0 && (
+            <div className="absolute top-3 right-3 flex items-center gap-1 bg-black/60 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-lg">
+              <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+              {course.avg_rating.toFixed(1)}
+            </div>
+          )}
         </div>
         <div className="p-4 flex-1 flex flex-col">
           <h3 className="font-semibold text-gray-900 dark:text-gray-100 line-clamp-1 mb-1">{name}</h3>
@@ -46,14 +57,21 @@ export default function CourseCard({ course, lt }: CourseCardProps) {
             </p>
           )}
           <div className="flex items-center gap-4 text-xs text-gray-400 dark:text-gray-500">
-            <span className="flex items-center gap-1">
-              <MapPin className="w-3 h-3" />
-              {spotCount} spots
-            </span>
-            <span className="flex items-center gap-1">
-              <Clock className="w-3 h-3" />
-              {course.duration}
-            </span>
+            {spotCount > 0 && (
+              <span className="flex items-center gap-1">
+                <MapPin className="w-3 h-3" />
+                {spotCount} spots
+              </span>
+            )}
+            {course.total_duration_minutes && (
+              <span className="flex items-center gap-1">
+                <Clock className="w-3 h-3" />
+                {Math.round(course.total_duration_minutes / 60)}h
+              </span>
+            )}
+            {course.review_count !== undefined && course.review_count > 0 && (
+              <span>{course.review_count} reviews</span>
+            )}
           </div>
         </div>
       </Card>

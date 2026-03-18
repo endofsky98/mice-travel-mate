@@ -15,6 +15,9 @@ class Course(Base):
     name_zh_tw = Column(String(500), nullable=True)
     name_ja = Column(String(500), nullable=True)
     name_es = Column(String(500), nullable=True)
+    name_th = Column(String(500), nullable=True)
+    name_vi = Column(String(500), nullable=True)
+    name_fr = Column(String(500), nullable=True)
 
     description_en = Column(Text, nullable=True)
     description_ko = Column(Text, nullable=True)
@@ -22,15 +25,21 @@ class Course(Base):
     description_zh_tw = Column(Text, nullable=True)
     description_ja = Column(Text, nullable=True)
     description_es = Column(Text, nullable=True)
+    description_th = Column(Text, nullable=True)
+    description_vi = Column(Text, nullable=True)
+    description_fr = Column(Text, nullable=True)
 
-    duration_type = Column(String(20), nullable=True)  # half_day, full_day, overnight_2d, overnight_3d
-    theme = Column(String(50), nullable=True)  # history, nature, shopping, food_tour, nightview, kpop, local
-    region = Column(String(50), nullable=True)  # seoul, busan, jeju, incheon, gyeongju
-    difficulty = Column(String(20), nullable=True)  # easy, moderate, hard
+    duration_type = Column(String(20), nullable=True)
+    theme = Column(String(50), nullable=True)
+    region = Column(String(50), nullable=True)
+    difficulty = Column(String(20), nullable=True)
 
     total_duration_minutes = Column(Integer, nullable=True)
     total_distance_km = Column(Float, nullable=True)
     estimated_transport_cost = Column(Float, nullable=True)
+
+    avg_rating = Column(Float, nullable=True)
+    review_count = Column(Integer, default=0)
 
     image_url = Column(String(1000), nullable=True)
     is_active = Column(Boolean, default=True)
@@ -51,6 +60,9 @@ class CourseSpot(Base):
     name_zh_tw = Column(String(500), nullable=True)
     name_ja = Column(String(500), nullable=True)
     name_es = Column(String(500), nullable=True)
+    name_th = Column(String(500), nullable=True)
+    name_vi = Column(String(500), nullable=True)
+    name_fr = Column(String(500), nullable=True)
 
     description_en = Column(Text, nullable=True)
     description_ko = Column(Text, nullable=True)
@@ -58,6 +70,9 @@ class CourseSpot(Base):
     description_zh_tw = Column(Text, nullable=True)
     description_ja = Column(Text, nullable=True)
     description_es = Column(Text, nullable=True)
+    description_th = Column(Text, nullable=True)
+    description_vi = Column(Text, nullable=True)
+    description_fr = Column(Text, nullable=True)
 
     latitude = Column(Float, nullable=True)
     longitude = Column(Float, nullable=True)
@@ -73,7 +88,7 @@ class CourseSpotTransition(Base):
     course_id = Column(String(36), ForeignKey("courses.id", ondelete="CASCADE"), nullable=False, index=True)
     from_spot_id = Column(String(36), ForeignKey("course_spots.id", ondelete="CASCADE"), nullable=False)
     to_spot_id = Column(String(36), ForeignKey("course_spots.id", ondelete="CASCADE"), nullable=False)
-    transport_mode = Column(String(20), nullable=True)  # walk, subway, bus, taxi
+    transport_mode = Column(String(20), nullable=True)
     duration_minutes = Column(Integer, nullable=True)
     distance_km = Column(Float, nullable=True)
     route_polyline = Column(Text, nullable=True)
