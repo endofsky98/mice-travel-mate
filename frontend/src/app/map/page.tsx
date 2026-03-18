@@ -39,6 +39,7 @@ export default function MapPage() {
   const popupRef = useRef<any>(null);
   const selectedMarkerRef = useRef<any>(null);
   const listContainerRef = useRef<HTMLDivElement>(null);
+  const filterByViewportRef = useRef<() => void>(() => {});
 
   const [categoryFilter, setCategoryFilter] = useState('restaurants');
   const [searchQuery, setSearchQuery] = useState('');
@@ -146,6 +147,9 @@ export default function MapPage() {
     }
   }, [items]);
 
+  // Keep ref in sync so moveend handler always uses latest filterByViewport
+  useEffect(() => { filterByViewportRef.current = filterByViewport; }, [filterByViewport]);
+
   // Initialize map
   useEffect(() => {
     if (!mapboxToken || !mapContainerRef.current || gpsStatus === 'pending') return;
@@ -180,9 +184,9 @@ export default function MapPage() {
         new mapboxgl.Marker(userEl).setLngLat([userLocation.lng, userLocation.lat]).addTo(map);
       }
 
-      // B4: moveend event for viewport-based list filtering
+      // B4: moveend event for viewport-based list filtering (use ref to avoid stale closure)
       map.on('moveend', () => {
-        if (mapRef.current) filterByViewport();
+        if (mapRef.current) filterByViewportRef.current();
       });
 
       map.on('load', () => {

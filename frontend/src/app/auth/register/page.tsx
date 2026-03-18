@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Mail, Lock, User, Globe } from 'lucide-react';
+import { Mail, Lock, User, Globe, ArrowLeft } from 'lucide-react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useAuth } from '@/hooks/useAuth';
 import Input from '@/components/ui/Input';
@@ -59,7 +59,14 @@ export default function RegisterPage() {
       </div>
 
       {/* Right Panel */}
-      <div className="flex-1 flex items-center justify-center p-6 bg-white dark:bg-dark-main">
+      <div className="flex-1 flex items-center justify-center p-6 bg-white dark:bg-dark-main relative">
+        <button
+          onClick={() => router.back()}
+          className="absolute top-4 left-4 flex items-center gap-1.5 px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-lg hover:bg-gray-50 dark:hover:bg-white/[0.05] transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          {t('common.back') || 'Back'}
+        </button>
         <div className="w-full max-w-md">
           <div className="lg:hidden mb-8">
             <Logo size="lg" />
