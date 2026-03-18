@@ -42,7 +42,7 @@ class UserResponse(BaseModel):
     email: str
     name: str
     nationality: Optional[str] = None
-    preferred_language: str
+    preferred_language: Optional[str] = "en"
     provider: str
     role: str
     is_admin: bool = False
