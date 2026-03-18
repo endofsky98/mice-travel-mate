@@ -165,22 +165,33 @@ async def seed_languages(session):
 
 
 async def seed_admin_user(session):
-    """Seed default admin user or ensure existing user has superadmin role."""
+    """Seed default admin user or ensure existing user has superadmin role and correct password."""
     import bcrypt
 
-    result = await session.execute(select(User).where(User.email == "endofsky98@daum.net"))
+    admin_email = settings.DEFAULT_ADMIN_EMAIL
+    admin_password = settings.DEFAULT_ADMIN_PASSWORD
+
+    result = await session.execute(select(User).where(User.email == admin_email))
     existing = result.scalar_one_or_none()
     if existing:
+        changed = False
         if existing.role != "superadmin":
             existing.role = "superadmin"
+            changed = True
+        # Always reset password to ensure it matches config
+        hashed = bcrypt.hashpw(admin_password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+        existing.password_hash = hashed
+        existing.is_active = True
+        changed = True
+        if changed:
             await session.flush()
-            logger.info("Updated endofsky98@daum.net role to superadmin")
+        logger.info("Admin user verified: %s (role=superadmin, password reset)", admin_email)
         return
 
-    hashed = bcrypt.hashpw(settings.DEFAULT_ADMIN_PASSWORD.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+    hashed = bcrypt.hashpw(admin_password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
     admin_user = User(
         id=str(uuid.uuid4()),
-        email="endofsky98@daum.net",
+        email=admin_email,
         password_hash=hashed,
         name=settings.DEFAULT_ADMIN_NAME,
         role="superadmin",
@@ -189,7 +200,7 @@ async def seed_admin_user(session):
     )
     session.add(admin_user)
     await session.flush()
-    logger.info("Seeded admin user: endofsky98@daum.net")
+    logger.info("Created admin user: %s", admin_email)
 
 
 async def seed_rolling_banners(session):
