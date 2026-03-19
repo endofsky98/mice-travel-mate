@@ -1,3 +1,66 @@
+_RESTAURANT_IMGS = {
+    'korean': [
+        "https://images.unsplash.com/photo-1590301157890-4810ed352733?w=600",
+        "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=600",
+        "https://images.unsplash.com/photo-1498654896293-37aacf113fd9?w=600",
+        "https://images.unsplash.com/photo-1617196034183-421b4040ed20?w=600",
+        "https://images.unsplash.com/photo-1583623025817-d180a2221d0a?w=600",
+        "https://images.unsplash.com/photo-1535399831218-d5bd36d1a6b3?w=600",
+        "https://images.unsplash.com/photo-1609501676725-7186f017a4b7?w=600",
+        "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=600",
+        "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600",
+        "https://images.unsplash.com/photo-1617196034096-e7f027ee82b9?w=600",
+    ],
+    'japanese': [
+        "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=600",
+        "https://images.unsplash.com/photo-1617093727343-374698b1b08d?w=600",
+        "https://images.unsplash.com/photo-1547592180-85f173990554?w=600",
+        "https://images.unsplash.com/photo-1611143669185-af224c5e3252?w=600",
+        "https://images.unsplash.com/photo-1569050467447-ce54b3bbc37d?w=600",
+    ],
+    'chinese': [
+        "https://images.unsplash.com/photo-1563245372-f21724e3856d?w=600",
+        "https://images.unsplash.com/photo-1526318896980-cf78c088247c?w=600",
+        "https://images.unsplash.com/photo-1455619452474-d2be8b1e70cd?w=600",
+        "https://images.unsplash.com/photo-1541014741259-de529411b96a?w=600",
+    ],
+    'western': [
+        "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600",
+        "https://images.unsplash.com/photo-1544025162-d76694265947?w=600",
+        "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=600",
+        "https://images.unsplash.com/photo-1473093295043-cdd812d0e601?w=600",
+        "https://images.unsplash.com/photo-1424847651672-bf20a4b0982b?w=600",
+    ],
+    'cafe': [
+        "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=600",
+        "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=600",
+        "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=600",
+        "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=600",
+        "https://images.unsplash.com/photo-1521017432531-fbd92d768814?w=600",
+    ],
+    'street_food': [
+        "https://images.unsplash.com/photo-1583623025817-d180a2221d0a?w=600",
+        "https://images.unsplash.com/photo-1535399831218-d5bd36d1a6b3?w=600",
+        "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=600",
+        "https://images.unsplash.com/photo-1609501676725-7186f017a4b7?w=600",
+    ],
+    'vegan': [
+        "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600",
+        "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=600",
+        "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600",
+        "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=600",
+    ],
+    'halal': [
+        "https://images.unsplash.com/photo-1476224203421-9ac39bcb3b16?w=600",
+        "https://images.unsplash.com/photo-1574484284002-952d92456975?w=600",
+        "https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=600",
+    ],
+    'default': [
+        "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600",
+        "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600",
+    ],
+}
+
 import uuid
 
 
@@ -19,7 +82,7 @@ def _r(name_en, name_ko, desc_en, desc_ko, category, price_range, address, lat, 
         "phone": phone,
         "opening_hours": hours,
         "menu_highlights": menu,
-        "images": [(['https://images.unsplash.com/photo-1590301157890-4810ed352733?w=600', 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=600', 'https://images.unsplash.com/photo-1498654896293-37aacf113fd9?w=600', 'https://images.unsplash.com/photo-1617196034183-421b4040ed20?w=600', 'https://images.unsplash.com/photo-1535399831218-d5bd36d1a6b3?w=600', 'https://images.unsplash.com/photo-1583623025817-d180a2221d0a?w=600', 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=600', 'https://images.unsplash.com/photo-1617093727343-374698b1b08d?w=600', 'https://images.unsplash.com/photo-1547592180-85f173990554?w=600', 'https://images.unsplash.com/photo-1563245372-f21724e3856d?w=600', 'https://images.unsplash.com/photo-1526318896980-cf78c088247c?w=600', 'https://images.unsplash.com/photo-1455619452474-d2be8b1e70cd?w=600', 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600', 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600', 'https://images.unsplash.com/photo-1544025162-d76694265947?w=600', 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=600', 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=600', 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=600', 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600', 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600'])[img_num % 20]],
+        "images": [_RESTAURANT_IMGS.get(category, _RESTAURANT_IMGS['default'])[img_num % len(_RESTAURANT_IMGS.get(category, _RESTAURANT_IMGS['default']))]],
         "avg_rating": rating, "review_count": reviews, "is_active": True,
     }
 
