@@ -224,6 +224,7 @@ export default function HomePage() {
       <RollingBanner banners={banners} lt={lt} />
 
       {/* 2. Location Bar */}
+      <div className="mt-3" />
       <LocationBar
         t={t}
         language={language}

@@ -96,7 +96,7 @@ export default function LocationBar({ t, language = 'en', onLocationChange, even
   };
 
   return (
-    <div className="bg-white dark:bg-[#1e1e1e] border-b border-gray-100 dark:border-gray-500/40 px-4 py-2.5">
+    <div className="bg-white dark:bg-[#1e1e1e] border-b border-gray-100 dark:border-gray-500/40 px-4 py-4">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         <div className="flex items-center gap-2 min-w-0">
           <MapPin className="w-4 h-4 text-indigo-600 dark:text-indigo-400 flex-shrink-0" />
