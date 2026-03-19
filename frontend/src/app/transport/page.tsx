@@ -99,28 +99,30 @@ export default function TransportPage() {
                   <div className="flex items-center gap-2 flex-1">
                     <div className="flex items-center gap-1 px-3 py-1.5 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
                       <MapPin className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-                      <span className="text-sm font-medium text-indigo-700 dark:text-indigo-300">{lt(route.from)}</span>
+                      <span className="text-sm font-medium text-indigo-700 dark:text-indigo-300">{route.from_name || lt(route.from)}</span>
                     </div>
                     <div className="flex-1 border-t-2 border-dashed border-gray-300 dark:border-gray-600" />
                     <div className="flex items-center gap-1 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-900/30 rounded-lg">
                       <MapPin className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                      <span className="text-sm font-medium text-emerald-700 dark:text-emerald-300">{lt(route.to)}</span>
+                      <span className="text-sm font-medium text-emerald-700 dark:text-emerald-300">{route.to_name || lt(route.to)}</span>
                     </div>
                   </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {route.modes.map((mode, idx) => {
+                  {(route.transport_modes || route.modes || []).map((mode, idx) => {
                     const Icon = modeIcons[mode.mode] || Bus;
+                    const duration = mode.duration_minutes ? `${mode.duration_minutes}분` : mode.duration || '';
+                    const cost = mode.cost_krw ? `₩${mode.cost_krw.toLocaleString()}` : mode.cost || '';
                     return (
                       <div key={idx} className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-dark-input">
                         <Icon className="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0" />
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
                             <span className="text-sm font-medium text-gray-900 dark:text-gray-100 capitalize">{mode.mode}</span>
-                            <Badge variant="info">{mode.duration}</Badge>
+                            {duration && <Badge variant="info">{duration}</Badge>}
                           </div>
-                          {mode.cost && (
-                            <span className="text-xs text-gray-500 dark:text-gray-400">{mode.cost}</span>
+                          {cost && (
+                            <span className="text-xs text-gray-500 dark:text-gray-400">{cost}</span>
                           )}
                         </div>
                       </div>

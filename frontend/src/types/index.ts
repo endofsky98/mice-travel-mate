@@ -184,20 +184,32 @@ export interface GuideLanguage {
 }
 
 export interface TransportRoute {
-  id: number;
-  from: string | MultilingualText;
-  to: string | MultilingualText;
-  modes: TransportMode[];
-  event_id?: number;
+  id: string;
+  from_name: string;
+  to_name: string;
+  from_latitude?: number;
+  from_longitude?: number;
+  to_latitude?: number;
+  to_longitude?: number;
+  transport_modes: TransportMode[];
+  route_polyline?: string | null;
   is_active: boolean;
+  // legacy aliases
+  from?: string | MultilingualText;
+  to?: string | MultilingualText;
+  modes?: TransportMode[];
 }
 
 export interface TransportMode {
   mode: string;
-  duration: string;
   duration_minutes?: number;
-  cost?: string;
   cost_krw?: number;
+  transfers?: number;
+  tip_en?: string;
+  tip_ko?: string;
+  // legacy
+  duration?: string;
+  cost?: string;
   cost_usd?: number;
   description?: string | MultilingualText;
   instructions_en?: string;

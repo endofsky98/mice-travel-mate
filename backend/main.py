@@ -1660,7 +1660,7 @@ async def health():
     return {"status": "ok"}
 
 
-@app.get("/api/v1/map-settings")
+@app.get("/api/map-settings")
 async def public_map_settings():
     """Public endpoint to get map settings (no auth required)."""
     from models.map_setting import MapSetting
