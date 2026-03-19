@@ -1,25 +1,54 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { MapPin, Navigation, ChevronDown } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { MapPin, Navigation } from 'lucide-react';
 
 interface LocationBarProps {
   t: (key: string) => string;
+  language?: string;
   onLocationChange?: (lat: number, lng: number, label: string) => void;
   eventLat?: number;
   eventLng?: number;
   eventName?: string;
 }
 
-export default function LocationBar({ t, onLocationChange, eventLat, eventLng, eventName }: LocationBarProps) {
+const LANG_MAP: Record<string, string> = {
+  'ko': 'ko', 'en': 'en', 'ja': 'ja',
+  'zh-CN': 'zh', 'zh-TW': 'zh-TW',
+  'es': 'es', 'th': 'th', 'vi': 'vi', 'fr': 'fr',
+};
+
+export default function LocationBar({ t, language = 'en', onLocationChange, eventLat, eventLng, eventName }: LocationBarProps) {
   const [locationLabel, setLocationLabel] = useState('');
   const [isLocating, setIsLocating] = useState(false);
   const [useVenue, setUseVenue] = useState(false);
+  const [mapboxToken, setMapboxToken] = useState('');
+
+  // Mapbox 토큰 로드
+  useEffect(() => {
+    fetch('/api/map-settings')
+      .then(r => r.json())
+      .then(d => { if (d.mapbox_api_key) setMapboxToken(d.mapbox_api_key); })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     detectLocation();
   }, []);
+
+  const reverseGeocode = async (lat: number, lng: number): Promise<string> => {
+    if (!mapboxToken) return t('home.current_location') || 'Current Location';
+    try {
+      const lang = LANG_MAP[language] || 'en';
+      const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${mapboxToken}&language=${lang}&types=address,neighborhood,place&limit=1`;
+      const res = await fetch(url);
+      const data = await res.json();
+      if (data.features && data.features.length > 0) {
+        return data.features[0].place_name;
+      }
+    } catch {}
+    return t('home.current_location') || 'Current Location';
+  };
 
   const detectLocation = () => {
     if (!navigator.geolocation) {
@@ -29,10 +58,12 @@ export default function LocationBar({ t, onLocationChange, eventLat, eventLng, e
 
     setIsLocating(true);
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const label = t('home.location_nearby') || 'Nearby';
-        setLocationLabel(label);
-        onLocationChange?.(pos.coords.latitude, pos.coords.longitude, label);
+      async (pos) => {
+        const { latitude, longitude } = pos.coords;
+        onLocationChange?.(latitude, longitude, '');
+        const address = await reverseGeocode(latitude, longitude);
+        setLocationLabel(address);
+        onLocationChange?.(latitude, longitude, address);
         setIsLocating(false);
         setUseVenue(false);
       },
@@ -40,7 +71,7 @@ export default function LocationBar({ t, onLocationChange, eventLat, eventLng, e
         fallbackLocation();
         setIsLocating(false);
       },
-      { timeout: 5000 }
+      { enableHighAccuracy: false, timeout: 15000, maximumAge: 60000 }
     );
   };
 
@@ -70,11 +101,12 @@ export default function LocationBar({ t, onLocationChange, eventLat, eventLng, e
         <div className="flex items-center gap-2 min-w-0">
           <MapPin className="w-4 h-4 text-indigo-600 dark:text-indigo-400 flex-shrink-0" />
           <span className="text-sm font-medium text-gray-700 dark:text-gray-200 truncate">
-            {isLocating ? '...' : locationLabel}
+            {isLocating ? (t('home.locating') || 'Locating...') : locationLabel}
           </span>
           <button
             onClick={detectLocation}
             className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline flex-shrink-0"
+            title="Refresh location"
           >
             <Navigation className="w-3.5 h-3.5" />
           </button>

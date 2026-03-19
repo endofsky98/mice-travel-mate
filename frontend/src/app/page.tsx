@@ -115,7 +115,7 @@ export default function HomePage() {
     };
 
     fetchData();
-  }, [eventSlug, language]);
+  }, [eventSlug, language, userLat, userLng]);
 
   if (loading) return <LoadingSpinner fullPage />;
 
@@ -180,9 +180,23 @@ export default function HomePage() {
     { key: 'exhibition', label: t('category.exhibition') || 'Exhibition' },
   ];
 
+  const calcDist = (lat1: number, lng1: number, lat2: number, lng2: number) => {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  };
+
+  const sortedRestaurants = [...restaurants].sort((a, b) => {
+    const aLat = a.latitude || a.lat || 0, aLng = a.longitude || a.lng || 0;
+    const bLat = b.latitude || b.lat || 0, bLng = b.longitude || b.lng || 0;
+    return calcDist(userLat, userLng, aLat, aLng) - calcDist(userLat, userLng, bLat, bLng);
+  });
+
   const filteredRestaurants = restaurantFilter
-    ? restaurants.filter((r) => r.category === restaurantFilter)
-    : restaurants;
+    ? sortedRestaurants.filter((r) => r.category === restaurantFilter)
+    : sortedRestaurants;
 
   const filteredCourses = courseFilter
     ? courses.filter((c) => c.duration_type === courseFilter || c.theme === courseFilter)
@@ -212,6 +226,7 @@ export default function HomePage() {
       {/* 2. Location Bar */}
       <LocationBar
         t={t}
+        language={language}
         onLocationChange={handleLocationChange}
         eventLat={selectedEvent?.latitude || selectedEvent?.venue_lat}
         eventLng={selectedEvent?.longitude || selectedEvent?.venue_lng}
