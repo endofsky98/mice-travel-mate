@@ -103,7 +103,7 @@ export default function MapPage() {
         return;
       }
       try {
-        const settings = await api.get<{ mapbox_api_key: string }>('/api/v1/map-settings');
+        const settings = await api.get<{ mapbox_api_key: string }>('/api/map-settings');
         if (settings.mapbox_api_key && settings.mapbox_api_key !== 'pk.placeholder') {
           setMapboxToken(settings.mapbox_api_key);
         }
@@ -116,7 +116,7 @@ export default function MapPage() {
   useEffect(() => {
     const fetchItems = async () => {
       try {
-        const endpoint = categoryFilter === 'festivals' ? '/api/festivals' : `/api/v1/${categoryFilter}`;
+        const endpoint = categoryFilter === 'festivals' ? '/api/festivals' : `/api/${categoryFilter}`;
         const data = await api.get<{ items: PlaceItem[] }>(endpoint, { per_page: 200, lang: language });
         setItems(data.items || []);
       } catch {

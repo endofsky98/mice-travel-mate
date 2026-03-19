@@ -8,7 +8,7 @@ from models.restaurant import Restaurant
 from models.event import EventRestaurant
 from utils.helpers import serialize_restaurant
 
-router = APIRouter(prefix="/api/v1/restaurants", tags=["Restaurants"])
+router = APIRouter(prefix="/api/restaurants", tags=["Restaurants"])
 
 
 @router.get("/")

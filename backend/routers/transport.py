@@ -7,7 +7,7 @@ from database import get_db
 from models.transport import TransportRoute, TransportTip
 from utils.helpers import serialize_transport_route, serialize_transport_tip
 
-router = APIRouter(prefix="/api/v1/transport", tags=["Transport"])
+router = APIRouter(prefix="/api/transport", tags=["Transport"])
 
 
 @router.get("/routes")

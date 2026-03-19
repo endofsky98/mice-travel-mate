@@ -8,7 +8,7 @@ from models.guide import Guide, GuideAvailability
 from models.event import EventGuide
 from utils.helpers import serialize_guide
 
-router = APIRouter(prefix="/api/v1/guides", tags=["Guides"])
+router = APIRouter(prefix="/api/guides", tags=["Guides"])
 
 
 @router.get("/")

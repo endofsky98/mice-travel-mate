@@ -28,7 +28,7 @@ export default function GuidesPage() {
     const fetchGuides = async () => {
       setLoading(true);
       try {
-        const data = await api.get<{ items: Guide[]; pages: number; total: number }>('/api/v1/guides', {
+        const data = await api.get<{ items: Guide[]; pages: number; total: number }>('/api/guides', {
           page: currentPage,
           per_page: 12,
           search: search || undefined,

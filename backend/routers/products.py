@@ -8,7 +8,7 @@ from models.product import Product, ProductInventory
 from models.event import EventProduct
 from utils.helpers import serialize_product
 
-router = APIRouter(prefix="/api/v1/products", tags=["Products"])
+router = APIRouter(prefix="/api/products", tags=["Products"])
 
 
 @router.get("/")

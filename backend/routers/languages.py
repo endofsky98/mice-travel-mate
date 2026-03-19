@@ -5,7 +5,7 @@ from sqlalchemy import select
 from database import get_db
 from models.language import Language, UITranslation
 
-router = APIRouter(prefix="/api/v1/languages", tags=["Languages"])
+router = APIRouter(prefix="/api/languages", tags=["Languages"])
 
 
 @router.get("/")

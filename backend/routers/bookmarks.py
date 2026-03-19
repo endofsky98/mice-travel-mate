@@ -8,7 +8,7 @@ from models.user import User, Bookmark
 from schemas.user import BookmarkCreate, BookmarkResponse
 from auth.dependencies import get_current_user
 
-router = APIRouter(prefix="/api/v1/bookmarks", tags=["Bookmarks"])
+router = APIRouter(prefix="/api/bookmarks", tags=["Bookmarks"])
 
 VALID_TARGET_TYPES = ["restaurant", "course", "product", "guide"]
 

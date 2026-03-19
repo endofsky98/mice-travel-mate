@@ -28,7 +28,7 @@ export default function CoursesPage() {
     const fetchCourses = async () => {
       setLoading(true);
       try {
-        const data = await api.get<{ items: Course[]; pages: number; total: number }>('/api/v1/courses', {
+        const data = await api.get<{ items: Course[]; pages: number; total: number }>('/api/courses', {
           page: currentPage,
           per_page: 12,
           search: search || undefined,

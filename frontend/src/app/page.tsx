@@ -84,7 +84,7 @@ export default function HomePage() {
         // If event slug, fetch event data
         if (eventSlug) {
           try {
-            const eventData = await api.get<Event>(`/api/v1/events/${eventSlug}`);
+            const eventData = await api.get<Event>(`/api/events/${eventSlug}`);
             setSelectedEvent(eventData);
           } catch {
             setSelectedEvent(null);
@@ -93,15 +93,15 @@ export default function HomePage() {
 
         // Fetch all section data in parallel
         const [restData, courseData, prodData, guideData, festData] = await Promise.all([
-          api.get<{ items: Restaurant[] }>('/api/v1/restaurants', {
+          api.get<{ items: Restaurant[] }>('/api/restaurants', {
             per_page: 10,
             lat: userLat,
             lng: userLng,
             lang: language,
           }).catch(() => ({ items: [] })),
-          api.get<{ items: Course[] }>('/api/v1/courses', { per_page: 10, lang: language }).catch(() => ({ items: [] })),
-          api.get<{ items: Product[] }>('/api/v1/products', { per_page: 10, lang: language }).catch(() => ({ items: [] })),
-          api.get<{ items: Guide[] }>('/api/v1/guides', { per_page: 10, lang: language }).catch(() => ({ items: [] })),
+          api.get<{ items: Course[] }>('/api/courses', { per_page: 10, lang: language }).catch(() => ({ items: [] })),
+          api.get<{ items: Product[] }>('/api/products', { per_page: 10, lang: language }).catch(() => ({ items: [] })),
+          api.get<{ items: Guide[] }>('/api/guides', { per_page: 10, lang: language }).catch(() => ({ items: [] })),
           api.get<{ items: Festival[] }>('/api/festivals', { per_page: 6, lang: language }).catch(() => ({ items: [] })),
         ]);
 

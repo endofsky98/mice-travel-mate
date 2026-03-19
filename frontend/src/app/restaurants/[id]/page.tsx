@@ -30,7 +30,7 @@ export default function RestaurantDetailPage() {
     const fetchRestaurant = async () => {
       setLoading(true);
       try {
-        const data = await api.get<Restaurant>(`/api/v1/restaurants/${id}`);
+        const data = await api.get<Restaurant>(`/api/restaurants/${id}`);
         setRestaurant(data);
       } catch {
         setRestaurant(null);

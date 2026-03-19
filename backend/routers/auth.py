@@ -27,7 +27,7 @@ from auth.dependencies import get_current_user
 from auth.social import verify_google_token, verify_apple_token
 from utils.email import send_password_reset_email
 
-router = APIRouter(prefix="/api/v1/auth", tags=["Auth"])
+router = APIRouter(prefix="/api/auth", tags=["Auth"])
 
 
 def hash_password(password: str) -> str:

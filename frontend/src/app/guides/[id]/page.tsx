@@ -32,7 +32,7 @@ export default function GuideDetailPage() {
     const fetchGuide = async () => {
       setLoading(true);
       try {
-        const data = await api.get<Guide>(`/api/v1/guides/${id}`);
+        const data = await api.get<Guide>(`/api/guides/${id}`);
         setGuide(data);
       } catch {
         setGuide(null);

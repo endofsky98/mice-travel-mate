@@ -48,7 +48,7 @@ export default function MapView({ center, zoom, markers = [], polyline, classNam
 
       // Fetch from public API
       try {
-        const settings = await api.get<MapSettings>('/api/v1/map-settings');
+        const settings = await api.get<MapSettings>('/api/map-settings');
         if (settings.mapbox_api_key && settings.mapbox_api_key !== 'pk.placeholder') {
           setMapboxToken(settings.mapbox_api_key);
         }

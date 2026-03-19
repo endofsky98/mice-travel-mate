@@ -8,7 +8,7 @@ from models.course import Course, CourseSpot, CourseSpotTransition
 from models.event import EventCourse
 from utils.helpers import serialize_course, serialize_course_spot, serialize_course_spot_transition
 
-router = APIRouter(prefix="/api/v1/courses", tags=["Courses"])
+router = APIRouter(prefix="/api/courses", tags=["Courses"])
 
 
 @router.get("/")

@@ -28,7 +28,7 @@ export function isAuthenticated(): boolean {
 }
 
 export async function login(email: string, password: string): Promise<AuthTokens> {
-  const tokens = await api.post<AuthTokens>('/api/v1/auth/login', { email, password });
+  const tokens = await api.post<AuthTokens>('/api/auth/login', { email, password });
   setTokens(tokens);
   return tokens;
 }
@@ -39,14 +39,14 @@ export async function register(data: {
   password: string;
   nationality?: string;
 }): Promise<AuthTokens> {
-  const tokens = await api.post<AuthTokens>('/api/v1/auth/register', data);
+  const tokens = await api.post<AuthTokens>('/api/auth/register', data);
   setTokens(tokens);
   return tokens;
 }
 
 export async function logout(): Promise<void> {
   try {
-    await api.post('/api/v1/auth/logout');
+    await api.post('/api/auth/logout');
   } catch {
     // Ignore error on logout
   }
@@ -57,18 +57,18 @@ export async function getCurrentUser(): Promise<User | null> {
   try {
     const token = getAccessToken();
     if (!token) return null;
-    return await api.get<User>('/api/v1/auth/me');
+    return await api.get<User>('/api/auth/me');
   } catch {
     return null;
   }
 }
 
 export async function forgotPassword(email: string): Promise<void> {
-  await api.post('/api/v1/auth/forgot-password', { email });
+  await api.post('/api/auth/forgot-password', { email });
 }
 
 export async function adminLogin(email: string, password: string): Promise<AuthTokens> {
-  const tokens = await api.post<AuthTokens>('/api/v1/auth/admin/login', { email, password });
+  const tokens = await api.post<AuthTokens>('/api/auth/admin/login', { email, password });
   setTokens(tokens);
   return tokens;
 }

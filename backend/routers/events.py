@@ -11,7 +11,7 @@ from models.product import Product
 from models.guide import Guide
 from utils.helpers import serialize_event, serialize_restaurant, serialize_course, serialize_product, serialize_guide
 
-router = APIRouter(prefix="/api/v1/events", tags=["Events"])
+router = APIRouter(prefix="/api/events", tags=["Events"])
 
 
 @router.get("/")
