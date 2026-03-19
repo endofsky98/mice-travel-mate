@@ -79,11 +79,12 @@ export default function RollingBanner({ banners, lt, interval = 4000 }: RollingB
   };
 
   const handleMouseLeave = (e: React.MouseEvent) => {
-    if (!isDragging.current) return;
-    isDragging.current = false;
-    const diff = mouseStartX.current - e.clientX;
-    if (Math.abs(diff) > 50) {
-      diff > 0 ? goNext() : goPrev();
+    if (isDragging.current) {
+      isDragging.current = false;
+      const diff = mouseStartX.current - e.clientX;
+      if (Math.abs(diff) > 50) {
+        diff > 0 ? goNext() : goPrev();
+      }
     }
     setTimeout(() => setIsAutoPlaying(true), 5000);
   };
@@ -262,9 +263,8 @@ export default function RollingBanner({ banners, lt, interval = 4000 }: RollingB
       onTouchEnd={handleTouchEnd}
       onMouseDown={handleMouseDown}
       onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseLeave}
       onMouseEnter={() => setIsAutoPlaying(false)}
-      onMouseLeave={() => setIsAutoPlaying(true)}
+      onMouseLeave={handleMouseLeave}
     >
       {renderSlideTransition()}
 
