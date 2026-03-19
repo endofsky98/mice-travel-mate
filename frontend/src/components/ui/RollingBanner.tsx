@@ -229,7 +229,7 @@ export default function RollingBanner({ banners, lt, interval = 4000 }: RollingB
 
   return (
     <div
-      className="relative w-full h-[280px] md:h-[400px] overflow-hidden"
+      className="relative w-full h-[280px] md:h-[480px] lg:h-[560px] overflow-hidden"
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
       onMouseEnter={() => setIsAutoPlaying(false)}
