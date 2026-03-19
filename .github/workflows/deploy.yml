@@ -25,7 +25,7 @@ jobs:
       - name: Build Next.js standalone
         working-directory: frontend
         env:
-          NEXT_PUBLIC_API_URL: http://3.36.108.114:8007
+          NEXT_PUBLIC_API_URL: https://exporoute-api.app.endofsky.com
         run: npm run build
 
       - name: Copy static & public into standalone
