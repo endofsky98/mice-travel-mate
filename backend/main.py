@@ -1609,6 +1609,9 @@ app = FastAPI(
     version=settings.APP_VERSION,
     description="A curated travel platform for foreign MICE exhibition visitors",
     lifespan=lifespan,
+    docs_url=None,
+    redoc_url=None,
+    openapi_url=None,
 )
 
 # CORS - Allow all origins for development
