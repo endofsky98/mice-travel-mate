@@ -90,7 +90,7 @@ export default function MapPage() {
         setGpsStatus('denied');
         setMapCenter(SAMSUNG_STATION);
       },
-      { enableHighAccuracy: true, timeout: 5000 }
+      { enableHighAccuracy: false, timeout: 15000, maximumAge: 60000 }
     );
   }, []);
 
@@ -355,7 +355,7 @@ export default function MapPage() {
           mapRef.current.flyTo({ center: [seoulCenter.lng, seoulCenter.lat], zoom: DEFAULT_ZOOM, duration: 800 });
         }
       },
-      { enableHighAccuracy: true, timeout: 5000 }
+      { enableHighAccuracy: false, timeout: 15000, maximumAge: 60000 }
     );
   };
 
