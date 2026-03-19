@@ -353,15 +353,23 @@ export default function MapPage() {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        console.log('[GPS] got position:', loc);
         setUserLocation(loc);
         setGpsStatus('granted');
-        if (mapRef.current) {
-          // 줌은 현재 상태 유지, 위치만 이동
-          const currentZoom = mapRef.current.getZoom();
-          mapRef.current.flyTo({ center: [loc.lng, loc.lat], zoom: currentZoom, duration: 800 });
-        }
+        // mapRef가 준비됐으면 즉시 이동, 아니면 잠시 후 재시도
+        const flyToLoc = () => {
+          if (mapRef.current) {
+            const currentZoom = mapRef.current.getZoom();
+            mapRef.current.flyTo({ center: [loc.lng, loc.lat], zoom: currentZoom, duration: 800 });
+          } else {
+            console.warn('[GPS] mapRef not ready, retrying...');
+            setTimeout(flyToLoc, 500);
+          }
+        };
+        flyToLoc();
       },
-      () => {
+      (err) => {
+        console.warn('[GPS] error:', err.code, err.message);
         setGpsStatus('denied');
       },
       { enableHighAccuracy: false, timeout: 15000, maximumAge: 60000 }
@@ -456,7 +464,7 @@ export default function MapPage() {
       {/* B2: My Location Button - positioned above GNB */}
       <button
         onClick={handleMyLocation}
-        className="absolute bottom-[88px] md:bottom-8 right-4 w-12 h-12 bg-white dark:bg-[#1e1e1e] rounded-full shadow-lg flex items-center justify-center text-indigo-600 dark:text-indigo-400 z-20 hover:bg-gray-50 dark:hover:bg-[#2a2a2a] transition-colors active:scale-95"
+        className="absolute bottom-[140px] md:bottom-8 right-4 w-12 h-12 bg-white dark:bg-[#1e1e1e] rounded-full shadow-lg flex items-center justify-center text-indigo-600 dark:text-indigo-400 z-20 hover:bg-gray-50 dark:hover:bg-[#2a2a2a] transition-colors active:scale-95"
         title={t('map.my_location') || 'My Location'}
       >
         <Navigation className="w-5 h-5" />

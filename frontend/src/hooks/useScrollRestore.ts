@@ -1,46 +1,54 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 
-/**
- * 페이지 이탈 시 스크롤 위치 저장, 복귀 시 복원.
- * 사용: useScrollRestore() — 복원 대상 페이지에 추가.
- */
 export function useScrollRestore() {
   const pathname = usePathname();
   const scrollKey = `scroll:${pathname}`;
-  const savedRef = useRef(false);
 
-  // 복원: 페이지 마운트 후 저장된 위치로 이동
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    // history.state에 스크롤 위치가 있으면 복원 (뒤로가기 감지)
+    // 복원
     const saved = sessionStorage.getItem(scrollKey);
     if (saved) {
-      const { y, x } = JSON.parse(saved);
-      // 데이터 로드 후 복원되도록 약간 지연
-      requestAnimationFrame(() => {
-        setTimeout(() => {
-          window.scrollTo({ top: y, left: x, behavior: 'instant' as ScrollBehavior });
-        }, 100);
-      });
+      const { y, horizontals } = JSON.parse(saved);
+      setTimeout(() => {
+        window.scrollTo({ top: y, behavior: 'instant' as ScrollBehavior });
+        // 가로 스크롤 복원
+        if (horizontals) {
+          Object.entries(horizontals).forEach(([idx, left]) => {
+            const els = document.querySelectorAll('.overflow-x-auto');
+            const el = els[Number(idx)] as HTMLElement;
+            if (el) el.scrollLeft = left as number;
+          });
+        }
+      }, 150);
     }
-    savedRef.current = false;
 
     // 이탈 시 저장
     const saveScroll = () => {
-      if (!savedRef.current) {
-        sessionStorage.setItem(scrollKey, JSON.stringify({ y: window.scrollY, x: window.scrollX }));
-        savedRef.current = true;
-      }
+      const horizontals: Record<number, number> = {};
+      document.querySelectorAll('.overflow-x-auto').forEach((el, i) => {
+        if ((el as HTMLElement).scrollLeft > 0) {
+          horizontals[i] = (el as HTMLElement).scrollLeft;
+        }
+      });
+      sessionStorage.setItem(scrollKey, JSON.stringify({
+        y: window.scrollY,
+        horizontals,
+      }));
     };
 
     window.addEventListener('beforeunload', saveScroll);
+    // Next.js Link 클릭 시 beforeunload 안 뜨므로 pagehide도 등록
+    window.addEventListener('pagehide', saveScroll);
+
     return () => {
       saveScroll();
       window.removeEventListener('beforeunload', saveScroll);
+      window.removeEventListener('pagehide', saveScroll);
     };
   }, [scrollKey]);
 }
