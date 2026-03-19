@@ -57,7 +57,7 @@ def get_products():
             "cancellation_policy_ja": cancel, "cancellation_policy_es": cancel,
             "cancellation_policy_th": cancel, "cancellation_policy_vi": cancel,
             "cancellation_policy_fr": cancel,
-            "images": [f"/images/placeholder/product_{len(products)+1}_{j}.jpg" for j in range(3)],
+            "images": [(['https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=600', 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=600', 'https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=600', 'https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=600', 'https://images.unsplash.com/photo-1544816155-12df9643f363?w=600'])[len(products) % 5]],
             "avg_rating": rating,
             "review_count": reviews,
             "status": "active",

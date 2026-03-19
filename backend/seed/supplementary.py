@@ -11,7 +11,7 @@ def get_banners():
     return [
         {
             "id": _id(), "display_order": 0, "is_active": True, "event_id": None, "rolling_interval": 4,
-            "image_url": "/images/placeholder/banner_1.jpg", "link_url": "/courses",
+            "image_url": "https://images.unsplash.com/photo-1540575467063-178a50c6da87?w=1200", "link_url": "/courses",
             "title_en": "Seoul After Dark", "title_ko": "어둠 속의 서울",
             "title_zh_cn": "首尔夜色", "title_zh_tw": "首爾夜色",
             "title_ja": "夜のソウル", "title_es": "Seúl de Noche",
@@ -28,7 +28,7 @@ def get_banners():
         },
         {
             "id": _id(), "display_order": 1, "is_active": True, "event_id": None, "rolling_interval": 4,
-            "image_url": "/images/placeholder/banner_2.jpg", "link_url": "/restaurants",
+            "image_url": "https://images.unsplash.com/photo-1511578314322-379afb476865?w=1200", "link_url": "/restaurants",
             "title_en": "Taste the Real Korea", "title_ko": "진짜 한국을 맛보세요",
             "title_zh_cn": "品味真正的韩国", "title_zh_tw": "品味真正的韓國",
             "title_ja": "本物の韓国を味わう", "title_es": "Saborea la Verdadera Corea",
@@ -45,7 +45,7 @@ def get_banners():
         },
         {
             "id": _id(), "display_order": 2, "is_active": True, "event_id": None, "rolling_interval": 4,
-            "image_url": "/images/placeholder/banner_3.jpg", "link_url": "/courses",
+            "image_url": "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=1200", "link_url": "/courses",
             "title_en": "Temples & Traditions", "title_ko": "사찰과 전통",
             "title_zh_cn": "寺庙与传统", "title_zh_tw": "寺廟與傳統",
             "title_ja": "寺院と伝統", "title_es": "Templos y Tradiciones",
@@ -61,7 +61,7 @@ def get_banners():
         },
         {
             "id": _id(), "display_order": 3, "is_active": True, "event_id": None, "rolling_interval": 4,
-            "image_url": "/images/placeholder/banner_4.jpg", "link_url": "/products",
+            "image_url": "https://images.unsplash.com/photo-1517154421773-0529f29ea451?w=1200", "link_url": "/products",
             "title_en": "K-Culture is Calling", "title_ko": "K-컬처가 부른다",
             "title_zh_cn": "K文化在召唤", "title_zh_tw": "K文化在召喚",
             "title_ja": "Kカルチャーが呼んでいる", "title_es": "La K-Cultura te Llama",
@@ -78,7 +78,7 @@ def get_banners():
         },
         {
             "id": _id(), "display_order": 4, "is_active": True, "event_id": None, "rolling_interval": 4,
-            "image_url": "/images/placeholder/banner_5.jpg", "link_url": "/themes",
+            "image_url": "https://images.unsplash.com/photo-1538485399081-7191377e8241?w=1200", "link_url": "/themes",
             "title_en": "Nature Escapes Near the City", "title_ko": "도시 근처 자연 탈출",
             "title_zh_cn": "城市附近的自然逃逸", "title_zh_tw": "城市附近的自然逃逸",
             "title_ja": "都会の近くの自然の逃避", "title_es": "Escapadas Naturales Cerca de la Ciudad",
@@ -119,7 +119,7 @@ def get_events():
             "venue_name": "COEX Convention Center", "venue_address": "513 Yeongdong-daero, Gangnam-gu, Seoul",
             "latitude": 37.5126, "longitude": 127.0590,
             "start_date": date(2026, 4, 15), "end_date": date(2026, 4, 18),
-            "banner_image_url": "/images/placeholder/event_coex.jpg", "is_active": True,
+            "banner_image_url": "https://images.unsplash.com/photo-1540575467063-178a50c6da87?w=1200", "is_active": True,
         },
         {
             "id": _id(), "slug": "bexco-tech-summit-2026",
@@ -136,7 +136,7 @@ def get_events():
             "venue_name": "BEXCO", "venue_address": "55 APEC-ro, Haeundae-gu, Busan",
             "latitude": 35.1695, "longitude": 129.1362,
             "start_date": date(2026, 5, 20), "end_date": date(2026, 5, 23),
-            "banner_image_url": "/images/placeholder/event_bexco.jpg", "is_active": True,
+            "banner_image_url": "https://images.unsplash.com/photo-1511578314322-379afb476865?w=1200", "is_active": True,
         },
         {
             "id": _id(), "slug": "kintex-global-fair-2026",
@@ -153,7 +153,7 @@ def get_events():
             "venue_name": "KINTEX", "venue_address": "217-60 Kintex-ro, Ilsanseo-gu, Goyang-si, Gyeonggi-do",
             "latitude": 37.6695, "longitude": 126.7463,
             "start_date": date(2026, 6, 10), "end_date": date(2026, 6, 13),
-            "banner_image_url": "/images/placeholder/event_kintex.jpg", "is_active": True,
+            "banner_image_url": "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=1200", "is_active": True,
         },
     ]
 
@@ -289,8 +289,8 @@ def get_festivals():
             "description_zh_cn": desc_en, "description_zh_tw": desc_en,
             "description_ja": desc_en, "description_es": desc_en,
             "description_th": desc_en, "description_vi": desc_en, "description_fr": desc_en,
-            "category": cat, "image_url": f"/images/placeholder/festival_{len(result)+1}.jpg",
-            "images": [f"/images/placeholder/festival_{len(result)+1}_{j}.jpg" for j in range(3)],
+            "category": cat, "image_url": (['https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=600', 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=600', 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=600', 'https://images.unsplash.com/photo-1504196606672-aef5c9cefc92?w=600', 'https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=600'])[len(result) % 5],
+            "images": [(['https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=600', 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=600', 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=600', 'https://images.unsplash.com/photo-1504196606672-aef5c9cefc92?w=600', 'https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=600'])[len(result) % 5]],
             "venue_name": venue, "address": addr,
             "latitude": lat, "longitude": lng,
             "start_date": date.fromisoformat(sd), "end_date": date.fromisoformat(ed),
@@ -474,7 +474,7 @@ def get_living_guide_articles():
                 "content_zh_cn": content_en, "content_zh_tw": content_en,
                 "content_ja": content_en, "content_es": content_en,
                 "content_th": content_en, "content_vi": content_en, "content_fr": content_en,
-                "image_url": f"/images/placeholder/guide_article_{len(result)+1}.jpg",
+                "image_url": "https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=600",
                 "display_order": len(result) % 3, "is_active": True,
             })
     return result

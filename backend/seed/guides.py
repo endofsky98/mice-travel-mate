@@ -25,7 +25,7 @@ def get_guides():
             "bio_th": (bios_extra or {}).get("th", bio_en),
             "bio_vi": (bios_extra or {}).get("vi", bio_en),
             "bio_fr": (bios_extra or {}).get("fr", bio_en),
-            "profile_image_url": f"/images/placeholder/guide_{len(guides)+1}.jpg",
+            "profile_image_url": (['https://images.unsplash.com/photo-1580489944761-15a19d654956?w=600', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600', 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=600', 'https://images.unsplash.com/photo-1542190891-2093d38760f2?w=600', 'https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?w=600'])[len(guides) % 5],
             "languages": langs,
             "specialties": specialties,
             "regions": regions,

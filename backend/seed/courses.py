@@ -31,7 +31,7 @@ def get_courses():
             "description_fr": (descs_extra or {}).get("fr", desc_en),
             "latitude": lat, "longitude": lng,
             "stay_duration_minutes": stay,
-            "image_url": f"/images/placeholder/spot_{order}.jpg",
+            "image_url": (['https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=600', 'https://images.unsplash.com/photo-1578637387939-43c525550085?w=600', 'https://images.unsplash.com/photo-1583417319070-4a69db38a482?w=600', 'https://images.unsplash.com/photo-1538485399081-7191377e8241?w=600', 'https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?w=600', 'https://images.unsplash.com/photo-1556660738-94df5ce05ef4?w=600', 'https://images.unsplash.com/photo-1568454537842-d933259bb258?w=600', 'https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?w=600'])[order % 8],
             "restaurant_id": None,
         }
         spots.append(s)
@@ -69,7 +69,7 @@ def get_courses():
             "difficulty": diff, "total_duration_minutes": total_min,
             "total_distance_km": total_km, "estimated_transport_cost": cost,
             "avg_rating": rating, "review_count": reviews,
-            "image_url": f"/images/placeholder/course_{len(courses)+1}.jpg",
+            "image_url": (['https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=600', 'https://images.unsplash.com/photo-1578637387939-43c525550085?w=600', 'https://images.unsplash.com/photo-1583417319070-4a69db38a482?w=600', 'https://images.unsplash.com/photo-1538485399081-7191377e8241?w=600', 'https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?w=600', 'https://images.unsplash.com/photo-1556660738-94df5ce05ef4?w=600', 'https://images.unsplash.com/photo-1568454537842-d933259bb258?w=600', 'https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?w=600'])[len(courses) % 8],
             "is_active": True,
         })
         return cid
