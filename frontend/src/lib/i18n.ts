@@ -23,6 +23,8 @@ export function getStoredLanguage(): Language {
 export function setStoredLanguage(lang: Language): void {
   if (typeof window === 'undefined') return;
   localStorage.setItem('language', lang);
+  // broadcast to all useLanguage instances in same tab
+  window.dispatchEvent(new StorageEvent('storage', { key: 'language', newValue: lang }));
 }
 
 export async function loadTranslations(lang: Language): Promise<Translations> {

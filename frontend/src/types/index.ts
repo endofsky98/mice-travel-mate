@@ -313,16 +313,16 @@ export interface Translations {
 
 export type Language = 'en' | 'ko' | 'ja' | 'zh-CN' | 'zh-TW' | 'es' | 'th' | 'vi' | 'fr';
 
-export const SUPPORTED_LANGUAGES: { code: Language; name: string; flag: string }[] = [
-  { code: 'en', name: 'English', flag: '🇺🇸' },
-  { code: 'ko', name: '한국어', flag: '🇰🇷' },
-  { code: 'ja', name: '日本語', flag: '🇯🇵' },
-  { code: 'zh-CN', name: '简体中文', flag: '🇨🇳' },
-  { code: 'zh-TW', name: '繁體中文', flag: '🇹🇼' },
-  { code: 'es', name: 'Español', flag: '🇪🇸' },
-  { code: 'th', name: 'ไทย', flag: '🇹🇭' },
-  { code: 'vi', name: 'Tiếng Việt', flag: '🇻🇳' },
-  { code: 'fr', name: 'Français', flag: '🇫🇷' },
+export const SUPPORTED_LANGUAGES: { code: Language; name: string; short: string; flag: string }[] = [
+  { code: 'en', name: 'English', short: 'ENG', flag: '🇺🇸' },
+  { code: 'ko', name: '한국어', short: '한국어', flag: '🇰🇷' },
+  { code: 'ja', name: '日本語', short: '日本語', flag: '🇯🇵' },
+  { code: 'zh-CN', name: '简体中文', short: '简中', flag: '🇨🇳' },
+  { code: 'zh-TW', name: '繁體中文', short: '繁中', flag: '🇹🇼' },
+  { code: 'es', name: 'Español', short: 'ESP', flag: '🇪🇸' },
+  { code: 'th', name: 'ไทย', short: 'ไทย', flag: '🇹🇭' },
+  { code: 'vi', name: 'Tiếng Việt', short: 'VIE', flag: '🇻🇳' },
+  { code: 'fr', name: 'Français', short: 'FRA', flag: '🇫🇷' },
 ];
 
 // --- New types for v4 features ---

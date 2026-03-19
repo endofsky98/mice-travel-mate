@@ -39,7 +39,7 @@ export default function LanguageSwitcher({ currentLanguage, onLanguageChange, co
         )}
       >
         <Globe className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-        <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{currentLang.name}</span>
+        <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{currentLang.short}</span>
         <ChevronDown className={cn('w-3 h-3 text-gray-400 transition-transform', isOpen && 'rotate-180')} />
       </button>
 

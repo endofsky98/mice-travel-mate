@@ -33,6 +33,18 @@ export function useLanguage() {
     };
 
     initLanguage();
+
+    // 언어 변경 브로드캐스트 수신 (같은 탭 내 모든 useLanguage 인스턴스 동기화)
+    const handleStorageChange = async (e: StorageEvent) => {
+      if (e.key === 'language' && e.newValue && VALID_LANGUAGES.includes(e.newValue as Language)) {
+        const lang = e.newValue as Language;
+        setLanguageState(lang);
+        const t = await loadTranslations(lang);
+        setTranslations(t);
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   const setLanguage = useCallback(async (lang: Language) => {
