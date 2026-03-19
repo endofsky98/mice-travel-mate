@@ -80,7 +80,7 @@ export default function AdminTransportPage() {
     setSaving(false);
   };
 
-  const handleDelete = async (type: string, id: number) => {
+  const handleDelete = async (type: string, id: number | string) => {
     if (!confirm('정말 삭제하시겠습니까?')) return;
     try {
       await api.delete(`/api/admin/transport/${type}/${id}`);
