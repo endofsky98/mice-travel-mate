@@ -1,19 +1,19 @@
-<svg width="260" height="48" viewBox="0 0 260 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg width="220" height="48" viewBox="0 0 220 48" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="iconBgW" x1="2" y1="2" x2="46" y2="46" gradientUnits="userSpaceOnUse">
-      <stop stop-color="white" stop-opacity="0.3"/>
-      <stop offset="1" stop-color="white" stop-opacity="0.18"/>
+      <stop stop-color="#818cf8"/>
+      <stop offset="1" stop-color="#a5b4fc"/>
     </linearGradient>
   </defs>
   <!-- Icon background -->
-  <rect x="2" y="2" width="44" height="44" rx="12" fill="url(#iconBgW)" stroke="white" stroke-opacity="0.3" stroke-width="1.2"/>
+  <rect x="2" y="2" width="44" height="44" rx="12" fill="url(#iconBgW)"/>
   <!-- Globe circle -->
-  <circle cx="24" cy="24" r="14" stroke="white" stroke-width="1.8" fill="none" opacity="0.5"/>
+  <circle cx="24" cy="24" r="14" stroke="white" stroke-width="1.8" fill="none" opacity="0.45"/>
   <!-- Meridian -->
-  <ellipse cx="24" cy="24" rx="8" ry="14" stroke="white" stroke-width="1.2" fill="none" opacity="0.38"/>
+  <ellipse cx="24" cy="24" rx="8" ry="14" stroke="white" stroke-width="1.2" fill="none" opacity="0.35"/>
   <!-- Parallels -->
-  <line x1="10" y1="18" x2="38" y2="18" stroke="white" stroke-width="1" opacity="0.32"/>
-  <line x1="10" y1="30" x2="38" y2="30" stroke="white" stroke-width="1" opacity="0.32"/>
+  <line x1="10" y1="18" x2="38" y2="18" stroke="white" stroke-width="1" opacity="0.3"/>
+  <line x1="10" y1="30" x2="38" y2="30" stroke="white" stroke-width="1" opacity="0.3"/>
   <!-- Location pin -->
   <path d="M24 9c-4.8 0-8.5 3.7-8.5 8.5C15.5 26 24 34 24 34s8.5-8 8.5-16.5C32.5 12.7 28.8 9 24 9z" fill="white" fill-opacity="0.97"/>
   <circle cx="24" cy="17.5" r="3.5" fill="#818cf8"/>
@@ -21,8 +21,8 @@
   <g transform="translate(36, 7) rotate(-30)">
     <path d="M0-3.5 2.5-0.5 7 0.8 2.5 2.8 0 6.5-2.5 2.8-7 0.8-2.5-0.5z" fill="white" opacity="0.85"/>
   </g>
-  <!-- Text: Exporum -->
-  <text x="56" y="32" font-family="Inter,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif" font-size="22" font-weight="800" fill="white" letter-spacing="-0.03em">Exporum</text>
-  <!-- Text: Travel Mate -->
-  <text x="155" y="32" font-family="Inter,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif" font-size="22" font-weight="500" fill="white" fill-opacity="0.85" letter-spacing="-0.01em">Travel Mate</text>
+  <!-- Text: exporum (작게, 위) -->
+  <text x="56" y="22" font-family="Inter,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif" font-size="13" font-weight="600" fill="rgba(255,255,255,0.6)" letter-spacing="0.04em">exporum</text>
+  <!-- Text: Travel Mate (크게, 아래) -->
+  <text x="56" y="41" font-family="Inter,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif" font-size="18" font-weight="700" fill="white" letter-spacing="-0.01em">Travel Mate</text>
 </svg>
