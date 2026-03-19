@@ -11,7 +11,7 @@ def get_banners():
     return [
         {
             "id": _id(), "display_order": 0, "is_active": True, "event_id": None, "rolling_interval": 4,
-            "image_url": "https://images.unsplash.com/photo-1540575467063-178a50c6da87?w=1200", "link_url": "/courses",
+            "image_url": "https://images.unsplash.com/photo-1511578314322-379afb476865?w=1200", "link_url": "/courses",
             "title_en": "Seoul After Dark", "title_ko": "어둠 속의 서울",
             "title_zh_cn": "首尔夜色", "title_zh_tw": "首爾夜色",
             "title_ja": "夜のソウル", "title_es": "Seúl de Noche",
@@ -119,7 +119,7 @@ def get_events():
             "venue_name": "COEX Convention Center", "venue_address": "513 Yeongdong-daero, Gangnam-gu, Seoul",
             "latitude": 37.5126, "longitude": 127.0590,
             "start_date": date(2026, 4, 15), "end_date": date(2026, 4, 18),
-            "banner_image_url": "https://images.unsplash.com/photo-1540575467063-178a50c6da87?w=1200", "is_active": True,
+            "banner_image_url": "https://images.unsplash.com/photo-1511578314322-379afb476865?w=1200", "is_active": True,
         },
         {
             "id": _id(), "slug": "bexco-tech-summit-2026",
