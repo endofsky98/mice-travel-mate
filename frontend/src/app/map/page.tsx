@@ -417,7 +417,7 @@ export default function MapPage() {
 
         {/* B3: Bottom items list with generous padding to avoid GNB overlap */}
         {displayItems.length > 0 && (
-          <div className="absolute bottom-0 left-0 right-0 z-10 pb-24 md:pb-4 px-3 pt-2" ref={listContainerRef}>
+          <div className="absolute bottom-0 left-0 right-0 z-10 pb-20 md:pb-4 px-3 pt-2" ref={listContainerRef}>
             <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2">
               {displayItems.slice(0, 15).map((item) => (
                 <button
@@ -456,7 +456,7 @@ export default function MapPage() {
       {/* B2: My Location Button - positioned above GNB */}
       <button
         onClick={handleMyLocation}
-        className="absolute bottom-28 md:bottom-8 right-4 w-12 h-12 bg-white dark:bg-[#1e1e1e] rounded-full shadow-lg flex items-center justify-center text-indigo-600 dark:text-indigo-400 z-20 hover:bg-gray-50 dark:hover:bg-[#2a2a2a] transition-colors active:scale-95"
+        className="absolute bottom-[88px] md:bottom-8 right-4 w-12 h-12 bg-white dark:bg-[#1e1e1e] rounded-full shadow-lg flex items-center justify-center text-indigo-600 dark:text-indigo-400 z-20 hover:bg-gray-50 dark:hover:bg-[#2a2a2a] transition-colors active:scale-95"
         title={t('map.my_location') || 'My Location'}
       >
         <Navigation className="w-5 h-5" />
