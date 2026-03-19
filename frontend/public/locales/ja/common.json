@@ -66,7 +66,8 @@
     "photos": "写真",
     "open_maps": "地図を開く",
     "open_in_google_maps": "Google Mapsで開く",
-    "open_in_naver_map": "Naver Mapで開く"
+    "open_in_naver_map": "Naver Mapで開く",
+    "view_detail": "詳細を見る"
   },
   "home": {
     "hero_title": "完璧な旅の相棒",
@@ -91,7 +92,9 @@
     "explore_courses": "コースを探す",
     "explore_products": "商品を探す",
     "explore_guides": "ガイドを探す",
-    "view_transport": "交通ガイド"
+    "view_transport": "交通ガイド",
+    "current_location": "現在地",
+    "locating": "位置確認中..."
   },
   "button": {
     "book_now": "予約する",
@@ -259,7 +262,11 @@
     "explore_title": "地図エクスプローラー",
     "search_places": "場所を検索...",
     "filter_category": "フィルター",
-    "nearby": "近く"
+    "nearby": "近く",
+    "gps_not_supported": "このデバイスはGPSに対応していません。",
+    "loading": "地図を読み込み中...",
+    "my_location": "現在地",
+    "places_count": "{count}件"
   },
   "festival": {
     "calendar_view": "カレンダー",
@@ -438,5 +445,10 @@
     "category_product": "商品",
     "category_guide": "ガイド",
     "category_festival": "祭り"
+  },
+  "theme": {
+    "no_spots": "スポットがありません",
+    "select_prompt": "テーマを選択してください",
+    "spots_found": "{count}件のスポット"
   }
 }

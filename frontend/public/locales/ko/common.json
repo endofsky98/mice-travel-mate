@@ -66,7 +66,8 @@
     "photos": "사진",
     "open_maps": "지도 열기",
     "open_in_google_maps": "Google Maps에서 열기",
-    "open_in_naver_map": "네이버 지도에서 열기"
+    "open_in_naver_map": "네이버 지도에서 열기",
+    "view_detail": "자세히 보기"
   },
   "home": {
     "hero_title": "완벽한 여행 동반자",
@@ -91,7 +92,9 @@
     "explore_courses": "코스",
     "explore_products": "상품",
     "explore_guides": "가이드",
-    "view_transport": "교통정보"
+    "view_transport": "교통정보",
+    "current_location": "현재 위치",
+    "locating": "위치 확인 중..."
   },
   "button": {
     "book_now": "예약하기",
@@ -259,7 +262,11 @@
     "explore_title": "지도 탐색",
     "search_places": "장소 검색...",
     "filter_category": "필터",
-    "nearby": "주변"
+    "nearby": "주변",
+    "gps_not_supported": "이 기기에서는 GPS를 지원하지 않습니다.",
+    "loading": "지도 로딩 중...",
+    "my_location": "내 위치",
+    "places_count": "{count}개 장소"
   },
   "festival": {
     "calendar_view": "캘린더",
@@ -438,5 +445,10 @@
     "category_product": "상품",
     "category_guide": "가이드",
     "category_festival": "축제"
+  },
+  "theme": {
+    "no_spots": "스팟이 없습니다",
+    "select_prompt": "테마를 선택하세요",
+    "spots_found": "{count}개 스팟"
   }
 }

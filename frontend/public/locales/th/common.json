@@ -66,7 +66,8 @@
     "photos": "รูปภาพ",
     "open_maps": "เปิดแผนที่",
     "open_in_google_maps": "เปิดใน Google Maps",
-    "open_in_naver_map": "เปิดใน Naver Map"
+    "open_in_naver_map": "เปิดใน Naver Map",
+    "view_detail": "ดูรายละเอียด"
   },
   "home": {
     "hero_title": "เพื่อนร่วมเดินทางที่สมบูรณ์แบบ",
@@ -91,7 +92,9 @@
     "explore_courses": "คอร์ส",
     "explore_products": "สินค้า",
     "explore_guides": "ไกด์",
-    "view_transport": "การเดินทาง"
+    "view_transport": "การเดินทาง",
+    "current_location": "ตำแหน่งปัจจุบัน",
+    "locating": "กำลังระบุตำแหน่ง..."
   },
   "button": {
     "book_now": "จองเลย",
@@ -259,7 +262,11 @@
     "explore_title": "สำรวจแผนที่",
     "search_places": "ค้นหาสถานที่...",
     "filter_category": "กรอง",
-    "nearby": "ใกล้เคียง"
+    "nearby": "ใกล้เคียง",
+    "gps_not_supported": "อุปกรณ์นี้ไม่รองรับ GPS",
+    "loading": "กำลังโหลดแผนที่...",
+    "my_location": "ตำแหน่งของฉัน",
+    "places_count": "{count} สถานที่"
   },
   "festival": {
     "calendar_view": "ปฏิทิน",
@@ -438,5 +445,10 @@
     "category_product": "สินค้า",
     "category_guide": "ไกด์",
     "category_festival": "เทศกาล"
+  },
+  "theme": {
+    "no_spots": "ไม่มีสถานที่",
+    "select_prompt": "เลือกธีม",
+    "spots_found": "พบ {count} สถานที่"
   }
 }

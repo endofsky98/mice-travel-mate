@@ -66,7 +66,8 @@
     "photos": "Photos",
     "open_maps": "Open Maps",
     "open_in_google_maps": "Open in Google Maps",
-    "open_in_naver_map": "Open in Naver Map"
+    "open_in_naver_map": "Open in Naver Map",
+    "view_detail": "View Details"
   },
   "home": {
     "hero_title": "Your Perfect Travel Companion",
@@ -91,7 +92,9 @@
     "explore_courses": "Courses",
     "explore_products": "Products",
     "explore_guides": "Guides",
-    "view_transport": "Transport"
+    "view_transport": "Transport",
+    "current_location": "Current Location",
+    "locating": "Locating..."
   },
   "button": {
     "book_now": "Book Now",
@@ -259,7 +262,11 @@
     "explore_title": "Map Explorer",
     "search_places": "Search places...",
     "filter_category": "Filter",
-    "nearby": "Nearby"
+    "nearby": "Nearby",
+    "gps_not_supported": "GPS is not supported on this device.",
+    "loading": "Loading map...",
+    "my_location": "My Location",
+    "places_count": "{count} places"
   },
   "festival": {
     "calendar_view": "Calendar",
@@ -438,5 +445,10 @@
     "category_product": "Products",
     "category_guide": "Guides",
     "category_festival": "Festivals"
+  },
+  "theme": {
+    "no_spots": "No spots available",
+    "select_prompt": "Select a theme to explore",
+    "spots_found": "{count} spots found"
   }
 }

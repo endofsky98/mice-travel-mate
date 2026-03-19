@@ -66,7 +66,8 @@
     "photos": "照片",
     "open_maps": "打开地图",
     "open_in_google_maps": "在Google Maps中打开",
-    "open_in_naver_map": "在Naver Map中打开"
+    "open_in_naver_map": "在Naver Map中打开",
+    "view_detail": "查看详情"
   },
   "home": {
     "hero_title": "您的完美旅行伴侣",
@@ -91,7 +92,9 @@
     "explore_courses": "探索路线",
     "explore_products": "探索产品",
     "explore_guides": "寻找导游",
-    "view_transport": "交通指南"
+    "view_transport": "交通指南",
+    "current_location": "当前位置",
+    "locating": "定位中..."
   },
   "button": {
     "book_now": "立即预订",
@@ -259,7 +262,11 @@
     "explore_title": "地图探索",
     "search_places": "搜索地点...",
     "filter_category": "筛选",
-    "nearby": "附近"
+    "nearby": "附近",
+    "gps_not_supported": "此设备不支持GPS。",
+    "loading": "地图加载中...",
+    "my_location": "我的位置",
+    "places_count": "{count}个地点"
   },
   "festival": {
     "calendar_view": "日历",
@@ -438,5 +445,10 @@
     "category_product": "产品",
     "category_guide": "导游",
     "category_festival": "节日"
+  },
+  "theme": {
+    "no_spots": "暂无景点",
+    "select_prompt": "请选择主题",
+    "spots_found": "找到{count}个景点"
   }
 }

@@ -66,7 +66,8 @@
     "photos": "Ảnh",
     "open_maps": "Mở bản đồ",
     "open_in_google_maps": "Mở trong Google Maps",
-    "open_in_naver_map": "Mở trong Naver Map"
+    "open_in_naver_map": "Mở trong Naver Map",
+    "view_detail": "Xem chi tiết"
   },
   "home": {
     "hero_title": "Bạn đồng hành du lịch hoàn hảo",
@@ -91,7 +92,9 @@
     "explore_courses": "Lộ trình",
     "explore_products": "Sản phẩm",
     "explore_guides": "Hướng dẫn viên",
-    "view_transport": "Giao thông"
+    "view_transport": "Giao thông",
+    "current_location": "Vị trí hiện tại",
+    "locating": "Đang xác định vị trí..."
   },
   "button": {
     "book_now": "Đặt ngay",
@@ -259,7 +262,11 @@
     "explore_title": "Khám phá bản đồ",
     "search_places": "Tìm kiếm địa điểm...",
     "filter_category": "Lọc",
-    "nearby": "Gần đây"
+    "nearby": "Gần đây",
+    "gps_not_supported": "Thiết bị không hỗ trợ GPS.",
+    "loading": "Đang tải bản đồ...",
+    "my_location": "Vị trí của tôi",
+    "places_count": "{count} địa điểm"
   },
   "festival": {
     "calendar_view": "Lịch",
@@ -438,5 +445,10 @@
     "category_product": "Sản phẩm",
     "category_guide": "Hướng dẫn viên",
     "category_festival": "Lễ hội"
+  },
+  "theme": {
+    "no_spots": "Không có địa điểm",
+    "select_prompt": "Chọn chủ đề",
+    "spots_found": "Tìm thấy {count} địa điểm"
   }
 }

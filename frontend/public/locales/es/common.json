@@ -66,7 +66,8 @@
     "photos": "Fotos",
     "open_maps": "Abrir mapa",
     "open_in_google_maps": "Abrir en Google Maps",
-    "open_in_naver_map": "Abrir en Naver Map"
+    "open_in_naver_map": "Abrir en Naver Map",
+    "view_detail": "Ver detalles"
   },
   "home": {
     "hero_title": "Tu compañero de viaje perfecto",
@@ -91,7 +92,9 @@
     "explore_courses": "Explorar rutas",
     "explore_products": "Explorar productos",
     "explore_guides": "Buscar guías",
-    "view_transport": "Guía de transporte"
+    "view_transport": "Guía de transporte",
+    "current_location": "Ubicación actual",
+    "locating": "Localizando..."
   },
   "button": {
     "book_now": "Reservar ahora",
@@ -259,7 +262,11 @@
     "explore_title": "Explorador de mapas",
     "search_places": "Buscar lugares...",
     "filter_category": "Filtrar",
-    "nearby": "Cercano"
+    "nearby": "Cercano",
+    "gps_not_supported": "GPS no compatible con este dispositivo.",
+    "loading": "Cargando mapa...",
+    "my_location": "Mi ubicación",
+    "places_count": "{count} lugares"
   },
   "festival": {
     "calendar_view": "Calendario",
@@ -438,5 +445,10 @@
     "category_product": "Productos",
     "category_guide": "Guías",
     "category_festival": "Festivales"
+  },
+  "theme": {
+    "no_spots": "Sin lugares disponibles",
+    "select_prompt": "Selecciona un tema",
+    "spots_found": "{count} lugares encontrados"
   }
 }
