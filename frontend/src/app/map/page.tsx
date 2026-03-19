@@ -36,6 +36,7 @@ export default function MapPage() {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
+  const userMarkerRef = useRef<any>(null);
   const popupRef = useRef<any>(null);
   const selectedMarkerRef = useRef<any>(null);
   const listContainerRef = useRef<HTMLDivElement>(null);
@@ -177,13 +178,6 @@ export default function MapPage() {
 
       map.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
-      // Add user location marker
-      if (userLocation) {
-        const userEl = document.createElement('div');
-        userEl.style.cssText = 'width:16px;height:16px;background:#3b82f6;border-radius:50%;border:3px solid white;box-shadow:0 0 0 2px rgba(59,130,246,0.3);';
-        new mapboxgl.Marker(userEl).setLngLat([userLocation.lng, userLocation.lat]).addTo(map);
-      }
-
       // B4: moveend event for viewport-based list filtering (use ref to avoid stale closure)
       map.on('moveend', () => {
         if (mapRef.current) filterByViewportRef.current();
@@ -202,7 +196,25 @@ export default function MapPage() {
       mapRef.current = null;
       setMapReady(false);
     };
-  }, [mapboxToken, gpsStatus, mapCenter.lat, mapCenter.lng, userLocation]);
+  }, [mapboxToken, gpsStatus, mapCenter.lat, mapCenter.lng]);
+
+  // Update user location marker separately (no map reload)
+  useEffect(() => {
+    if (!mapRef.current || !mapReady || !userLocation) return;
+    (async () => {
+      const mapboxgl = (await import('mapbox-gl')).default;
+      // Remove old user marker
+      if (userMarkerRef.current) {
+        userMarkerRef.current.remove();
+        userMarkerRef.current = null;
+      }
+      const userEl = document.createElement('div');
+      userEl.style.cssText = 'width:16px;height:16px;background:#3b82f6;border-radius:50%;border:3px solid white;box-shadow:0 0 0 4px rgba(59,130,246,0.25);';
+      userMarkerRef.current = new mapboxgl.Marker(userEl)
+        .setLngLat([userLocation.lng, userLocation.lat])
+        .addTo(mapRef.current);
+    })();
+  }, [userLocation, mapReady]);
 
   // Update markers when items or mapReady changes
   useEffect(() => {
@@ -344,16 +356,13 @@ export default function MapPage() {
         setUserLocation(loc);
         setGpsStatus('granted');
         if (mapRef.current) {
-          mapRef.current.flyTo({ center: [loc.lng, loc.lat], zoom: DEFAULT_ZOOM, duration: 800 });
+          // 줌은 현재 상태 유지, 위치만 이동
+          const currentZoom = mapRef.current.getZoom();
+          mapRef.current.flyTo({ center: [loc.lng, loc.lat], zoom: currentZoom, duration: 800 });
         }
       },
       () => {
-        // GPS 거부 시 서울 중심(COEX)으로 이동
-        const seoulCenter = { lat: 37.5126, lng: 127.059 };
         setGpsStatus('denied');
-        if (mapRef.current) {
-          mapRef.current.flyTo({ center: [seoulCenter.lng, seoulCenter.lat], zoom: DEFAULT_ZOOM, duration: 800 });
-        }
       },
       { enableHighAccuracy: false, timeout: 15000, maximumAge: 60000 }
     );

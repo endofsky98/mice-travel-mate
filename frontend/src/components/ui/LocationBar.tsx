@@ -40,7 +40,7 @@ export default function LocationBar({ t, language = 'en', onLocationChange, even
     if (!mapboxToken) return t('home.current_location') || 'Current Location';
     try {
       const lang = LANG_MAP[language] || 'en';
-      const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${mapboxToken}&language=${lang}&types=address,neighborhood,place&limit=1`;
+      const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${mapboxToken}&language=${lang}&types=address&limit=1`;
       const res = await fetch(url);
       const data = await res.json();
       if (data.features && data.features.length > 0) {
