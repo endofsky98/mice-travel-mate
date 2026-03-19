@@ -300,7 +300,7 @@ export default function HomePage() {
           <MapView
             center={{ lat: userLat, lng: userLng }}
             zoom={13}
-            markers={restaurants.slice(0, 5).filter(r => (r.lat || r.latitude) && (r.lng || r.longitude)).map(r => ({
+            markers={filteredRestaurants.slice(0, 8).filter(r => (r.lat || r.latitude) && (r.lng || r.longitude)).map(r => ({
               id: r.id,
               lat: r.lat || r.latitude || 0,
               lng: r.lng || r.longitude || 0,
