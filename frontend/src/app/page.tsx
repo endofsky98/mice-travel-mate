@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useScrollRestore } from '@/hooks/useScrollRestore';
+import { useDragScroll } from '@/hooks/useDragScroll';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -48,6 +49,13 @@ export default function HomePage() {
   const { t, lt, language } = useLanguage();
   useScrollRestore();
   const searchParams = useSearchParams();
+
+  // 가로 드래그+자동스크롤 (카드 260px + gap 16px = 276)
+  const restScrollRef = useDragScroll(276, 2, 3000);
+  const courseScrollRef = useDragScroll(276, 2, 3500);
+  const productScrollRef = useDragScroll(276, 2, 4000);
+  const guideScrollRef = useDragScroll(276, 2, 4500);
+  const festivalScrollRef = useDragScroll(276, 2, 5000);
   const [loading, setLoading] = useState(true);
 
   const [banners, setBanners] = useState<BannerType[]>([]);
@@ -261,7 +269,7 @@ export default function HomePage() {
             className="mb-4"
           />
           {filteredRestaurants.length > 0 ? (
-            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
+            <div ref={restScrollRef} className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
               {filteredRestaurants.slice(0, 8).map((r) => (
                 <div key={r.id} className="w-[260px] flex-shrink-0 relative">
                   <RestaurantCard restaurant={r} lt={lt} />
@@ -333,7 +341,7 @@ export default function HomePage() {
             className="mb-4"
           />
           {filteredCourses.length > 0 ? (
-            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
+            <div ref={courseScrollRef} className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
               {filteredCourses.map((c) => (
                 <div key={c.id} className="w-[280px] flex-shrink-0 relative">
                   <CourseCard course={c} lt={lt} />
@@ -373,7 +381,7 @@ export default function HomePage() {
             className="mb-4"
           />
           {filteredProducts.length > 0 ? (
-            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
+            <div ref={productScrollRef} className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
               {filteredProducts.map((p) => (
                 <div key={p.id} className="w-[280px] flex-shrink-0 relative">
                   <ProductCard product={p} lt={lt} />
@@ -413,7 +421,7 @@ export default function HomePage() {
             className="mb-4"
           />
           {filteredGuides.length > 0 ? (
-            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
+            <div ref={guideScrollRef} className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
               {filteredGuides.map((g) => (
                 <div key={g.id} className="w-[260px] flex-shrink-0 relative">
                   <GuideCard guide={g} lt={lt} />
@@ -454,7 +462,7 @@ export default function HomePage() {
             className="mb-4"
           />
           {filteredFestivals.length > 0 ? (
-            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
+            <div ref={festivalScrollRef} className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
               {filteredFestivals.map((f) => (
                 <Link key={f.id} href={`/festivals/${f.id}`} className="w-[260px] flex-shrink-0 relative">
                   <Card hoverable className="h-full">
