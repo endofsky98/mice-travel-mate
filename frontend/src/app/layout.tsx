@@ -3,6 +3,7 @@
 import { Inter } from 'next/font/google';
 import { usePathname, useRouter } from 'next/navigation';
 import './globals.css';
+import 'mapbox-gl/dist/mapbox-gl.css';
 import Header from '@/components/layout/Header';
 import BottomNav from '@/components/layout/BottomNav';
 import Footer from '@/components/layout/Footer';

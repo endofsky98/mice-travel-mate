@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { MapPin, Navigation } from 'lucide-react';
+import api from '@/lib/api';
 
 interface LocationBarProps {
   t: (key: string) => string;
@@ -26,8 +27,7 @@ export default function LocationBar({ t, language = 'en', onLocationChange, even
 
   // Mapbox 토큰 로드
   useEffect(() => {
-    fetch('/api/map-settings')
-      .then(r => r.json())
+    api.get<{ mapbox_api_key: string }>('/api/map-settings')
       .then(d => { if (d.mapbox_api_key) setMapboxToken(d.mapbox_api_key); })
       .catch(() => {});
   }, []);
