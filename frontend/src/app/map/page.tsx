@@ -348,7 +348,12 @@ export default function MapPage() {
         }
       },
       () => {
-        alert(t('map.gps_denied') || 'Location permission denied. Please enable GPS in your device settings.');
+        // GPS 거부 시 서울 중심(COEX)으로 이동
+        const seoulCenter = { lat: 37.5126, lng: 127.059 };
+        setGpsStatus('denied');
+        if (mapRef.current) {
+          mapRef.current.flyTo({ center: [seoulCenter.lng, seoulCenter.lat], zoom: DEFAULT_ZOOM, duration: 800 });
+        }
       },
       { enableHighAccuracy: true, timeout: 5000 }
     );
