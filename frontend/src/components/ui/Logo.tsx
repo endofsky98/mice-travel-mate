@@ -31,7 +31,7 @@ export default function Logo({ size = 'md', className, showText = true, href, va
             alt="Exporum Travel Mate"
             style={{ height: s.full }}
             className={cn(
-              'w-auto flex-shrink-0',
+              'w-auto flex-shrink-0 max-w-[160px] sm:max-w-none',
               variant === 'default' && 'block dark:hidden'
             )}
           />
@@ -41,7 +41,7 @@ export default function Logo({ size = 'md', className, showText = true, href, va
               src="/logo-white.svg"
               alt="Exporum Travel Mate"
               style={{ height: s.full }}
-              className="w-auto flex-shrink-0 hidden dark:block"
+              className="w-auto flex-shrink-0 max-w-[160px] sm:max-w-none hidden dark:block"
             />
           )}
         </>

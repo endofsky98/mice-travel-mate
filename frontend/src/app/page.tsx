@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import { useScrollRestore } from '@/hooks/useScrollRestore';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -45,6 +46,7 @@ import { cn, formatDateRange } from '@/lib/utils';
 
 export default function HomePage() {
   const { t, lt, language } = useLanguage();
+  useScrollRestore();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(true);
 
