@@ -20,6 +20,8 @@ export default function RollingBanner({ banners, lt, interval = 4000 }: RollingB
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
+  const mouseStartX = useRef(0);
+  const isDragging = useRef(false);
 
   const transitionType: BannerTransitionType = banners[current]?.transition_type || 'slide';
 
@@ -54,6 +56,32 @@ export default function RollingBanner({ banners, lt, interval = 4000 }: RollingB
   const handleTouchEnd = (e: React.TouchEvent) => {
     touchEndX.current = e.changedTouches[0].clientX;
     const diff = touchStartX.current - touchEndX.current;
+    if (Math.abs(diff) > 50) {
+      diff > 0 ? goNext() : goPrev();
+    }
+    setTimeout(() => setIsAutoPlaying(true), 5000);
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    mouseStartX.current = e.clientX;
+    isDragging.current = true;
+    setIsAutoPlaying(false);
+  };
+
+  const handleMouseUp = (e: React.MouseEvent) => {
+    if (!isDragging.current) return;
+    isDragging.current = false;
+    const diff = mouseStartX.current - e.clientX;
+    if (Math.abs(diff) > 50) {
+      diff > 0 ? goNext() : goPrev();
+    }
+    setTimeout(() => setIsAutoPlaying(true), 5000);
+  };
+
+  const handleMouseLeave = (e: React.MouseEvent) => {
+    if (!isDragging.current) return;
+    isDragging.current = false;
+    const diff = mouseStartX.current - e.clientX;
     if (Math.abs(diff) > 50) {
       diff > 0 ? goNext() : goPrev();
     }
@@ -229,9 +257,12 @@ export default function RollingBanner({ banners, lt, interval = 4000 }: RollingB
 
   return (
     <div
-      className="relative w-full h-[280px] md:h-[480px] lg:h-[560px] overflow-hidden"
+      className="relative w-full h-[280px] md:h-[480px] lg:h-[560px] overflow-hidden cursor-grab active:cursor-grabbing select-none"
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
+      onMouseDown={handleMouseDown}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseLeave}
       onMouseEnter={() => setIsAutoPlaying(false)}
       onMouseLeave={() => setIsAutoPlaying(true)}
     >
