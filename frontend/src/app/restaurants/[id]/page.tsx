@@ -40,6 +40,10 @@ export default function RestaurantDetailPage() {
     fetchRestaurant();
   }, [id, language]);
 
+  useEffect(() => {
+    if (restaurant) document.title = `${lt(restaurant.name)} | Exporoute`;
+  }, [restaurant, lt]);
+
   const handleShare = async () => {
     const url = window.location.href;
     if (navigator.share) {

@@ -35,12 +35,12 @@ export default function MapPage() {
   const { t, lt, language } = useLanguage();
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
-  const markersRef = useRef<any[]>([]);
   const userMarkerRef = useRef<any>(null);
   const popupRef = useRef<any>(null);
-  const selectedMarkerRef = useRef<any>(null);
+  const itemsRef = useRef<PlaceItem[]>([]);
   const listContainerRef = useRef<HTMLDivElement>(null);
   const filterByViewportRef = useRef<() => void>(() => {});
+  const selectedIdRef = useRef<number | null>(null);
 
   const [categoryFilter, setCategoryFilter] = useState('restaurants');
   const [searchQuery, setSearchQuery] = useState('');
@@ -72,6 +72,32 @@ export default function MapPage() {
     if (item.profile_image_url) return item.profile_image_url;
     return null;
   };
+
+  // Keep itemsRef in sync
+  useEffect(() => { itemsRef.current = items; }, [items]);
+
+  // Build GeoJSON from items
+  const buildGeoJSON = useCallback((data: PlaceItem[], selectedId: number | null) => {
+    return {
+      type: 'FeatureCollection' as const,
+      features: data.filter(i => getCoords(i)).map(item => {
+        const coords = getCoords(item)!;
+        return {
+          type: 'Feature' as const,
+          geometry: { type: 'Point' as const, coordinates: [coords.lng, coords.lat] },
+          properties: { itemId: item.id, selected: item.id === selectedId },
+        };
+      }),
+    };
+  }, []);
+
+  // Update GeoJSON source on the map
+  const updateSource = useCallback((selectedId?: number | null) => {
+    const map = mapRef.current;
+    if (!map || !map.getSource('places')) return;
+    const sid = selectedId !== undefined ? selectedId : selectedIdRef.current;
+    map.getSource('places').setData(buildGeoJSON(itemsRef.current, sid));
+  }, [buildGeoJSON]);
 
   // B4: Request GPS on mount - fallback to Samsung Station
   useEffect(() => {
@@ -151,7 +177,7 @@ export default function MapPage() {
   // Keep ref in sync so moveend handler always uses latest filterByViewport
   useEffect(() => { filterByViewportRef.current = filterByViewport; }, [filterByViewport]);
 
-  // Initialize map
+  // Initialize map with GeoJSON source + layers
   useEffect(() => {
     if (!mapboxToken || !mapContainerRef.current || gpsStatus === 'pending') return;
 
@@ -178,12 +204,74 @@ export default function MapPage() {
 
       map.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
-      // B4: moveend event for viewport-based list filtering (use ref to avoid stale closure)
+      // B4: moveend event for viewport-based list filtering
       map.on('moveend', () => {
         if (mapRef.current) filterByViewportRef.current();
       });
 
       map.on('load', () => {
+        // Add GeoJSON source (empty initially)
+        map.addSource('places', {
+          type: 'geojson',
+          data: { type: 'FeatureCollection', features: [] },
+        });
+
+        // Shadow layer for depth
+        map.addLayer({
+          id: 'places-shadow',
+          type: 'circle',
+          source: 'places',
+          paint: {
+            'circle-radius': ['case', ['get', 'selected'], 14, 10],
+            'circle-color': 'rgba(0,0,0,0.15)',
+            'circle-translate': [0, 2],
+            'circle-blur': 0.4,
+          },
+        });
+
+        // Main circle layer — color/size driven by 'selected' property
+        map.addLayer({
+          id: 'places-circle',
+          type: 'circle',
+          source: 'places',
+          paint: {
+            'circle-radius': ['case', ['get', 'selected'], 12, 8],
+            'circle-color': ['case', ['get', 'selected'], '#dc2626', '#4f46e5'],
+            'circle-stroke-color': '#ffffff',
+            'circle-stroke-width': 2.5,
+          },
+        });
+
+        // Icon layer — small white pin icon via symbol
+        map.addLayer({
+          id: 'places-icon',
+          type: 'circle',
+          source: 'places',
+          paint: {
+            'circle-radius': ['case', ['get', 'selected'], 3.5, 2.5],
+            'circle-color': '#ffffff',
+          },
+        });
+
+        // Click handler on markers
+        map.on('click', 'places-circle', (e: any) => {
+          if (!e.features || e.features.length === 0) return;
+          const feature = e.features[0];
+          const itemId = feature.properties.itemId;
+          const item = itemsRef.current.find(i => i.id === itemId);
+          if (item) {
+            handleSelectItemFromMap(item, mapboxgl, map);
+          }
+        });
+
+        // Cursor change on hover
+        map.on('mouseenter', 'places-circle', () => {
+          map.getCanvas().style.cursor = 'pointer';
+        });
+        map.on('mouseleave', 'places-circle', () => {
+          map.getCanvas().style.cursor = '';
+        });
+
         setMapReady(true);
       });
 
@@ -198,12 +286,11 @@ export default function MapPage() {
     };
   }, [mapboxToken, gpsStatus, mapCenter.lat, mapCenter.lng]);
 
-  // Update user location marker separately (no map reload)
+  // Update user location marker separately (small DOM marker — just 1 element, no delay concern)
   useEffect(() => {
     if (!mapRef.current || !mapReady || !userLocation) return;
     (async () => {
       const mapboxgl = (await import('mapbox-gl')).default;
-      // Remove old user marker
       if (userMarkerRef.current) {
         userMarkerRef.current.remove();
         userMarkerRef.current = null;
@@ -216,84 +303,41 @@ export default function MapPage() {
     })();
   }, [userLocation, mapReady]);
 
-  // Update markers when items or mapReady changes
+  // Update GeoJSON source when items change
   useEffect(() => {
     if (!mapRef.current || !mapReady) return;
+    updateSource(null);
+    selectedIdRef.current = null;
+    setSelectedItem(null);
+    if (popupRef.current) { popupRef.current.remove(); popupRef.current = null; }
+    filterByViewport();
+  }, [items, mapReady, updateSource, filterByViewport]);
 
-    const updateMarkers = async () => {
-      const mapboxgl = (await import('mapbox-gl')).default;
-      const map = mapRef.current;
+  // Ref for stable access to categoryFilter and lt
+  const categoryFilterRef = useRef(categoryFilter);
+  useEffect(() => { categoryFilterRef.current = categoryFilter; }, [categoryFilter]);
+  const ltRef = useRef(lt);
+  useEffect(() => { ltRef.current = lt; }, [lt]);
+  const tRef = useRef(t);
+  useEffect(() => { tRef.current = t; }, [t]);
 
-      // Clear old markers
-      markersRef.current.forEach(m => m.remove());
-      markersRef.current = [];
-      if (popupRef.current) { popupRef.current.remove(); popupRef.current = null; }
-
-      const itemsWithCoords = items.filter(i => getCoords(i));
-
-      itemsWithCoords.forEach((item) => {
-        const coords = getCoords(item)!;
-        const el = document.createElement('div');
-        el.className = 'map-marker';
-        el.dataset.itemId = String(item.id);
-        el.style.cssText = 'width:32px;height:32px;background:#4f46e5;border-radius:50%;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;';
-        el.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>';
-
-        // B5: Marker click -> popup + list highlight
-        el.addEventListener('click', (e) => {
-          e.stopPropagation();
-          handleSelectItem(item, mapboxgl, map);
-        });
-
-        const marker = new mapboxgl.Marker(el)
-          .setLngLat([coords.lng, coords.lat])
-          .addTo(map);
-
-        markersRef.current.push(marker);
-      });
-
-      filterByViewport();
-    };
-
-    updateMarkers();
-  }, [items, mapReady, language]);
-
-  // B5: Handle item selection (from list or marker)
-  const handleSelectItem = useCallback(async (item: PlaceItem, mapboxgl?: any, map?: any) => {
-    if (!mapboxgl) mapboxgl = (await import('mapbox-gl')).default;
-    if (!map) map = mapRef.current;
-    if (!map) return;
-
+  // Handle item selection from map layer click
+  const handleSelectItemFromMap = useCallback((item: PlaceItem, mapboxgl: any, map: any) => {
     const coords = getCoords(item);
     if (!coords) return;
 
     setSelectedItem(item);
-
-    // Reset previous selected marker
-    if (selectedMarkerRef.current) {
-      selectedMarkerRef.current.style.background = '#4f46e5';
-      selectedMarkerRef.current.style.width = '32px';
-      selectedMarkerRef.current.style.height = '32px';
-    }
-
-    // Highlight new marker with different color
-    const markerEl = document.querySelector(`.map-marker[data-item-id="${item.id}"]`) as HTMLElement;
-    if (markerEl) {
-      markerEl.style.background = '#dc2626';
-      markerEl.style.width = '40px';
-      markerEl.style.height = '40px';
-      selectedMarkerRef.current = markerEl;
-    }
+    selectedIdRef.current = item.id;
+    updateSource(item.id);
 
     // Remove old popup
     if (popupRef.current) popupRef.current.remove();
 
     const image = getImage(item);
-    const name = lt(item.name);
-    const desc = lt(item.description || item.address || '');
-    const detailUrl = `/${categoryFilter}/${item.id}`;
+    const name = ltRef.current(item.name);
+    const desc = ltRef.current(item.description || item.address || '');
+    const detailUrl = `/${categoryFilterRef.current}/${item.id}`;
 
-    // B5: Popup with name, image, description, bookmark, detail link
     const popupHtml = `
       <div style="min-width:220px;max-width:280px;font-family:Inter,sans-serif;">
         ${image ? `<img src="${image}" style="width:100%;height:120px;object-fit:cover;border-radius:8px 8px 0 0;" alt="${name}" onerror="this.style.display='none'" />` : ''}
@@ -302,17 +346,17 @@ export default function MapPage() {
           <p style="font-size:12px;color:#666;margin:0 0 8px 0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${desc}</p>
           ${item.avg_rating ? `<div style="font-size:12px;color:#f59e0b;margin-bottom:8px;">★ ${item.avg_rating.toFixed(1)}</div>` : ''}
           <div style="display:flex;gap:6px;">
-            <button onclick="event.stopPropagation()" style="padding:6px 10px;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:6px;cursor:pointer;display:flex;align-items:center;font-size:12px;" title="${t('common.bookmark') || 'Bookmark'}">
+            <button onclick="event.stopPropagation()" style="padding:6px 10px;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:6px;cursor:pointer;display:flex;align-items:center;font-size:12px;" title="${tRef.current('common.bookmark') || 'Bookmark'}">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
             </button>
-            <a href="${detailUrl}" style="flex:1;display:inline-flex;align-items:center;justify-content:center;padding:6px 12px;background:#4f46e5;color:white;border-radius:6px;font-size:12px;font-weight:500;text-decoration:none;">${t('common.view_detail') || '상세보기'}</a>
+            <a href="${detailUrl}" style="flex:1;display:inline-flex;align-items:center;justify-content:center;padding:6px 12px;background:#4f46e5;color:white;border-radius:6px;font-size:12px;font-weight:500;text-decoration:none;">${tRef.current('common.view_detail') || '상세보기'}</a>
           </div>
         </div>
       </div>
     `;
 
     const popup = new mapboxgl.Popup({
-      offset: 25,
+      offset: 15,
       closeButton: true,
       maxWidth: '300px',
     })
@@ -324,25 +368,29 @@ export default function MapPage() {
 
     popup.on('close', () => {
       setSelectedItem(null);
-      if (selectedMarkerRef.current) {
-        selectedMarkerRef.current.style.background = '#4f46e5';
-        selectedMarkerRef.current.style.width = '32px';
-        selectedMarkerRef.current.style.height = '32px';
-        selectedMarkerRef.current = null;
-      }
+      selectedIdRef.current = null;
+      updateSource(null);
       popupRef.current = null;
     });
 
-    map.flyTo({ center: [coords.lng, coords.lat], zoom: Math.max(map.getZoom(), 15), duration: 500 });
+    map.flyTo({ center: [coords.lng, coords.lat], zoom: map.getZoom(), duration: 500 });
 
-    // B5: Scroll selected item into view in the list
+    // Scroll selected item into view in the list
     setTimeout(() => {
       const cardEl = document.querySelector(`[data-list-item-id="${item.id}"]`);
       if (cardEl) {
         cardEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
       }
     }, 100);
-  }, [categoryFilter, lt, language, t]);
+  }, [updateSource]);
+
+  // Handle item selection from bottom list
+  const handleSelectItem = useCallback(async (item: PlaceItem) => {
+    const mapboxgl = (await import('mapbox-gl')).default;
+    const map = mapRef.current;
+    if (!map) return;
+    handleSelectItemFromMap(item, mapboxgl, map);
+  }, [handleSelectItemFromMap]);
 
   // B2: My location button handler with GPS permission check
   const handleMyLocation = () => {
@@ -353,23 +401,19 @@ export default function MapPage() {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-        console.log('[GPS] got position:', loc);
         setUserLocation(loc);
         setGpsStatus('granted');
-        // mapRef가 준비됐으면 즉시 이동, 아니면 잠시 후 재시도
         const flyToLoc = () => {
           if (mapRef.current) {
             const currentZoom = mapRef.current.getZoom();
             mapRef.current.flyTo({ center: [loc.lng, loc.lat], zoom: currentZoom, duration: 800 });
           } else {
-            console.warn('[GPS] mapRef not ready, retrying...');
             setTimeout(flyToLoc, 500);
           }
         };
         flyToLoc();
       },
-      (err) => {
-        console.warn('[GPS] error:', err.code, err.message);
+      () => {
         setGpsStatus('denied');
       },
       { enableHighAccuracy: false, timeout: 15000, maximumAge: 60000 }
@@ -387,10 +431,10 @@ export default function MapPage() {
     : visibleItems;
 
   return (
-    <div className="relative h-[calc(100vh-64px)] flex flex-col">
+    <div className="relative" style={{ height: 'calc(100dvh - 128px)' }}>
       {/* Search & Filter Overlay */}
-      <div className="absolute top-0 left-0 right-0 z-20 p-3 space-y-2">
-        <div className="relative max-w-lg mx-auto">
+      <div className="fixed top-16 left-0 right-0 z-30 p-3 space-y-2 pointer-events-none">
+        <div className="relative w-[80%] pointer-events-auto">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
             type="text"
@@ -405,13 +449,13 @@ export default function MapPage() {
             </button>
           )}
         </div>
-        <div className="max-w-lg mx-auto">
+        <div className="pointer-events-auto">
           <FilterChips chips={categoryChips} selected={categoryFilter} onSelect={(k) => k && setCategoryFilter(k)} />
         </div>
       </div>
 
       {/* Map Area */}
-      <div className="flex-1 relative">
+      <div className="fixed left-0 right-0" style={{ top: '64px', bottom: '64px' }}>
         {mapboxToken ? (
           <div ref={mapContainerRef} className="w-full h-full" />
         ) : (
@@ -422,49 +466,45 @@ export default function MapPage() {
             </div>
           </div>
         )}
-
-        {/* B3: Bottom items list with generous padding to avoid GNB overlap */}
-        {displayItems.length > 0 && (
-          <div className="absolute bottom-0 left-0 right-0 z-10 pb-20 md:pb-4 px-3 pt-2" ref={listContainerRef}>
-            <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2">
-              {displayItems.slice(0, 15).map((item) => (
-                <button
-                  key={item.id}
-                  data-list-item-id={item.id}
-                  onClick={() => handleSelectItem(item)}
-                  className={`flex-shrink-0 w-[200px] text-left transition-all ${
-                    selectedItem?.id === item.id
-                      ? 'ring-2 ring-red-500 rounded-xl scale-105'
-                      : ''
-                  }`}
-                >
-                  <Card hoverable className="p-3">
-                    <h3 className="font-medium text-sm text-gray-900 dark:text-gray-100 line-clamp-1">
-                      {lt(item.name)}
-                    </h3>
-                    {item.avg_rating && item.avg_rating > 0 && (
-                      <StarRating rating={item.avg_rating} size="sm" showValue />
-                    )}
-                    <p className="text-xs text-gray-400 mt-1 line-clamp-1">
-                      {lt(item.description || item.address || '')}
-                    </p>
-                  </Card>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Items count badge */}
-        <div className="absolute top-24 left-3 z-10 bg-white dark:bg-[#1e1e1e] shadow-md rounded-lg px-3 py-1.5 text-xs text-gray-600 dark:text-gray-300">
-          {displayItems.length}{t('map.places_count') || ' places'}
-        </div>
       </div>
 
-      {/* B2: My Location Button - positioned above GNB */}
+      {/* Bottom spot list */}
+      {displayItems.length > 0 && (
+        <div className="fixed bottom-16 left-0 right-0 z-20 px-3 py-2" ref={listContainerRef}>
+          <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-1">
+            {displayItems.slice(0, 15).map((item) => (
+              <button
+                key={item.id}
+                data-list-item-id={item.id}
+                onClick={() => handleSelectItem(item)}
+                className={`flex-shrink-0 w-[200px] text-left transition-all ${
+                  selectedItem?.id === item.id
+                    ? 'ring-2 ring-red-500 rounded-xl scale-105'
+                    : ''
+                }`}
+              >
+                <Card hoverable className="p-3">
+                  <h3 className="font-medium text-sm text-gray-900 dark:text-gray-100 line-clamp-1">
+                    {lt(item.name)}
+                  </h3>
+                  {item.avg_rating && item.avg_rating > 0 && (
+                    <StarRating rating={item.avg_rating} size="sm" showValue />
+                  )}
+                  <p className="text-xs text-gray-400 mt-1 line-clamp-1">
+                    {lt(item.description || item.address || '')}
+                  </p>
+                </Card>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* GPS button */}
       <button
         onClick={handleMyLocation}
-        className="absolute bottom-[140px] md:bottom-8 right-4 w-12 h-12 bg-white dark:bg-[#1e1e1e] rounded-full shadow-lg flex items-center justify-center text-indigo-600 dark:text-indigo-400 z-20 hover:bg-gray-50 dark:hover:bg-[#2a2a2a] transition-colors active:scale-95"
+        className="fixed z-20 right-4 w-12 h-12 bg-white dark:bg-[#1e1e1e] rounded-full shadow-lg flex items-center justify-center text-indigo-600 dark:text-indigo-400 hover:bg-gray-50 dark:hover:bg-[#2a2a2a] transition-colors active:scale-95"
+        style={{ bottom: displayItems.length > 0 ? 'calc(64px + 80px)' : 'calc(64px + 16px)' }}
         title={t('map.my_location') || 'My Location'}
       >
         <Navigation className="w-5 h-5" />

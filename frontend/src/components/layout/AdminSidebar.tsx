@@ -92,7 +92,7 @@ export default function AdminSidebar({ t, onLogout }: AdminSidebarProps) {
       <aside className="hidden md:flex flex-col w-64 bg-white dark:bg-dark-sidebar border-r border-gray-200 dark:border-gray-500/40 min-h-screen flex-shrink-0">
         <div className="flex items-center gap-2 px-4 py-4 border-b border-gray-200 dark:border-gray-500/40">
           <Logo size="sm" showText={false} />
-          <span className="text-sm font-bold text-gray-900 dark:text-white">Exporum 관리자</span>
+          <span className="text-sm font-bold text-gray-900 dark:text-white">Exporoute 관리자</span>
         </div>
 
         <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">

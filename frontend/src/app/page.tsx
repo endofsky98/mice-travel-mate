@@ -46,7 +46,7 @@ import {
 import { cn, formatDateRange } from '@/lib/utils';
 
 export default function HomePage() {
-  const { t, lt, language } = useLanguage();
+  const { t, lt, language, isLoaded } = useLanguage();
   useScrollRestore();
   const searchParams = useSearchParams();
 
@@ -82,6 +82,7 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
+    if (!isLoaded) return;
     const fetchData = async () => {
       setLoading(true);
       try {
@@ -101,21 +102,14 @@ export default function HomePage() {
           }
         }
 
-        // Fetch all section data in parallel
-        const [restData, courseData, prodData, guideData, festData] = await Promise.all([
-          api.get<{ items: Restaurant[] }>('/api/restaurants', {
-            per_page: 10,
-            lat: userLat,
-            lng: userLng,
-            lang: language,
-          }).catch(() => ({ items: [] })),
+        // Fetch non-location data in parallel
+        const [courseData, prodData, guideData, festData] = await Promise.all([
           api.get<{ items: Course[] }>('/api/courses', { per_page: 10, lang: language }).catch(() => ({ items: [] })),
           api.get<{ items: Product[] }>('/api/products', { per_page: 10, lang: language }).catch(() => ({ items: [] })),
           api.get<{ items: Guide[] }>('/api/guides', { per_page: 10, lang: language }).catch(() => ({ items: [] })),
           api.get<{ items: Festival[] }>('/api/festivals', { per_page: 6, lang: language }).catch(() => ({ items: [] })),
         ]);
 
-        setRestaurants(restData.items || []);
         setCourses(courseData.items || []);
         setProducts(prodData.items || []);
         setGuides(guideData.items || []);
@@ -125,7 +119,22 @@ export default function HomePage() {
     };
 
     fetchData();
-  }, [eventSlug, language, userLat, userLng]);
+  }, [eventSlug, language, isLoaded]);
+
+  // 위치 변경 시 맛집만 별도 fetch
+  useEffect(() => {
+    if (!isLoaded) return;
+    const fetchRestaurants = async () => {
+      const restData = await api.get<{ items: Restaurant[] }>('/api/restaurants', {
+        per_page: 10,
+        lat: userLat,
+        lng: userLng,
+        lang: language,
+      }).catch(() => ({ items: [] }));
+      setRestaurants(restData.items || []);
+    };
+    fetchRestaurants();
+  }, [userLat, userLng, language, isLoaded]);
 
   if (loading) return <LoadingSpinner fullPage />;
 

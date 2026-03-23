@@ -28,7 +28,7 @@ export default function Logo({ size = 'md', className, showText = true, href, va
           {/* Color logo for light mode */}
           <img
             src={variant === 'white' ? '/logo-white.svg' : '/logo.svg'}
-            alt="Exporum Travel Mate"
+            alt="Exporoute"
             style={{ height: s.full }}
             className={cn(
               'w-auto flex-shrink-0 max-w-[160px] sm:max-w-none',
@@ -39,7 +39,7 @@ export default function Logo({ size = 'md', className, showText = true, href, va
           {variant === 'default' && (
             <img
               src="/logo-white.svg"
-              alt="Exporum Travel Mate"
+              alt="Exporoute"
               style={{ height: s.full }}
               className="w-auto flex-shrink-0 max-w-[160px] sm:max-w-none hidden dark:block"
             />
@@ -48,7 +48,7 @@ export default function Logo({ size = 'md', className, showText = true, href, va
       ) : (
         <img
           src="/favicon.svg"
-          alt="Exporum Travel Mate"
+          alt="Exporoute"
           width={s.icon}
           height={s.icon}
           className="flex-shrink-0"

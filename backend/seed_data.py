@@ -1,5 +1,5 @@
 """
-Exporum Travel Mate - Seed Data Script
+Exporoute - Seed Data Script
 Run: python seed_data.py
 Inserts sample data into the database with duplicate prevention.
 Seeds 100 items each for restaurants, courses, guides, and festivals.
@@ -254,7 +254,7 @@ async def print_counts(session):
 async def run_seed():
     """Main seed function with duplicate prevention."""
     logger.info("=" * 60)
-    logger.info("Exporum Travel Mate - Seeding Database (Duplicate-Safe)")
+    logger.info("Exporoute - Seeding Database (Duplicate-Safe)")
     logger.info("=" * 60)
 
     # Create tables if they don't exist

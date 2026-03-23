@@ -41,6 +41,10 @@ export default function ProductDetailPage() {
     fetchProduct();
   }, [id, language]);
 
+  useEffect(() => {
+    if (product) document.title = `${lt(product.name)} | Exporoute`;
+  }, [product, lt]);
+
   if (loading) return <LoadingSpinner fullPage />;
   if (!product) {
     return (

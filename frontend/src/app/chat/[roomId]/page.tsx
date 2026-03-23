@@ -24,7 +24,6 @@ export default function ChatRoomPage() {
 
   useEffect(() => {
     fetchMessages();
-    // Poll for new messages every 5s
     pollRef.current = setInterval(fetchMessages, 5000);
     return () => { if (pollRef.current) clearInterval(pollRef.current); };
   }, [roomId]);
@@ -36,7 +35,8 @@ export default function ChatRoomPage() {
   const fetchMessages = async () => {
     try {
       const data = await api.get<{ items: ChatMessage[] }>(`/api/chat/rooms/${roomId}/messages`, { per_page: 100 });
-      setMessages(data.items || []);
+      const sorted = (data.items || []).sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+      setMessages(sorted);
     } catch { /* */ }
     setLoading(false);
   };
@@ -58,17 +58,20 @@ export default function ChatRoomPage() {
   if (loading) return <LoadingSpinner fullPage />;
 
   return (
-    <div className="flex flex-col h-[calc(100vh-64px)]">
-      {/* Header */}
-      <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-200 dark:border-gray-500/40 bg-white dark:bg-[#141414]">
+    <>
+      {/* 채팅 헤더 — Header(h-16) 바로 아래 fixed */}
+      <div className="fixed top-16 left-0 right-0 z-30 flex items-center gap-3 px-4 py-3 border-b border-gray-200 dark:border-gray-500/40 bg-white dark:bg-[#141414]">
         <button onClick={() => router.back()} className="p-1">
           <ArrowLeft className="w-5 h-5 text-gray-600 dark:text-gray-300" />
         </button>
         <h1 className="font-semibold text-gray-900 dark:text-gray-100">{t('nav.chat') || 'Chat'}</h1>
       </div>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50 dark:bg-[#1a1a1a]">
+      {/* 메시지 영역 — 채팅헤더(top-16+52px) ~ 입력창(bottom-16+68px) 사이 스크롤 */}
+      <div
+        className="fixed left-0 right-0 overflow-y-auto bg-gray-50 dark:bg-[#1a1a1a] p-4 space-y-3"
+        style={{ top: 'calc(64px + 52px)', bottom: 'calc(64px + 68px)' }}
+      >
         {messages.map((msg) => {
           const isMe = msg.sender_type === 'user';
           return (
@@ -95,8 +98,8 @@ export default function ChatRoomPage() {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input */}
-      <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-500/40 bg-white dark:bg-[#141414] flex items-center gap-2">
+      {/* 입력창 — BottomNav(h-16) 바로 위 fixed */}
+      <div className="fixed bottom-16 left-0 right-0 z-30 px-4 py-3 border-t border-gray-200 dark:border-gray-500/40 bg-white dark:bg-[#141414] flex items-center gap-2">
         <button className="p-2 text-gray-400 hover:text-gray-600">
           <Image className="w-5 h-5" />
         </button>
@@ -116,6 +119,6 @@ export default function ChatRoomPage() {
           <Send className="w-4 h-4" />
         </button>
       </div>
-    </div>
+    </>
   );
 }

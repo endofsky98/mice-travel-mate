@@ -7,7 +7,12 @@ import { getStoredLanguage, setStoredLanguage, loadTranslations, getTranslation,
 const VALID_LANGUAGES = SUPPORTED_LANGUAGES.map(l => l.code);
 
 export function useLanguage() {
-  const [language, setLanguageState] = useState<Language>('en');
+  const [language, setLanguageState] = useState<Language>(() => {
+    if (typeof window !== 'undefined') {
+      return getStoredLanguage();
+    }
+    return 'en';
+  });
   const [translations, setTranslations] = useState<Translations>({});
   const [isLoaded, setIsLoaded] = useState(false);
 

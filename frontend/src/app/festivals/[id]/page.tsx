@@ -51,6 +51,10 @@ export default function FestivalDetailPage() {
     fetchFestival();
   }, [id, language]);
 
+  useEffect(() => {
+    if (festival) document.title = `${lt(festival.name)} | Exporoute`;
+  }, [festival, lt]);
+
   const handleShare = async () => {
     const url = window.location.href;
     if (navigator.share) {

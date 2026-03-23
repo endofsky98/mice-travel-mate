@@ -47,6 +47,10 @@ export default function CourseDetailPage() {
     fetchCourse();
   }, [id, language]);
 
+  useEffect(() => {
+    if (course) document.title = `${lt(course.name)} | Exporoute`;
+  }, [course, lt]);
+
   if (loading) return <LoadingSpinner fullPage />;
   if (!course) {
     return (

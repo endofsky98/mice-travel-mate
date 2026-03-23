@@ -13,7 +13,7 @@ export default function Footer({ t }: FooterProps) {
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <Logo size="sm" href="/" />
-            <span className="text-xs text-gray-400 dark:text-gray-500">powered by exporum</span>
+            <span className="text-xs text-gray-400 dark:text-gray-500">powered by Exporoute</span>
           </div>
           <nav className="flex items-center gap-6">
             <a href="/restaurants" className="text-sm text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
@@ -30,7 +30,7 @@ export default function Footer({ t }: FooterProps) {
             </a>
           </nav>
           <p className="text-xs text-gray-400 dark:text-gray-500">
-            &copy; 2026 exporum. All rights reserved.
+            &copy; 2026 Exporoute. All rights reserved.
           </p>
         </div>
       </div>

@@ -42,6 +42,10 @@ export default function GuideDetailPage() {
     fetchGuide();
   }, [id, language]);
 
+  useEffect(() => {
+    if (guide) document.title = `${lt(guide.name)} | Exporoute`;
+  }, [guide, lt]);
+
   const handleShare = async () => {
     const url = window.location.href;
     if (navigator.share) {

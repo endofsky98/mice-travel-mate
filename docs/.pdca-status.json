@@ -1,6 +1,6 @@
 {
   "version": "2.0",
-  "lastUpdated": "2026-03-18T19:22:14.060Z",
+  "lastUpdated": "2026-03-23T02:54:07.462Z",
   "activeFeatures": [
     "backend",
     "frontend",
@@ -60,9 +60,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-03-18T04:06:01.830Z",
-        "lastUpdated": "2026-03-18T19:18:51.007Z"
+        "lastUpdated": "2026-03-23T02:49:35.602Z"
       },
-      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/backend/main.py"
+      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/backend/seed_data.py"
     },
     "frontend": {
       "phase": "do",
@@ -73,7 +73,7 @@
       "documents": {},
       "timestamps": {
         "started": "2026-03-18T04:07:19.250Z",
-        "lastUpdated": "2026-03-18T19:01:09.941Z"
+        "lastUpdated": "2026-03-23T02:50:21.154Z"
       },
       "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/frontend/src/app/layout.tsx"
     },
@@ -112,7 +112,7 @@
       "documents": {},
       "timestamps": {
         "started": "2026-03-18T04:13:00.027Z",
-        "lastUpdated": "2026-03-18T19:00:55.213Z"
+        "lastUpdated": "2026-03-23T02:49:30.591Z"
       },
       "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/frontend/src/components/ui/Logo.tsx"
     },
@@ -125,9 +125,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-03-18T04:14:54.468Z",
-        "lastUpdated": "2026-03-18T18:35:42.684Z"
+        "lastUpdated": "2026-03-23T02:49:33.301Z"
       },
-      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/frontend/src/components/layout/BottomNav.tsx"
+      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/frontend/src/components/layout/AdminSidebar.tsx"
     },
     "restaurant": {
       "phase": "do",
@@ -203,7 +203,7 @@
       "documents": {},
       "timestamps": {
         "started": "2026-03-18T04:17:34.050Z",
-        "lastUpdated": "2026-03-18T18:14:53.451Z"
+        "lastUpdated": "2026-03-23T02:52:39.488Z"
       },
       "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/frontend/src/app/map/page.tsx"
     },
@@ -242,9 +242,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-03-18T04:19:39.611Z",
-        "lastUpdated": "2026-03-18T16:22:48.243Z"
+        "lastUpdated": "2026-03-23T02:54:07.462Z"
       },
-      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/frontend/src/app/booking/[id]/page.tsx"
+      "lastFile": "/Users/endofsky/Documents/aidev/mice-travel-mate/frontend/src/app/festivals/[id]/page.tsx"
     },
     "courses": {
       "phase": "do",
@@ -658,7 +658,7 @@
   "session": {
     "startedAt": "2026-03-18T04:03:46.194Z",
     "onboardingCompleted": false,
-    "lastActivity": "2026-03-18T19:22:14.060Z"
+    "lastActivity": "2026-03-23T02:54:07.462Z"
   },
   "history": [
     {
@@ -3292,6 +3292,84 @@
     {
       "timestamp": "2026-03-18T19:22:14.060Z",
       "feature": "festivals",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-23T02:49:30.591Z",
+      "feature": "ui",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-23T02:49:31.488Z",
+      "feature": "layout",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-23T02:49:32.396Z",
+      "feature": "layout",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-23T02:49:33.301Z",
+      "feature": "layout",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-23T02:49:34.680Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-23T02:49:35.602Z",
+      "feature": "backend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-23T02:50:21.154Z",
+      "feature": "frontend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-23T02:52:39.488Z",
+      "feature": "map",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-23T02:53:48.750Z",
+      "feature": "[id]",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-23T02:53:52.154Z",
+      "feature": "[id]",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-23T02:53:55.905Z",
+      "feature": "[id]",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-23T02:53:56.871Z",
+      "feature": "[id]",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-23T02:54:07.462Z",
+      "feature": "[id]",
       "phase": "do",
       "action": "updated"
     }
