@@ -203,6 +203,39 @@ async def seed_admin_user(session):
     logger.info("Created admin user: %s", admin_email)
 
 
+async def seed_test_user(session):
+    """Seed test user or reset password if already exists."""
+    import bcrypt
+
+    test_email = "test@runhatch.com"
+    test_password = "test1234"
+
+    result = await session.execute(select(User).where(User.email == test_email))
+    existing = result.scalar_one_or_none()
+    if existing:
+        hashed = bcrypt.hashpw(test_password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+        existing.password_hash = hashed
+        existing.role = "user"
+        existing.is_active = True
+        await session.flush()
+        logger.info("Test user verified: %s (role=user, password reset)", test_email)
+        return
+
+    hashed = bcrypt.hashpw(test_password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+    test_user = User(
+        id=str(uuid.uuid4()),
+        email=test_email,
+        password_hash=hashed,
+        name="Test User",
+        role="user",
+        provider="local",
+        is_active=True,
+    )
+    session.add(test_user)
+    await session.flush()
+    logger.info("Created test user: %s", test_email)
+
+
 async def seed_rolling_banners(session):
     """Seed rolling banners with 9-language translations."""
     result = await session.execute(select(RollingBanner))
@@ -1572,17 +1605,18 @@ async def lifespan(app: FastAPI):
     async with engine.begin() as conn:
         await run_migrations(conn)
 
-    # Seed admin user (independent transaction to prevent rollback)
+    # Seed users (independent transaction to prevent rollback)
     async with async_session() as session:
         try:
             await seed_admin_user(session)
+            await seed_test_user(session)
             await session.commit()
-            logger.info("Admin user seed completed")
+            logger.info("User seed completed")
         except Exception as e:
-            logger.error("Admin seed error: %s", str(e))
+            logger.error("User seed error: %s", str(e))
             await session.rollback()
 
-    # Seed data
+    # Seed basic data (languages, banners, living guide, map, inline samples)
     async with async_session() as session:
         try:
             await seed_languages(session)
@@ -1595,6 +1629,33 @@ async def lifespan(app: FastAPI):
         except Exception as e:
             logger.error("Seed error: %s", str(e))
             await session.rollback()
+
+    # Seed comprehensive data from seed/ directory (duplicate-safe, fills up to 100 each)
+    try:
+        from seed_data import (
+            seed_restaurants as seed_restaurants_full,
+            seed_courses as seed_courses_full,
+            seed_guides as seed_guides_full,
+            seed_festivals as seed_festivals_full,
+            seed_banners as seed_banners_full,
+            seed_events as seed_events_full,
+            seed_transport as seed_transport_full,
+            seed_themes as seed_themes_full,
+            seed_living_guide as seed_living_guide_full,
+        )
+        async with async_session() as session:
+            await seed_restaurants_full(session)
+            await seed_courses_full(session)
+            await seed_guides_full(session)
+            await seed_festivals_full(session)
+            await seed_banners_full(session)
+            await seed_events_full(session)
+            await seed_transport_full(session)
+            await seed_themes_full(session)
+            await seed_living_guide_full(session)
+            logger.info("Comprehensive seed data completed")
+    except Exception as e:
+        logger.error("Comprehensive seed error: %s", str(e))
 
     logger.info("MICE Travel Mate Backend started on port 8007")
     yield
