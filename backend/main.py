@@ -1591,14 +1591,36 @@ async def seed_sample_data(session):
     logger.info("Seeded sample data: events, restaurants, courses, products, guides, transport, translations (9 languages)")
 
 
+async def check_data_counts(session) -> dict:
+    """Check record counts for key tables. Returns dict of table->count."""
+    counts = {}
+    tables = [
+        ("restaurants", Restaurant),
+        ("courses", Course),
+        ("guides", Guide),
+        ("festivals", Festival),
+        ("events", Event),
+    ]
+    for name, model in tables:
+        try:
+            result = await session.execute(select(model))
+            items = result.scalars().all()
+            counts[name] = len(items)
+        except Exception:
+            counts[name] = 0
+    return counts
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application startup and shutdown."""
+    print("[STARTUP] Starting MICE Travel Mate Backend...", flush=True)
     logger.info("Starting MICE Travel Mate Backend...")
 
     # Create all tables
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        print("[STARTUP] Database tables created", flush=True)
         logger.info("Database tables created")
 
     # Run migrations
@@ -1611,8 +1633,10 @@ async def lifespan(app: FastAPI):
             await seed_admin_user(session)
             await seed_test_user(session)
             await session.commit()
+            print("[STARTUP] User seed completed", flush=True)
             logger.info("User seed completed")
         except Exception as e:
+            print(f"[STARTUP] User seed error: {e}", flush=True)
             logger.error("User seed error: %s", str(e))
             await session.rollback()
 
@@ -1626,37 +1650,61 @@ async def lifespan(app: FastAPI):
             await seed_map_settings(session)
             await seed_sample_data(session)
             await session.commit()
+            print("[STARTUP] Basic seed data completed", flush=True)
         except Exception as e:
+            print(f"[STARTUP] Seed error: {e}", flush=True)
             logger.error("Seed error: %s", str(e))
             await session.rollback()
 
-    # Seed comprehensive data from seed/ directory (duplicate-safe, fills up to 100 each)
-    try:
-        from seed_data import (
-            seed_restaurants as seed_restaurants_full,
-            seed_courses as seed_courses_full,
-            seed_guides as seed_guides_full,
-            seed_festivals as seed_festivals_full,
-            seed_banners as seed_banners_full,
-            seed_events as seed_events_full,
-            seed_transport as seed_transport_full,
-            seed_themes as seed_themes_full,
-            seed_living_guide as seed_living_guide_full,
-        )
-        async with async_session() as session:
-            await seed_restaurants_full(session)
-            await seed_courses_full(session)
-            await seed_guides_full(session)
-            await seed_festivals_full(session)
-            await seed_banners_full(session)
-            await seed_events_full(session)
-            await seed_transport_full(session)
-            await seed_themes_full(session)
-            await seed_living_guide_full(session)
-            logger.info("Comprehensive seed data completed")
-    except Exception as e:
-        logger.error("Comprehensive seed error: %s", str(e))
+    # Check if comprehensive seed is needed (any key table has < 10 items)
+    needs_comprehensive_seed = False
+    async with async_session() as session:
+        counts = await check_data_counts(session)
+        print(f"[STARTUP] Current data counts: {counts}", flush=True)
+        for table_name, count in counts.items():
+            if count < 10:
+                print(f"[STARTUP] {table_name} has only {count} items (< 10), comprehensive seed needed", flush=True)
+                needs_comprehensive_seed = True
+                break
 
+    # Seed comprehensive data from seed/ directory (duplicate-safe, fills up to 100 each)
+    if needs_comprehensive_seed:
+        try:
+            from seed_data import (
+                seed_restaurants as seed_restaurants_full,
+                seed_courses as seed_courses_full,
+                seed_guides as seed_guides_full,
+                seed_festivals as seed_festivals_full,
+                seed_banners as seed_banners_full,
+                seed_events as seed_events_full,
+                seed_transport as seed_transport_full,
+                seed_themes as seed_themes_full,
+                seed_living_guide as seed_living_guide_full,
+            )
+            async with async_session() as session:
+                await seed_restaurants_full(session)
+                await seed_courses_full(session)
+                await seed_guides_full(session)
+                await seed_festivals_full(session)
+                await seed_banners_full(session)
+                await seed_events_full(session)
+                await seed_transport_full(session)
+                await seed_themes_full(session)
+                await seed_living_guide_full(session)
+                print("[STARTUP] Comprehensive seed data completed", flush=True)
+                logger.info("Comprehensive seed data completed")
+        except Exception as e:
+            print(f"[STARTUP] Comprehensive seed error: {e}", flush=True)
+            logger.error("Comprehensive seed error: %s", str(e))
+    else:
+        print("[STARTUP] All key tables have >= 10 items, skipping comprehensive seed", flush=True)
+
+    # Final count verification
+    async with async_session() as session:
+        final_counts = await check_data_counts(session)
+        print(f"[STARTUP] Final data counts: {final_counts}", flush=True)
+
+    print("[STARTUP] MICE Travel Mate Backend started on port 8007", flush=True)
     logger.info("MICE Travel Mate Backend started on port 8007")
     yield
 

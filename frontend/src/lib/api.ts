@@ -104,8 +104,8 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
 
     return response.json();
   } catch (error) {
-    if (error instanceof TypeError && error.message.includes('fetch')) {
-      throw new Error('Network error. Please check your connection.');
+    if (error instanceof TypeError) {
+      throw new Error('서버에 연결할 수 없습니다. 잠시 후 다시 시도해주세요. (Server connection failed)');
     }
     throw error;
   }
