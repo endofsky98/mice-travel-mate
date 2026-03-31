@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { Inter } from 'next/font/google';
 import { usePathname, useRouter } from 'next/navigation';
+import Script from 'next/script';
 import './globals.css';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import Header from '@/components/layout/Header';
@@ -122,6 +123,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             {!hideMainNav && <BottomNav t={t} isLoggedIn={isLoggedIn} />}
           </>
         )}
+        <Script src="https://guide.runhatch.com/sdk.js?v=3" data-key="bsk_62b54def8bd9562c037055e3d49caba926f463da4eb32191" strategy="afterInteractive" />
       </body>
     </html>
   );
