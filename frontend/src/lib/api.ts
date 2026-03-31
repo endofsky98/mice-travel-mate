@@ -1,4 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://3.36.108.114:8007';
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? '';
 
 function getLanguage(): string {
   if (typeof window !== 'undefined') {
