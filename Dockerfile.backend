@@ -1,0 +1,10 @@
+FROM python:3.11-slim
+WORKDIR /app
+COPY backend/requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+COPY backend/ ./
+RUN mkdir -p /app/data /app/uploads
+ENV DATABASE_URL=sqlite+aiosqlite:////app/data/mice_travel.db
+ENV FRONTEND_URL=https://e9KKOEecE8lp646CjvT7.runhatch.com
+EXPOSE 8007
+CMD ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8007"]
