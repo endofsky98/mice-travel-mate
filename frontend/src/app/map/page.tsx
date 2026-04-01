@@ -31,6 +31,34 @@ interface PlaceItem {
   profile_image_url?: string;
 }
 
+interface MapSettingsResponse {
+  map_engine: string;
+  mapbox_api_key: string;
+  google_maps_api_key: string;
+  default_center_lat: number;
+  default_center_lng: number;
+  default_zoom: number;
+}
+
+let googleMapsLoadPromise: Promise<void> | null = null;
+
+function loadGoogleMapsScript(apiKey: string): Promise<void> {
+  if (googleMapsLoadPromise) return googleMapsLoadPromise;
+  if (typeof window !== 'undefined' && (window as any).google?.maps) {
+    return Promise.resolve();
+  }
+  googleMapsLoadPromise = new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=marker`;
+    script.async = true;
+    script.defer = true;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error('Failed to load Google Maps'));
+    document.head.appendChild(script);
+  });
+  return googleMapsLoadPromise;
+}
+
 export default function MapPage() {
   const { t, lt, language } = useLanguage();
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -41,6 +69,8 @@ export default function MapPage() {
   const listContainerRef = useRef<HTMLDivElement>(null);
   const filterByViewportRef = useRef<() => void>(() => {});
   const selectedIdRef = useRef<number | null>(null);
+  const googleMarkersRef = useRef<any[]>([]);
+  const googleInfoWindowRef = useRef<any>(null);
 
   const [categoryFilter, setCategoryFilter] = useState('restaurants');
   const [searchQuery, setSearchQuery] = useState('');
@@ -50,7 +80,10 @@ export default function MapPage() {
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [mapCenter, setMapCenter] = useState(SAMSUNG_STATION);
   const [mapReady, setMapReady] = useState(false);
+  const [mapEngine, setMapEngine] = useState<string | null>(null);
   const [mapboxToken, setMapboxToken] = useState<string | null>(null);
+  const [googleApiKey, setGoogleApiKey] = useState<string | null>(null);
+  const [settingsLoaded, setSettingsLoaded] = useState(false);
   const [gpsStatus, setGpsStatus] = useState<'pending' | 'granted' | 'denied'>('pending');
 
   const categoryChips = [
@@ -76,7 +109,7 @@ export default function MapPage() {
   // Keep itemsRef in sync
   useEffect(() => { itemsRef.current = items; }, [items]);
 
-  // Build GeoJSON from items
+  // Build GeoJSON from items (for Mapbox)
   const buildGeoJSON = useCallback((data: PlaceItem[], selectedId: number | null) => {
     return {
       type: 'FeatureCollection' as const,
@@ -91,10 +124,10 @@ export default function MapPage() {
     };
   }, []);
 
-  // Update GeoJSON source on the map
+  // Update GeoJSON source on the map (Mapbox only)
   const updateSource = useCallback((selectedId?: number | null) => {
     const map = mapRef.current;
-    if (!map || !map.getSource('places')) return;
+    if (!map || !map.getSource || !map.getSource('places')) return;
     const sid = selectedId !== undefined ? selectedId : selectedIdRef.current;
     map.getSource('places').setData(buildGeoJSON(itemsRef.current, sid));
   }, [buildGeoJSON]);
@@ -121,22 +154,33 @@ export default function MapPage() {
     );
   }, []);
 
-  // Load mapbox token
+  // Load map settings (engine + keys)
   useEffect(() => {
-    const loadToken = async () => {
+    const loadSettings = async () => {
       const envToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
-      if (envToken && envToken !== 'pk.placeholder') {
-        setMapboxToken(envToken);
-        return;
-      }
       try {
-        const settings = await api.get<{ mapbox_api_key: string }>('/api/map-settings');
-        if (settings.mapbox_api_key && settings.mapbox_api_key !== 'pk.placeholder') {
-          setMapboxToken(settings.mapbox_api_key);
+        const settings = await api.get<MapSettingsResponse>('/api/map-settings');
+        const engine = settings.map_engine || 'mapbox';
+        setMapEngine(engine);
+
+        if (engine === 'google' && settings.google_maps_api_key) {
+          setGoogleApiKey(settings.google_maps_api_key);
+        } else if (engine === 'mapbox') {
+          const token = settings.mapbox_api_key && settings.mapbox_api_key !== 'pk.placeholder'
+            ? settings.mapbox_api_key
+            : (envToken && envToken !== 'pk.placeholder' ? envToken : null);
+          setMapboxToken(token);
         }
-      } catch { /* */ }
+      } catch {
+        // Fallback to env var for mapbox
+        if (envToken && envToken !== 'pk.placeholder') {
+          setMapEngine('mapbox');
+          setMapboxToken(envToken);
+        }
+      }
+      setSettingsLoaded(true);
     };
-    loadToken();
+    loadSettings();
   }, []);
 
   // Fetch data when category or language changes
@@ -153,33 +197,81 @@ export default function MapPage() {
     fetchItems();
   }, [categoryFilter, language]);
 
-  // B4: Filter items by viewport bounds
+  // B4: Filter items by viewport bounds (engine-aware)
   const filterByViewport = useCallback(() => {
     if (!mapRef.current) {
       setVisibleItems(items.filter(i => getCoords(i)));
       return;
     }
     try {
-      const bounds = mapRef.current.getBounds();
-      const sw = bounds.getSouthWest();
-      const ne = bounds.getNorthEast();
+      const map = mapRef.current;
+      let swLat: number, swLng: number, neLat: number, neLng: number;
+
+      if (mapEngine === 'google') {
+        const bounds = map.getBounds();
+        if (!bounds) { setVisibleItems(items.filter(i => getCoords(i))); return; }
+        const sw = bounds.getSouthWest();
+        const ne = bounds.getNorthEast();
+        swLat = sw.lat(); swLng = sw.lng();
+        neLat = ne.lat(); neLng = ne.lng();
+      } else {
+        const bounds = map.getBounds();
+        const sw = bounds.getSouthWest();
+        const ne = bounds.getNorthEast();
+        swLat = sw.lat; swLng = sw.lng;
+        neLat = ne.lat; neLng = ne.lng;
+      }
+
       const filtered = items.filter((item) => {
         const coords = getCoords(item);
         if (!coords) return false;
-        return coords.lat >= sw.lat && coords.lat <= ne.lat && coords.lng >= sw.lng && coords.lng <= ne.lng;
+        return coords.lat >= swLat && coords.lat <= neLat && coords.lng >= swLng && coords.lng <= neLng;
       });
       setVisibleItems(filtered);
     } catch {
       setVisibleItems(items.filter(i => getCoords(i)));
     }
-  }, [items]);
+  }, [items, mapEngine]);
 
-  // Keep ref in sync so moveend handler always uses latest filterByViewport
+  // Keep ref in sync so moveend/idle handler always uses latest filterByViewport
   useEffect(() => { filterByViewportRef.current = filterByViewport; }, [filterByViewport]);
 
-  // Initialize map with GeoJSON source + layers
+  // Ref for stable access to categoryFilter and lt
+  const categoryFilterRef = useRef(categoryFilter);
+  useEffect(() => { categoryFilterRef.current = categoryFilter; }, [categoryFilter]);
+  const ltRef = useRef(lt);
+  useEffect(() => { ltRef.current = lt; }, [lt]);
+  const tRef = useRef(t);
+  useEffect(() => { tRef.current = t; }, [t]);
+
+  // Build popup/infowindow HTML content
+  const buildPopupHtml = useCallback((item: PlaceItem) => {
+    const image = getImage(item);
+    const name = ltRef.current(item.name);
+    const desc = ltRef.current(item.description || item.address || '');
+    const detailUrl = `/${categoryFilterRef.current}/${item.id}`;
+
+    return `
+      <div style="min-width:220px;max-width:280px;font-family:Inter,sans-serif;">
+        ${image ? `<img src="${image}" style="width:100%;height:120px;object-fit:cover;border-radius:8px 8px 0 0;" alt="${name}" onerror="this.style.display='none'" />` : ''}
+        <div style="padding:10px 12px;">
+          <h3 style="font-size:14px;font-weight:600;margin:0 0 4px 0;color:#111;">${name}</h3>
+          <p style="font-size:12px;color:#666;margin:0 0 8px 0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${desc}</p>
+          ${item.avg_rating ? `<div style="font-size:12px;color:#f59e0b;margin-bottom:8px;">★ ${item.avg_rating.toFixed(1)}</div>` : ''}
+          <div style="display:flex;gap:6px;">
+            <button onclick="event.stopPropagation()" style="padding:6px 10px;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:6px;cursor:pointer;display:flex;align-items:center;font-size:12px;" title="${tRef.current('common.bookmark') || 'Bookmark'}">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            </button>
+            <a href="${detailUrl}" style="flex:1;display:inline-flex;align-items:center;justify-content:center;padding:6px 12px;background:#4f46e5;color:white;border-radius:6px;font-size:12px;font-weight:500;text-decoration:none;">${tRef.current('common.view_detail') || '상세보기'}</a>
+          </div>
+        </div>
+      </div>
+    `;
+  }, []);
+
+  // === MAPBOX INITIALIZATION ===
   useEffect(() => {
-    if (!mapboxToken || !mapContainerRef.current || gpsStatus === 'pending') return;
+    if (!settingsLoaded || mapEngine !== 'mapbox' || !mapboxToken || !mapContainerRef.current || gpsStatus === 'pending') return;
 
     let map: any;
     const initMap = async () => {
@@ -204,19 +296,16 @@ export default function MapPage() {
 
       map.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
-      // B4: moveend event for viewport-based list filtering
       map.on('moveend', () => {
         if (mapRef.current) filterByViewportRef.current();
       });
 
       map.on('load', () => {
-        // Add GeoJSON source (empty initially)
         map.addSource('places', {
           type: 'geojson',
           data: { type: 'FeatureCollection', features: [] },
         });
 
-        // Shadow layer for depth
         map.addLayer({
           id: 'places-shadow',
           type: 'circle',
@@ -229,7 +318,6 @@ export default function MapPage() {
           },
         });
 
-        // Main circle layer — color/size driven by 'selected' property
         map.addLayer({
           id: 'places-circle',
           type: 'circle',
@@ -242,7 +330,6 @@ export default function MapPage() {
           },
         });
 
-        // Icon layer — small white pin icon via symbol
         map.addLayer({
           id: 'places-icon',
           type: 'circle',
@@ -253,18 +340,14 @@ export default function MapPage() {
           },
         });
 
-        // Click handler on markers
         map.on('click', 'places-circle', (e: any) => {
           if (!e.features || e.features.length === 0) return;
           const feature = e.features[0];
           const itemId = feature.properties.itemId;
           const item = itemsRef.current.find(i => i.id === itemId);
-          if (item) {
-            handleSelectItemFromMap(item, mapboxgl, map);
-          }
+          if (item) handleSelectItemMapbox(item, mapboxgl, map);
         });
 
-        // Cursor change on hover
         map.on('mouseenter', 'places-circle', () => {
           map.getCanvas().style.cursor = 'pointer';
         });
@@ -284,45 +367,163 @@ export default function MapPage() {
       mapRef.current = null;
       setMapReady(false);
     };
-  }, [mapboxToken, gpsStatus, mapCenter.lat, mapCenter.lng]);
+  }, [settingsLoaded, mapEngine, mapboxToken, gpsStatus, mapCenter.lat, mapCenter.lng]);
 
-  // Update user location marker separately (small DOM marker — just 1 element, no delay concern)
+  // === GOOGLE MAPS INITIALIZATION ===
   useEffect(() => {
-    if (!mapRef.current || !mapReady || !userLocation) return;
-    (async () => {
-      const mapboxgl = (await import('mapbox-gl')).default;
-      if (userMarkerRef.current) {
-        userMarkerRef.current.remove();
-        userMarkerRef.current = null;
+    if (!settingsLoaded || mapEngine !== 'google' || !googleApiKey || !mapContainerRef.current || gpsStatus === 'pending') return;
+
+    let map: any;
+    const initGoogleMap = async () => {
+      try {
+        await loadGoogleMapsScript(googleApiKey);
+        const google = (window as any).google;
+
+        map = new google.maps.Map(mapContainerRef.current!, {
+          center: { lat: mapCenter.lat, lng: mapCenter.lng },
+          zoom: DEFAULT_ZOOM,
+          mapId: 'exporoute-map',
+        });
+
+        // Viewport filtering on idle (equivalent to Mapbox moveend)
+        map.addListener('idle', () => {
+          if (mapRef.current) filterByViewportRef.current();
+        });
+
+        // Create shared InfoWindow
+        googleInfoWindowRef.current = new google.maps.InfoWindow();
+        googleInfoWindowRef.current.addListener('closeclick', () => {
+          setSelectedItem(null);
+          selectedIdRef.current = null;
+          updateGoogleMarkerStyles(null);
+        });
+
+        mapRef.current = map;
+        setMapReady(true);
+      } catch (err) {
+        console.error('Failed to initialize Google Maps:', err);
       }
-      const userEl = document.createElement('div');
-      userEl.style.cssText = 'width:16px;height:16px;background:#3b82f6;border-radius:50%;border:3px solid white;box-shadow:0 0 0 4px rgba(59,130,246,0.25);';
-      userMarkerRef.current = new mapboxgl.Marker(userEl)
-        .setLngLat([userLocation.lng, userLocation.lat])
-        .addTo(mapRef.current);
-    })();
-  }, [userLocation, mapReady]);
+    };
 
-  // Update GeoJSON source when items change
+    initGoogleMap();
+    return () => {
+      // Clean up Google markers
+      googleMarkersRef.current.forEach(m => m.setMap(null));
+      googleMarkersRef.current = [];
+      if (googleInfoWindowRef.current) googleInfoWindowRef.current.close();
+      map = null;
+      mapRef.current = null;
+      setMapReady(false);
+    };
+  }, [settingsLoaded, mapEngine, googleApiKey, gpsStatus, mapCenter.lat, mapCenter.lng]);
+
+  // Update Google marker icon styles based on selection
+  const updateGoogleMarkerStyles = useCallback((selectedId: number | null) => {
+    const google = (window as any).google;
+    if (!google) return;
+    googleMarkersRef.current.forEach((gMarker) => {
+      const itemId = gMarker._itemId;
+      const isSelected = itemId === selectedId;
+      gMarker.setIcon({
+        path: google.maps.SymbolPath.CIRCLE,
+        scale: isSelected ? 12 : 8,
+        fillColor: isSelected ? '#dc2626' : '#4f46e5',
+        fillOpacity: 1,
+        strokeColor: '#ffffff',
+        strokeWeight: 2.5,
+      });
+      gMarker.setZIndex(isSelected ? 1000 : 1);
+    });
+  }, []);
+
+  // Update Google markers when items change
   useEffect(() => {
-    if (!mapRef.current || !mapReady) return;
-    updateSource(null);
+    if (!mapReady || mapEngine !== 'google' || !mapRef.current) return;
+    const google = (window as any).google;
+    if (!google) return;
+
+    // Remove old markers
+    googleMarkersRef.current.forEach(m => m.setMap(null));
+    googleMarkersRef.current = [];
+
+    // Close info window
+    if (googleInfoWindowRef.current) googleInfoWindowRef.current.close();
     selectedIdRef.current = null;
     setSelectedItem(null);
-    if (popupRef.current) { popupRef.current.remove(); popupRef.current = null; }
-    filterByViewport();
-  }, [items, mapReady, updateSource, filterByViewport]);
 
-  // Ref for stable access to categoryFilter and lt
-  const categoryFilterRef = useRef(categoryFilter);
-  useEffect(() => { categoryFilterRef.current = categoryFilter; }, [categoryFilter]);
-  const ltRef = useRef(lt);
-  useEffect(() => { ltRef.current = lt; }, [lt]);
-  const tRef = useRef(t);
-  useEffect(() => { tRef.current = t; }, [t]);
+    // Add new markers
+    items.forEach((item) => {
+      const coords = getCoords(item);
+      if (!coords) return;
 
-  // Handle item selection from map layer click
-  const handleSelectItemFromMap = useCallback((item: PlaceItem, mapboxgl: any, map: any) => {
+      const marker = new google.maps.Marker({
+        position: { lat: coords.lat, lng: coords.lng },
+        map: mapRef.current,
+        icon: {
+          path: google.maps.SymbolPath.CIRCLE,
+          scale: 8,
+          fillColor: '#4f46e5',
+          fillOpacity: 1,
+          strokeColor: '#ffffff',
+          strokeWeight: 2.5,
+        },
+        zIndex: 1,
+      });
+
+      (marker as any)._itemId = item.id;
+
+      marker.addListener('click', () => {
+        handleSelectItemGoogle(item, marker);
+      });
+
+      googleMarkersRef.current.push(marker);
+    });
+
+    filterByViewportRef.current();
+  }, [items, mapReady, mapEngine]);
+
+  // Handle item selection on Google Maps
+  const handleSelectItemGoogle = useCallback((item: PlaceItem, marker?: any) => {
+    const coords = getCoords(item);
+    if (!coords || !mapRef.current) return;
+    const google = (window as any).google;
+    if (!google) return;
+
+    setSelectedItem(item);
+    selectedIdRef.current = item.id;
+    updateGoogleMarkerStyles(item.id);
+
+    const popupHtml = buildPopupHtml(item);
+
+    if (googleInfoWindowRef.current) {
+      googleInfoWindowRef.current.setContent(popupHtml);
+      if (marker) {
+        googleInfoWindowRef.current.open(mapRef.current, marker);
+      } else {
+        // Find the marker for this item
+        const targetMarker = googleMarkersRef.current.find((m: any) => m._itemId === item.id);
+        if (targetMarker) {
+          googleInfoWindowRef.current.open(mapRef.current, targetMarker);
+        } else {
+          googleInfoWindowRef.current.setPosition({ lat: coords.lat, lng: coords.lng });
+          googleInfoWindowRef.current.open(mapRef.current);
+        }
+      }
+    }
+
+    mapRef.current.panTo({ lat: coords.lat, lng: coords.lng });
+
+    // Scroll selected item into view in the list
+    setTimeout(() => {
+      const cardEl = document.querySelector(`[data-list-item-id="${item.id}"]`);
+      if (cardEl) {
+        cardEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      }
+    }, 100);
+  }, [updateGoogleMarkerStyles, buildPopupHtml]);
+
+  // Handle item selection on Mapbox
+  const handleSelectItemMapbox = useCallback((item: PlaceItem, mapboxgl: any, map: any) => {
     const coords = getCoords(item);
     if (!coords) return;
 
@@ -333,27 +534,7 @@ export default function MapPage() {
     // Remove old popup
     if (popupRef.current) popupRef.current.remove();
 
-    const image = getImage(item);
-    const name = ltRef.current(item.name);
-    const desc = ltRef.current(item.description || item.address || '');
-    const detailUrl = `/${categoryFilterRef.current}/${item.id}`;
-
-    const popupHtml = `
-      <div style="min-width:220px;max-width:280px;font-family:Inter,sans-serif;">
-        ${image ? `<img src="${image}" style="width:100%;height:120px;object-fit:cover;border-radius:8px 8px 0 0;" alt="${name}" onerror="this.style.display='none'" />` : ''}
-        <div style="padding:10px 12px;">
-          <h3 style="font-size:14px;font-weight:600;margin:0 0 4px 0;color:#111;">${name}</h3>
-          <p style="font-size:12px;color:#666;margin:0 0 8px 0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${desc}</p>
-          ${item.avg_rating ? `<div style="font-size:12px;color:#f59e0b;margin-bottom:8px;">★ ${item.avg_rating.toFixed(1)}</div>` : ''}
-          <div style="display:flex;gap:6px;">
-            <button onclick="event.stopPropagation()" style="padding:6px 10px;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:6px;cursor:pointer;display:flex;align-items:center;font-size:12px;" title="${tRef.current('common.bookmark') || 'Bookmark'}">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-            </button>
-            <a href="${detailUrl}" style="flex:1;display:inline-flex;align-items:center;justify-content:center;padding:6px 12px;background:#4f46e5;color:white;border-radius:6px;font-size:12px;font-weight:500;text-decoration:none;">${tRef.current('common.view_detail') || '상세보기'}</a>
-          </div>
-        </div>
-      </div>
-    `;
+    const popupHtml = buildPopupHtml(item);
 
     const popup = new mapboxgl.Popup({
       offset: 15,
@@ -382,17 +563,74 @@ export default function MapPage() {
         cardEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
       }
     }, 100);
-  }, [updateSource]);
+  }, [updateSource, buildPopupHtml]);
 
-  // Handle item selection from bottom list
+  // Update user location marker (Mapbox)
+  useEffect(() => {
+    if (!mapRef.current || !mapReady || !userLocation || mapEngine !== 'mapbox') return;
+    (async () => {
+      const mapboxgl = (await import('mapbox-gl')).default;
+      if (userMarkerRef.current) {
+        userMarkerRef.current.remove();
+        userMarkerRef.current = null;
+      }
+      const userEl = document.createElement('div');
+      userEl.style.cssText = 'width:16px;height:16px;background:#3b82f6;border-radius:50%;border:3px solid white;box-shadow:0 0 0 4px rgba(59,130,246,0.25);';
+      userMarkerRef.current = new mapboxgl.Marker(userEl)
+        .setLngLat([userLocation.lng, userLocation.lat])
+        .addTo(mapRef.current);
+    })();
+  }, [userLocation, mapReady, mapEngine]);
+
+  // Update user location marker (Google Maps)
+  useEffect(() => {
+    if (!mapRef.current || !mapReady || !userLocation || mapEngine !== 'google') return;
+    const google = (window as any).google;
+    if (!google) return;
+
+    if (userMarkerRef.current) {
+      userMarkerRef.current.setMap(null);
+      userMarkerRef.current = null;
+    }
+
+    userMarkerRef.current = new google.maps.Marker({
+      position: { lat: userLocation.lat, lng: userLocation.lng },
+      map: mapRef.current,
+      icon: {
+        path: google.maps.SymbolPath.CIRCLE,
+        scale: 8,
+        fillColor: '#3b82f6',
+        fillOpacity: 1,
+        strokeColor: '#ffffff',
+        strokeWeight: 3,
+      },
+      zIndex: 2000,
+    });
+  }, [userLocation, mapReady, mapEngine]);
+
+  // Update Mapbox GeoJSON source when items change
+  useEffect(() => {
+    if (!mapRef.current || !mapReady || mapEngine !== 'mapbox') return;
+    updateSource(null);
+    selectedIdRef.current = null;
+    setSelectedItem(null);
+    if (popupRef.current) { popupRef.current.remove(); popupRef.current = null; }
+    filterByViewport();
+  }, [items, mapReady, mapEngine, updateSource, filterByViewport]);
+
+  // Handle item selection from bottom list (engine-aware)
   const handleSelectItem = useCallback(async (item: PlaceItem) => {
-    const mapboxgl = (await import('mapbox-gl')).default;
-    const map = mapRef.current;
-    if (!map) return;
-    handleSelectItemFromMap(item, mapboxgl, map);
-  }, [handleSelectItemFromMap]);
+    if (mapEngine === 'google') {
+      handleSelectItemGoogle(item);
+    } else {
+      const mapboxgl = (await import('mapbox-gl')).default;
+      const map = mapRef.current;
+      if (!map) return;
+      handleSelectItemMapbox(item, mapboxgl, map);
+    }
+  }, [mapEngine, handleSelectItemGoogle, handleSelectItemMapbox]);
 
-  // B2: My location button handler with GPS permission check
+  // B2: My location button handler (engine-aware)
   const handleMyLocation = () => {
     if (!navigator.geolocation) {
       alert(t('map.gps_not_supported') || 'GPS is not supported on this device.');
@@ -405,8 +643,12 @@ export default function MapPage() {
         setGpsStatus('granted');
         const flyToLoc = () => {
           if (mapRef.current) {
-            const currentZoom = mapRef.current.getZoom();
-            mapRef.current.flyTo({ center: [loc.lng, loc.lat], zoom: currentZoom, duration: 800 });
+            if (mapEngine === 'google') {
+              mapRef.current.panTo({ lat: loc.lat, lng: loc.lng });
+            } else {
+              const currentZoom = mapRef.current.getZoom();
+              mapRef.current.flyTo({ center: [loc.lng, loc.lat], zoom: currentZoom, duration: 800 });
+            }
           } else {
             setTimeout(flyToLoc, 500);
           }
@@ -429,6 +671,8 @@ export default function MapPage() {
         return name.includes(q) || desc.includes(q);
       })
     : visibleItems;
+
+  const hasMapKey = mapboxToken || googleApiKey;
 
   return (
     <div className="relative" style={{ height: 'calc(100dvh - 128px)' }}>
@@ -456,7 +700,7 @@ export default function MapPage() {
 
       {/* Map Area */}
       <div className="fixed left-0 right-0" style={{ top: '64px', bottom: '64px' }}>
-        {mapboxToken ? (
+        {hasMapKey ? (
           <div ref={mapContainerRef} className="w-full h-full" />
         ) : (
           <div className="w-full h-full bg-gray-100 dark:bg-[#1a1a1a] flex items-center justify-center">
