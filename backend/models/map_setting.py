@@ -8,7 +8,11 @@ class MapSetting(Base):
     __tablename__ = "map_settings"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    map_engine = Column(String(20), default="mapbox")  # 'mapbox' or 'google'
     mapbox_api_key = Column(String(500), nullable=True)
+    google_maps_api_key = Column(String(500), nullable=True)
+    google_oauth_client_id = Column(String(500), nullable=True)
+    google_oauth_client_secret = Column(String(500), nullable=True)
     default_latitude = Column(Float, default=37.5665)  # Seoul default
     default_longitude = Column(Float, default=126.9780)
     default_zoom = Column(Integer, default=12)

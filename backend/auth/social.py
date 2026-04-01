@@ -6,7 +6,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-async def verify_google_token(id_token: str) -> Optional[dict]:
+async def verify_google_token(id_token: str, client_id: str | None = None) -> Optional[dict]:
     """
     Verify a Google OAuth ID token.
     Returns user info dict with email, name, and sub (Google user ID) on success.
@@ -24,7 +24,9 @@ async def verify_google_token(id_token: str) -> Optional[dict]:
             data = response.json()
 
             # Verify the token was issued for our app
-            if settings.GOOGLE_CLIENT_ID and data.get("aud") != settings.GOOGLE_CLIENT_ID:
+            # Use provided client_id, fall back to settings
+            expected_client_id = client_id or settings.GOOGLE_CLIENT_ID
+            if expected_client_id and data.get("aud") != expected_client_id:
                 logger.warning("Google token audience mismatch")
                 return None
 

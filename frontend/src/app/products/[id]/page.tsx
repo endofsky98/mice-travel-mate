@@ -68,8 +68,10 @@ export default function ProductDetailPage() {
 
   const name = lt(product.name);
   const bookmarked = isBookmarked(product.id, 'product');
-  const markers = product.lat && product.lng
-    ? [{ id: product.id, lat: product.lat, lng: product.lng, title: name }]
+  const meetingLat = product.meeting_point_lat || product.lat;
+  const meetingLng = product.meeting_point_lng || product.lng;
+  const markers = meetingLat && meetingLng
+    ? [{ id: product.id, lat: meetingLat, lng: meetingLng, title: lt(product.meeting_point) || name }]
     : [];
 
   return (
@@ -243,18 +245,19 @@ export default function ProductDetailPage() {
         )}
       </div>
 
+      {/* Meeting Point Map */}
+      {markers.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">{t('product.meeting_point_map') || 'Meeting Point'}</h2>
+          <MapView markers={markers} t={t} className="h-64" />
+        </div>
+      )}
+
       {/* Cancellation Policy */}
       {lt(product.cancellation_policy) && (
         <div className="mb-8 p-4 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40">
           <h3 className="font-semibold text-amber-700 dark:text-amber-400 mb-2">{t('booking.cancellation_policy')}</h3>
           <p className="text-sm text-amber-600 dark:text-amber-300">{lt(product.cancellation_policy)}</p>
-        </div>
-      )}
-
-      {/* Map */}
-      {markers.length > 0 && (
-        <div className="mb-8">
-          <MapView markers={markers} t={t} className="h-64" />
         </div>
       )}
 

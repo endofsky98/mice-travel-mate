@@ -113,7 +113,13 @@ async def login(data: UserLogin, db: AsyncSession = Depends(get_db)):
 
 @router.post("/social/google", response_model=TokenResponse)
 async def google_login(data: SocialLoginRequest, db: AsyncSession = Depends(get_db)):
-    google_user = await verify_google_token(data.id_token)
+    # Try to get client_id from DB settings
+    from models.map_setting import MapSetting
+    result_settings = await db.execute(select(MapSetting).limit(1))
+    map_setting = result_settings.scalar_one_or_none()
+    db_client_id = map_setting.google_oauth_client_id if map_setting else None
+
+    google_user = await verify_google_token(data.id_token, client_id=db_client_id)
     if not google_user:
         raise HTTPException(status_code=401, detail="Invalid Google token")
 

@@ -44,6 +44,15 @@ export async function register(data: {
   return tokens;
 }
 
+export async function socialLogin(provider: string, idToken: string, name?: string): Promise<void> {
+  const response = await api.post<{ access_token: string; refresh_token: string; user: any }>(
+    `/api/auth/social/${provider}`,
+    { id_token: idToken, name }
+  );
+  localStorage.setItem('access_token', response.access_token);
+  localStorage.setItem('refresh_token', response.refresh_token);
+}
+
 export async function logout(): Promise<void> {
   try {
     await api.post('/api/auth/logout');

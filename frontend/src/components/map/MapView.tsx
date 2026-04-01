@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { MapPin, ExternalLink } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import { MapMarker } from '@/types';
@@ -18,58 +18,86 @@ interface MapViewProps {
   t: (key: string) => string;
 }
 
-interface MapSettings {
+interface MapSettingsResponse {
+  map_engine: string;
   mapbox_api_key: string;
+  google_maps_api_key: string;
   default_center_lat: number;
   default_center_lng: number;
   default_zoom: number;
 }
 
+let googleMapsLoadPromise: Promise<void> | null = null;
+
+function loadGoogleMapsScript(apiKey: string): Promise<void> {
+  if (googleMapsLoadPromise) return googleMapsLoadPromise;
+  if (typeof window !== 'undefined' && (window as any).google?.maps) {
+    return Promise.resolve();
+  }
+  googleMapsLoadPromise = new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=marker`;
+    script.async = true;
+    script.defer = true;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error('Failed to load Google Maps'));
+    document.head.appendChild(script);
+  });
+  return googleMapsLoadPromise;
+}
+
 export default function MapView({ center, zoom, markers = [], polyline, className, onMarkerClick, t }: MapViewProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
+  const [mapEngine, setMapEngine] = useState<string | null>(null);
   const [mapboxToken, setMapboxToken] = useState<string | null>(null);
-  const [tokenLoaded, setTokenLoaded] = useState(false);
+  const [googleApiKey, setGoogleApiKey] = useState<string | null>(null);
+  const [settingsLoaded, setSettingsLoaded] = useState(false);
 
   const mainLat = center?.lat || markers[0]?.lat || 37.5665;
   const mainLng = center?.lng || markers[0]?.lng || 126.978;
   const mainTitle = markers[0]?.title || '';
 
-  // Load mapbox token from public settings API or env var
+  // Load map settings
   useEffect(() => {
-    const loadToken = async () => {
-      // Try env var first
+    const loadSettings = async () => {
+      // Try env var first for mapbox
       const envToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
-      if (envToken && envToken !== 'pk.placeholder') {
-        setMapboxToken(envToken);
-        setTokenLoaded(true);
-        return;
-      }
 
-      // Fetch from public API
       try {
-        const settings = await api.get<MapSettings>('/api/map-settings');
-        if (settings.mapbox_api_key && settings.mapbox_api_key !== 'pk.placeholder') {
-          setMapboxToken(settings.mapbox_api_key);
+        const settings = await api.get<MapSettingsResponse>('/api/map-settings');
+        const engine = settings.map_engine || 'mapbox';
+        setMapEngine(engine);
+
+        if (engine === 'google' && settings.google_maps_api_key) {
+          setGoogleApiKey(settings.google_maps_api_key);
+        } else if (engine === 'mapbox') {
+          const token = settings.mapbox_api_key && settings.mapbox_api_key !== 'pk.placeholder'
+            ? settings.mapbox_api_key
+            : (envToken && envToken !== 'pk.placeholder' ? envToken : null);
+          setMapboxToken(token);
         }
       } catch {
-        // Token not available
+        // Fallback to env var
+        if (envToken && envToken !== 'pk.placeholder') {
+          setMapEngine('mapbox');
+          setMapboxToken(envToken);
+        }
       }
-      setTokenLoaded(true);
+      setSettingsLoaded(true);
     };
-    loadToken();
+    loadSettings();
   }, []);
 
-  // Initialize Mapbox map
+  // Initialize Mapbox
   useEffect(() => {
-    if (!tokenLoaded || !mapboxToken || !mapContainerRef.current) return;
+    if (!settingsLoaded || mapEngine !== 'mapbox' || !mapboxToken || !mapContainerRef.current) return;
 
     let map: any;
     const initMap = async () => {
       try {
         const mapboxgl = (await import('mapbox-gl')).default;
 
-        // Load Mapbox CSS via link tag if not already loaded
         if (!document.getElementById('mapbox-gl-css')) {
           const link = document.createElement('link');
           link.id = 'mapbox-gl-css';
@@ -89,7 +117,6 @@ export default function MapView({ center, zoom, markers = [], polyline, classNam
 
         map.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
-        // Add markers
         markers.forEach((marker) => {
           const el = document.createElement('div');
           el.className = 'mapbox-custom-marker';
@@ -100,7 +127,7 @@ export default function MapView({ center, zoom, markers = [], polyline, classNam
             `<div style="padding:4px 8px;"><strong style="font-size:14px;">${marker.title || ''}</strong>${marker.description ? `<p style="font-size:12px;color:#666;margin-top:4px;">${marker.description}</p>` : ''}</div>`
           );
 
-          const m = new mapboxgl.Marker(el)
+          new mapboxgl.Marker(el)
             .setLngLat([marker.lng, marker.lat])
             .setPopup(popup)
             .addTo(map);
@@ -110,7 +137,6 @@ export default function MapView({ center, zoom, markers = [], polyline, classNam
           }
         });
 
-        // Add polyline
         if (polyline && polyline.length > 1) {
           map.on('load', () => {
             map.addSource('route', {
@@ -134,7 +160,6 @@ export default function MapView({ center, zoom, markers = [], polyline, classNam
           });
         }
 
-        // Fit bounds if multiple markers
         if (markers.length > 1) {
           const bounds = new mapboxgl.LngLatBounds();
           markers.forEach(m => bounds.extend([m.lng, m.lat]));
@@ -148,14 +173,71 @@ export default function MapView({ center, zoom, markers = [], polyline, classNam
     };
 
     initMap();
+    return () => { if (map) map.remove(); };
+  }, [settingsLoaded, mapEngine, mapboxToken, mainLat, mainLng, zoom, markers, polyline, onMarkerClick]);
 
-    return () => {
-      if (map) map.remove();
+  // Initialize Google Maps
+  useEffect(() => {
+    if (!settingsLoaded || mapEngine !== 'google' || !googleApiKey || !mapContainerRef.current) return;
+
+    let map: any;
+    const initGoogleMap = async () => {
+      try {
+        await loadGoogleMapsScript(googleApiKey);
+        const google = (window as any).google;
+
+        map = new google.maps.Map(mapContainerRef.current!, {
+          center: { lat: mainLat, lng: mainLng },
+          zoom: zoom || 13,
+          mapId: 'exporoute-map',
+        });
+
+        markers.forEach((marker) => {
+          const gMarker = new google.maps.Marker({
+            position: { lat: marker.lat, lng: marker.lng },
+            map,
+            title: marker.title || '',
+          });
+
+          if (marker.title || marker.description) {
+            const infoWindow = new google.maps.InfoWindow({
+              content: `<div style="padding:4px 8px;"><strong style="font-size:14px;">${marker.title || ''}</strong>${marker.description ? `<p style="font-size:12px;color:#666;margin-top:4px;">${marker.description}</p>` : ''}</div>`,
+            });
+            gMarker.addListener('click', () => {
+              infoWindow.open(map, gMarker);
+              if (onMarkerClick) onMarkerClick(marker);
+            });
+          }
+        });
+
+        if (polyline && polyline.length > 1) {
+          new google.maps.Polyline({
+            path: polyline.map(p => ({ lat: p.lat, lng: p.lng })),
+            geodesic: true,
+            strokeColor: '#4f46e5',
+            strokeWeight: 4,
+            map,
+          });
+        }
+
+        if (markers.length > 1) {
+          const bounds = new google.maps.LatLngBounds();
+          markers.forEach(m => bounds.extend({ lat: m.lat, lng: m.lng }));
+          map.fitBounds(bounds);
+        }
+
+        mapRef.current = map;
+      } catch (err) {
+        console.error('Failed to initialize Google Maps:', err);
+      }
     };
-  }, [tokenLoaded, mapboxToken, mainLat, mainLng, zoom, markers, polyline, onMarkerClick]);
 
-  // If no token, show fallback with Google/Naver links
-  if (tokenLoaded && !mapboxToken) {
+    initGoogleMap();
+    return () => { map = null; };
+  }, [settingsLoaded, mapEngine, googleApiKey, mainLat, mainLng, zoom, markers, polyline, onMarkerClick]);
+
+  // Fallback: no token/key available
+  if (settingsLoaded && !mapboxToken && !googleApiKey) {
     return (
       <div
         className={cn(
@@ -173,21 +255,13 @@ export default function MapView({ center, zoom, markers = [], polyline, classNam
             </p>
           )}
           <div className="flex flex-col sm:flex-row gap-2">
-            <a
-              href={generateGoogleMapsUrl(mainLat, mainLng, mainTitle)}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            <a href={generateGoogleMapsUrl(mainLat, mainLng, mainTitle)} target="_blank" rel="noopener noreferrer">
               <Button variant="outline" size="sm">
                 <ExternalLink className="w-4 h-4" />
                 {t('common.open_in_google_maps') || 'Google Maps'}
               </Button>
             </a>
-            <a
-              href={generateNaverMapUrl(mainLat, mainLng, mainTitle)}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            <a href={generateNaverMapUrl(mainLat, mainLng, mainTitle)} target="_blank" rel="noopener noreferrer">
               <Button variant="outline" size="sm">
                 <ExternalLink className="w-4 h-4" />
                 {t('common.open_in_naver_map') || 'Naver Map'}
@@ -207,7 +281,6 @@ export default function MapView({ center, zoom, markers = [], polyline, classNam
       )}
     >
       <div ref={mapContainerRef} className="w-full h-full" style={{ minHeight: '200px' }} />
-      {/* External map links overlay */}
       <div className="absolute bottom-2 right-2 flex gap-1 z-10">
         <a
           href={generateGoogleMapsUrl(mainLat, mainLng, mainTitle)}

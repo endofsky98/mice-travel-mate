@@ -2214,14 +2214,22 @@ async def admin_get_map_settings(
 
     if not setting:
         return {
+            "map_engine": "mapbox",
             "mapbox_api_key": "",
+            "google_maps_api_key": "",
+            "google_oauth_client_id": "",
+            "google_oauth_client_secret": "",
             "default_center_lat": 37.5665,
             "default_center_lng": 126.978,
             "default_zoom": 12,
         }
 
     return {
+        "map_engine": setting.map_engine or "mapbox",
         "mapbox_api_key": setting.mapbox_api_key or "",
+        "google_maps_api_key": setting.google_maps_api_key or "",
+        "google_oauth_client_id": setting.google_oauth_client_id or "",
+        "google_oauth_client_secret": setting.google_oauth_client_secret or "",
         "default_center_lat": setting.default_latitude or 37.5665,
         "default_center_lng": setting.default_longitude or 126.978,
         "default_zoom": setting.default_zoom or 12,
@@ -2244,8 +2252,16 @@ async def admin_update_map_settings(
         setting = MapSetting(id=str(uuid.uuid4()))
         db.add(setting)
 
+    if "map_engine" in data:
+        setting.map_engine = data["map_engine"]
     if "mapbox_api_key" in data:
         setting.mapbox_api_key = data["mapbox_api_key"]
+    if "google_maps_api_key" in data:
+        setting.google_maps_api_key = data["google_maps_api_key"]
+    if "google_oauth_client_id" in data:
+        setting.google_oauth_client_id = data["google_oauth_client_id"]
+    if "google_oauth_client_secret" in data:
+        setting.google_oauth_client_secret = data["google_oauth_client_secret"]
     if "default_center_lat" in data:
         setting.default_latitude = data["default_center_lat"]
     if "default_center_lng" in data:
@@ -2258,7 +2274,11 @@ async def admin_update_map_settings(
     await db.refresh(setting)
 
     return {
+        "map_engine": setting.map_engine or "mapbox",
         "mapbox_api_key": setting.mapbox_api_key or "",
+        "google_maps_api_key": setting.google_maps_api_key or "",
+        "google_oauth_client_id": setting.google_oauth_client_id or "",
+        "google_oauth_client_secret": setting.google_oauth_client_secret or "",
         "default_center_lat": setting.default_latitude or 37.5665,
         "default_center_lng": setting.default_longitude or 126.978,
         "default_zoom": setting.default_zoom or 12,

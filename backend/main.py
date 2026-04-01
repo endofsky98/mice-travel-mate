@@ -132,6 +132,13 @@ async def run_migrations(conn):
 
         # ── Banners: transition_type ──
         "ALTER TABLE rolling_banners ADD COLUMN transition_type VARCHAR(20) DEFAULT 'slide'",
+
+        # ── Map Settings: engine selection + google maps ──
+        "ALTER TABLE map_settings ADD COLUMN map_engine VARCHAR(20) DEFAULT 'mapbox'",
+        "ALTER TABLE map_settings ADD COLUMN google_maps_api_key VARCHAR(500)",
+        # ── Map Settings: Google OAuth keys stored in map_settings ──
+        "ALTER TABLE map_settings ADD COLUMN google_oauth_client_id VARCHAR(500)",
+        "ALTER TABLE map_settings ADD COLUMN google_oauth_client_secret VARCHAR(500)",
     ]
     for migration in migrations:
         try:
@@ -478,102 +485,59 @@ async def seed_festivals(session):
 
 
 async def seed_living_guide(session):
-    """Seed living guide categories and sample articles."""
+    """Seed living guide categories and articles with rich content."""
     result = await session.execute(select(LivingGuideCategory))
     if result.scalars().first():
         return
 
     categories = [
         {
-            "name_en": "Transportation",
-            "name_ko": "교통",
-            "name_zh_cn": "交通",
-            "name_zh_tw": "交通",
-            "name_ja": "交通",
-            "name_es": "Transporte",
-            "name_th": "การเดินทาง",
-            "name_vi": "Giao thông",
-            "name_fr": "Transport",
-            "icon": "bus",
-            "display_order": 1,
+            "name_en": "Transportation", "name_ko": "교통",
+            "name_zh_cn": "交通", "name_zh_tw": "交通", "name_ja": "交通",
+            "name_es": "Transporte", "name_th": "การขนส่ง", "name_vi": "Giao thong", "name_fr": "Transport",
+            "icon": "transportation", "display_order": 1,
         },
         {
-            "name_en": "Food Culture",
-            "name_ko": "음식 문화",
-            "name_zh_cn": "饮食文化",
-            "name_zh_tw": "飲食文化",
-            "name_ja": "食文化",
-            "name_es": "Cultura Gastronómica",
-            "name_th": "วัฒนธรรมอาหาร",
-            "name_vi": "Văn hóa Ẩm thực",
-            "name_fr": "Culture Culinaire",
-            "icon": "utensils",
-            "display_order": 2,
+            "name_en": "Food & Dining", "name_ko": "음식 문화",
+            "name_zh_cn": "饮食文化", "name_zh_tw": "飲食文化", "name_ja": "食文化",
+            "name_es": "Gastronomia", "name_th": "อาหาร", "name_vi": "Am thuc", "name_fr": "Gastronomie",
+            "icon": "food_culture", "display_order": 2,
         },
         {
-            "name_en": "Shopping",
-            "name_ko": "쇼핑",
-            "name_zh_cn": "购物",
-            "name_zh_tw": "購物",
-            "name_ja": "ショッピング",
-            "name_es": "Compras",
-            "name_th": "ช้อปปิ้ง",
-            "name_vi": "Mua sắm",
-            "name_fr": "Shopping",
-            "icon": "shopping-bag",
-            "display_order": 3,
+            "name_en": "Shopping", "name_ko": "쇼핑",
+            "name_zh_cn": "购物", "name_zh_tw": "購物", "name_ja": "ショッピング",
+            "name_es": "Compras", "name_th": "ช้อปปิ้ง", "name_vi": "Mua sam", "name_fr": "Shopping",
+            "icon": "shopping", "display_order": 3,
         },
         {
-            "name_en": "Currency Exchange",
-            "name_ko": "환전",
-            "name_zh_cn": "货币兑换",
-            "name_zh_tw": "貨幣兌換",
-            "name_ja": "両替",
-            "name_es": "Cambio de Moneda",
-            "name_th": "แลกเงิน",
-            "name_vi": "Đổi tiền",
-            "name_fr": "Change de Devises",
-            "icon": "currency-exchange",
-            "display_order": 4,
+            "name_en": "Emergency", "name_ko": "긴급 상황",
+            "name_zh_cn": "紧急情况", "name_zh_tw": "緊急情況", "name_ja": "緊急",
+            "name_es": "Emergencia", "name_th": "ฉุกเฉิน", "name_vi": "Khan cap", "name_fr": "Urgence",
+            "icon": "emergency", "display_order": 4,
         },
         {
-            "name_en": "Telecom",
-            "name_ko": "통신",
-            "name_zh_cn": "通讯",
-            "name_zh_tw": "通訊",
-            "name_ja": "通信",
-            "name_es": "Telecomunicaciones",
-            "name_th": "โทรคมนาคม",
-            "name_vi": "Viễn thông",
-            "name_fr": "Télécommunications",
-            "icon": "wifi",
-            "display_order": 5,
+            "name_en": "Communication", "name_ko": "통신",
+            "name_zh_cn": "通信", "name_zh_tw": "通訊", "name_ja": "通信",
+            "name_es": "Comunicacion", "name_th": "การสื่อสาร", "name_vi": "Lien lac", "name_fr": "Communication",
+            "icon": "telecom", "display_order": 5,
         },
         {
-            "name_en": "Emergency",
-            "name_ko": "응급상황",
-            "name_zh_cn": "紧急情况",
-            "name_zh_tw": "緊急情況",
-            "name_ja": "緊急時",
-            "name_es": "Emergencia",
-            "name_th": "เหตุฉุกเฉิน",
-            "name_vi": "Khẩn cấp",
-            "name_fr": "Urgences",
-            "icon": "alert-circle",
-            "display_order": 6,
+            "name_en": "Money & Currency", "name_ko": "환전",
+            "name_zh_cn": "换钱", "name_zh_tw": "換錢", "name_ja": "両替",
+            "name_es": "Cambio", "name_th": "แลกเงิน", "name_vi": "Doi tien", "name_fr": "Change",
+            "icon": "currency", "display_order": 6,
         },
         {
-            "name_en": "Etiquette",
-            "name_ko": "예절",
-            "name_zh_cn": "礼仪",
-            "name_zh_tw": "禮儀",
-            "name_ja": "マナー",
-            "name_es": "Etiqueta",
-            "name_th": "มารยาท",
-            "name_vi": "Phép lịch sự",
-            "name_fr": "Étiquette",
-            "icon": "hand-shake",
-            "display_order": 7,
+            "name_en": "Culture & Etiquette", "name_ko": "문화 & 에티켓",
+            "name_zh_cn": "文化礼仪", "name_zh_tw": "文化禮儀", "name_ja": "文化とマナー",
+            "name_es": "Cultura", "name_th": "วัฒนธรรม", "name_vi": "Van hoa", "name_fr": "Culture",
+            "icon": "etiquette", "display_order": 7,
+        },
+        {
+            "name_en": "Weather & Clothing", "name_ko": "날씨 & 옷차림",
+            "name_zh_cn": "天气穿衣", "name_zh_tw": "天氣穿搭", "name_ja": "天気と服装",
+            "name_es": "Clima", "name_th": "สภาพอากาศ", "name_vi": "Thoi tiet", "name_fr": "Meteo",
+            "icon": "weather", "display_order": 8,
         },
     ]
 
@@ -584,88 +548,146 @@ async def seed_living_guide(session):
         session.add(LivingGuideCategory(id=cat_id, **cat_data, is_active=True))
     await session.flush()
 
-    # Sample articles for Transportation category
-    transport_cat_id = cat_ids[0]
-    sample_articles = [
-        LivingGuideArticle(
-            id=str(uuid.uuid4()),
-            category_id=transport_cat_id,
-            title_en="Getting a T-money Card",
-            title_ko="T-money 카드 구매하기",
-            title_zh_cn="购买T-money卡",
-            title_zh_tw="購買T-money卡",
-            title_ja="T-moneyカードの購入",
-            title_es="Obtener una tarjeta T-money",
-            title_th="การซื้อบัตร T-money",
-            title_vi="Mua thẻ T-money",
-            title_fr="Obtenir une carte T-money",
-            content_en="Buy a T-money card at any convenience store (CU, GS25, 7-Eleven) for 2,500 KRW. Recharge at subway stations or convenience stores. Works on buses, subways, and taxis across Korea.",
-            content_ko="편의점(CU, GS25, 세븐일레븐)에서 2,500원에 T-money 카드를 구매하세요. 지하철역이나 편의점에서 충전 가능합니다.",
-            display_order=1,
-            is_active=True,
-        ),
-        LivingGuideArticle(
-            id=str(uuid.uuid4()),
-            category_id=transport_cat_id,
-            title_en="Seoul Metro Guide",
-            title_ko="서울 지하철 가이드",
-            title_zh_cn="首尔地铁指南",
-            title_zh_tw="首爾地鐵指南",
-            title_ja="ソウル地下鉄ガイド",
-            title_es="Guía del Metro de Seúl",
-            title_th="คู่มือรถไฟใต้ดินโซล",
-            title_vi="Hướng dẫn Tàu điện ngầm Seoul",
-            title_fr="Guide du Métro de Séoul",
-            content_en="Seoul Metro runs from 5:30 AM to midnight. Use the 'Subway Korea' app for route planning. All stations have signs in English, Korean, Chinese, and Japanese.",
-            content_ko="서울 지하철은 오전 5:30부터 자정까지 운행합니다. 'Subway Korea' 앱으로 경로를 계획하세요.",
-            display_order=2,
-            is_active=True,
-        ),
-    ]
+    # Articles organized by category index
+    articles_by_cat = {
+        0: [  # Transportation
+            {
+                "title_en": "T-money Card",
+                "title_ko": "T-money 카드",
+                "title_ja": "T-moneyカード",
+                "title_zh_cn": "T-money卡",
+                "content_en": "T-money is a rechargeable smart card used for public transportation in Korea. You can buy one at any convenience store (CU, GS25, 7-Eleven) for 2,500 KRW. It works on subway, bus, and even some taxis. Recharge at convenience stores or subway station machines. Each ride saves you 100 KRW compared to cash payment. When transferring between bus and subway within 30 minutes, you get a free transfer discount.",
+                "content_ko": "T-money는 한국 대중교통에서 사용하는 충전식 스마트카드입니다. 편의점(CU, GS25, 세븐일레븐)에서 2,500원에 구입 가능합니다. 지하철, 버스, 일부 택시에서 사용 가능하며, 편의점이나 지하철역 기계에서 충전할 수 있습니다. 현금 대비 100원 할인되며, 30분 이내 버스-지하철 환승 시 무료 환승 할인을 받을 수 있습니다.",
+                "display_order": 1,
+            },
+            {
+                "title_en": "Seoul Subway Guide",
+                "title_ko": "서울 지하철 가이드",
+                "title_ja": "ソウル地下鉄ガイド",
+                "title_zh_cn": "首尔地铁指南",
+                "content_en": "Seoul's subway system has 23 lines covering the entire metropolitan area. Most signs and announcements are in Korean, English, Chinese, and Japanese. Operating hours are roughly 5:30 AM to midnight. Base fare is 1,250 KRW with T-money (1,350 KRW cash). Download the 'Subway Korea' app for route planning. Key lines: Line 2 (green circle) for Gangnam/Hongdae, Line 4 for Myeongdong, Airport Railroad (AREX) for Incheon Airport.",
+                "content_ko": "서울 지하철은 23개 노선으로 수도권 전역을 커버합니다. 대부분의 안내판과 안내방송은 한국어, 영어, 중국어, 일본어로 제공됩니다. 운행 시간은 대략 새벽 5:30부터 자정까지입니다. T-money 기본요금 1,250원 (현금 1,350원). 주요 노선: 2호선(강남/홍대), 4호선(명동), 공항철도(인천공항).",
+                "display_order": 2,
+            },
+            {
+                "title_en": "Taxi Tips for Foreigners",
+                "title_ko": "외국인을 위한 택시 팁",
+                "title_ja": "外国人のためのタクシーガイド",
+                "title_zh_cn": "外国人打车指南",
+                "content_en": "Korean taxis are safe and relatively affordable. Regular (orange/silver) base fare is 4,800 KRW. Use Kakao T app for easy booking - it shows the fare estimate and driver speaks through translation. International taxis (black) have English-speaking drivers but cost more. Tip: Screenshot your destination in Korean to show the driver. Late night surcharge (20%) applies from midnight to 4 AM.",
+                "content_ko": "한국 택시는 안전하고 비교적 저렴합니다. 일반택시(주황/은색) 기본요금은 4,800원입니다. 카카오 T 앱을 사용하면 편리하게 호출할 수 있으며, 예상 요금을 확인할 수 있습니다. 목적지를 한국어로 캡처하여 기사님께 보여주세요. 심야 할증(20%)은 자정~오전 4시에 적용됩니다.",
+                "display_order": 3,
+            },
+        ],
+        1: [  # Food & Dining
+            {
+                "title_en": "How to Order Food in Korea",
+                "title_ko": "한국에서 음식 주문하는 법",
+                "content_en": "Many Korean restaurants use kiosk ordering systems. Look for the machine near the entrance. Some have English options - press the flag icon. In traditional restaurants, press the call button on your table to call a server. Side dishes (banchan) are free and can be refilled. Water is usually self-serve from a water dispenser. Tipping is NOT customary in Korea.",
+                "content_ko": "많은 한국 식당은 무인 주문기(키오스크)를 사용합니다. 입구 근처의 기계를 찾으세요. 일부는 영어 옵션이 있으며, 국기 아이콘을 누르세요. 전통 식당에서는 테이블 위 호출 벨을 누르세요. 반찬은 무료이며 리필 가능합니다. 물은 보통 셀프서비스입니다. 한국에서는 팁 문화가 없습니다.",
+                "display_order": 1,
+            },
+            {
+                "title_en": "Korean Food Etiquette",
+                "title_ko": "한국 음식 에티켓",
+                "content_en": "Wait for the eldest person to start eating first. Use both hands when receiving or giving dishes. Don't stick chopsticks upright in rice (funeral ritual). Slurping noodles is acceptable. Sharing dishes is the norm - most Korean meals are communal. Drinking etiquette: turn away from elders when drinking alcohol, pour for others before yourself.",
+                "content_ko": "어른이 먼저 식사를 시작할 때까지 기다리세요. 음식을 주고받을 때는 양손을 사용하세요. 밥에 젓가락을 꽂지 마세요(장례식 풍습). 면을 소리 내며 먹는 것은 괜찮습니다. 한국 식사는 대부분 함께 나눠 먹습니다. 음주 예절: 어른 앞에서는 고개를 돌려 마시세요.",
+                "display_order": 2,
+            },
+            {
+                "title_en": "Allergy & Dietary Info",
+                "title_ko": "알레르기 & 식이 정보",
+                "content_en": "Korean cuisine uses many common allergens: sesame, soy, shellfish, wheat, and peanuts. Vegetarian/vegan options are limited in traditional restaurants but growing in Seoul. Useful phrases: '알레르기 있어요' (I have allergies), '고기 빼주세요' (No meat please), '채식주의자예요' (I'm vegetarian). Temple food restaurants are always vegetarian.",
+                "content_ko": "한국 음식에는 참깨, 간장, 조개류, 밀, 땅콩 등 알레르기 유발 식품이 많이 사용됩니다. 채식 옵션은 전통 식당에서는 제한적이지만 서울에서는 증가하고 있습니다. 사찰음식 식당은 항상 채식입니다.",
+                "display_order": 3,
+            },
+        ],
+        2: [  # Shopping
+            {
+                "title_en": "Tax Refund Guide",
+                "title_ko": "세금 환급 가이드",
+                "content_en": "Foreign tourists can get a VAT refund (10%) on purchases over 30,000 KRW at tax-free stores. Look for 'Tax Free' signs. Methods: 1) Immediate refund at checkout (show passport), 2) Refund at airport kiosks before departure. Keep receipts! Major refund operators: Global Tax Free, Korea Tax Refund. At Incheon Airport, use the automated kiosks near customs.",
+                "content_ko": "외국인 관광객은 면세점에서 30,000원 이상 구매 시 부가세(10%) 환급을 받을 수 있습니다. 'Tax Free' 표시를 찾으세요. 방법: 1) 계산 시 즉시 환급(여권 제시), 2) 출국 전 공항 키오스크에서 환급. 영수증을 보관하세요!",
+                "display_order": 1,
+            },
+            {
+                "title_en": "Popular Shopping Areas",
+                "title_ko": "인기 쇼핑 지역",
+                "content_en": "Myeongdong: K-beauty cosmetics, fashion. Gangnam/Apgujeong: Luxury brands, trendy boutiques. Hongdae: Indie fashion, vintage shops. Dongdaemun: Wholesale fashion market (open late night). Insadong: Traditional crafts, souvenirs. Itaewon: International brands, custom tailoring. COEX Mall: Underground shopping mall with aquarium. Goto Mall (Gangnam): 620+ fashion shops underground.",
+                "content_ko": "명동: K-뷰티 화장품, 패션. 강남/압구정: 명품, 트렌디 부티크. 홍대: 인디 패션, 빈티지. 동대문: 도매 패션(심야 운영). 인사동: 전통 공예품. 이태원: 해외 브랜드. 코엑스몰: 지하 쇼핑몰. 고투몰(강남): 620개+ 패션 매장.",
+                "display_order": 2,
+            },
+        ],
+        3: [  # Emergency
+            {
+                "title_en": "Emergency Numbers",
+                "title_ko": "긴급 전화번호",
+                "content_en": "Police: 112 (English available)\nFire/Ambulance: 119\nTourist Helpline: 1330 (24/7, multilingual)\nMedical Emergency for Foreigners: +82-2-790-7561\nEmbassy assistance: Contact your embassy\n\nThe 1330 Korea Travel Hotline is incredibly useful - they provide translation, tourist info, and emergency assistance in English, Chinese, Japanese, and more. Available 24 hours.",
+                "content_ko": "경찰: 112\n소방/구급: 119\n관광 안내: 1330 (24시간, 다국어)\n외국인 의료 긴급: +82-2-790-7561\n대사관: 해당 대사관 연락\n\n1330 관광안내전화는 번역, 관광 정보, 긴급 지원을 영어, 중국어, 일본어 등으로 24시간 제공합니다.",
+                "display_order": 1,
+            },
+            {
+                "title_en": "Medical Care",
+                "title_ko": "의료 서비스",
+                "content_en": "International clinics in Seoul: Severance Hospital International Health Care Center, Samsung Medical Center International Clinic, Seoul National University Hospital. Most major hospitals have international patient services with interpreters. Pharmacies are everywhere - pharmacists can recommend medicine for common ailments. Over-the-counter medicine like Tylenol is available without prescription.",
+                "content_ko": "서울의 국제 클리닉: 세브란스 국제진료센터, 삼성서울병원 국제진료센터, 서울대학교병원. 대부분의 대형 병원에 통역 서비스가 있습니다. 약국은 어디에나 있으며, 약사가 일반 질환에 대한 약을 추천해줄 수 있습니다.",
+                "display_order": 2,
+            },
+        ],
+        4: [  # Communication
+            {
+                "title_en": "SIM Cards & WiFi",
+                "title_ko": "SIM 카드 & WiFi",
+                "content_en": "Options: 1) Tourist SIM cards at Incheon Airport (KT, SKT, LG U+) - data only from 20,000 KRW/5 days. 2) Portable WiFi router rental at airport - 5,000-8,000 KRW/day, unlimited data, connect 5+ devices. 3) Free WiFi is widely available in subway stations, cafes, and convenience stores. Network name: 'KT_Free_WiFi' or 'Public WiFi Free'. 4) eSIM options via Airalo or Klook - activate before arrival.",
+                "content_ko": "옵션: 1) 인천공항에서 관광 SIM 카드 (KT, SKT, LG U+) - 데이터 전용 20,000원/5일. 2) 공항에서 포터블 WiFi 라우터 대여 - 5,000~8,000원/일, 무제한 데이터. 3) 지하철역, 카페, 편의점에서 무료 WiFi 이용 가능. 4) Airalo, Klook 등 eSIM 옵션 - 도착 전 활성화.",
+                "display_order": 1,
+            },
+        ],
+        5: [  # Money & Currency
+            {
+                "title_en": "Currency Exchange Tips",
+                "title_ko": "환전 팁",
+                "content_en": "Korean Won (KRW) comes in notes: 1,000, 5,000, 10,000, 50,000. Best exchange rates: Myeongdong money changers, Itaewon, or banks. Avoid airport exchange (worst rates). Most places accept credit cards (Visa/Mastercard widely accepted). Mobile payment: Many shops accept Samsung Pay and Apple Pay. Cash needed: Traditional markets, small street food vendors. ATMs: Look for 'Global ATM' signs at convenience stores (7-Eleven, CU).",
+                "content_ko": "한국 원(KRW) 지폐: 1,000, 5,000, 10,000, 50,000원. 최적 환율: 명동 환전소, 이태원, 은행. 공항 환전은 피하세요. 대부분 신용카드(비자/마스터카드) 사용 가능. 삼성페이, 애플페이도 많은 매장에서 사용됩니다. 현금 필요: 전통시장, 소규모 노점.",
+                "display_order": 1,
+            },
+        ],
+        6: [  # Culture & Etiquette
+            {
+                "title_en": "Korean Etiquette Basics",
+                "title_ko": "한국 에티켓 기본",
+                "content_en": "Bowing: A slight bow (15 degrees) is a common greeting. Deeper bows show more respect. Shoes: Remove shoes when entering homes, some restaurants (look for raised floors), and temples. Age & Hierarchy: Korea is hierarchical - use both hands when giving/receiving items from elders. Quiet zones: Keep phones silent on public transport. Priority seats on subway are for elderly/disabled/pregnant. Trash: Separate recycling (general/plastic/paper/food waste). Smoking: Only in designated areas.",
+                "content_ko": "인사: 약간의 고개 숙임(15도)이 일반적인 인사입니다. 신발: 가정, 일부 식당(마루가 높은 곳), 사찰에 들어갈 때 신발을 벗으세요. 나이 & 위계: 어른에게 물건을 줄 때 양손을 사용하세요. 대중교통에서 휴대폰은 진동 모드로. 노약자석은 반드시 양보. 분리수거(일반/플라스틱/종이/음식물). 흡연은 지정 구역에서만.",
+                "display_order": 1,
+            },
+        ],
+        7: [  # Weather & Clothing
+            {
+                "title_en": "Seasonal Guide",
+                "title_ko": "계절별 가이드",
+                "content_en": "Spring (Mar-May): 5-20 C, cherry blossoms in April. Light layers, jacket needed.\nSummer (Jun-Aug): 25-35 C, humid with monsoon rain (July). Light clothes, umbrella essential, sunscreen.\nAutumn (Sep-Nov): 10-25 C, stunning foliage in October-November. Perfect weather, light to medium layers.\nWinter (Dec-Feb): -10 to 5 C, cold and dry. Heavy coat, thermal wear, gloves essential. Indoor heating is strong.\n\nTip: Korean buildings are well-heated in winter and air-conditioned in summer, so layering is key!",
+                "content_ko": "봄 (3-5월): 5-20 C, 4월 벚꽃. 가벼운 겹옷, 재킷 필요.\n여름 (6-8월): 25-35 C, 습하고 7월 장마. 가벼운 옷, 우산 필수, 자외선차단제.\n가을 (9-11월): 10-25 C, 10-11월 단풍. 가벼운~중간 겹옷.\n겨울 (12-2월): -10~5 C, 춥고 건조. 두꺼운 코트, 발열내의, 장갑 필수.\n\n팁: 한국 건물은 겨울에 난방이, 여름에 에어컨이 잘 되어 있으니 레이어링이 핵심!",
+                "display_order": 1,
+            },
+        ],
+    }
 
-    # Sample articles for Food Culture category
-    food_cat_id = cat_ids[1]
-    sample_articles.extend([
-        LivingGuideArticle(
-            id=str(uuid.uuid4()),
-            category_id=food_cat_id,
-            title_en="Korean Dining Etiquette",
-            title_ko="한국 식사 예절",
-            title_zh_cn="韩国用餐礼仪",
-            title_zh_tw="韓國用餐禮儀",
-            title_ja="韓国の食事マナー",
-            title_es="Etiqueta en la Mesa Coreana",
-            title_th="มารยาทการรับประทานอาหารเกาหลี",
-            title_vi="Nghi thức dùng bữa Hàn Quốc",
-            title_fr="Étiquette de table coréenne",
-            content_en="Wait for the eldest to start eating. Use metal chopsticks and spoons. Do not stick chopsticks upright in rice. Side dishes (banchan) are free refills!",
-            content_ko="연장자가 식사를 시작할 때까지 기다리세요. 젓가락을 밥에 꽂지 마세요. 반찬은 무료 리필입니다!",
-            display_order=1,
-            is_active=True,
-        ),
-    ])
-
-    # Sample articles for Emergency category
-    emergency_cat_id = cat_ids[5]
-    sample_articles.extend([
-        LivingGuideArticle(
-            id=str(uuid.uuid4()),
-            category_id=emergency_cat_id,
-            title_en="Emergency Numbers in Korea",
-            title_ko="한국 긴급 전화번호",
-            title_zh_cn="韩国紧急电话号码",
-            title_zh_tw="韓國緊急電話號碼",
-            title_ja="韓国の緊急電話番号",
-            title_es="Números de Emergencia en Corea",
-            title_th="หมายเลขฉุกเฉินในเกาหลี",
-            title_vi="Số điện thoại khẩn cấp tại Hàn Quốc",
-            title_fr="Numéros d'urgence en Corée",
-            content_en="Police: 112 | Fire/Ambulance: 119 | Tourist Helpline: 1330 (multilingual). 1330 is available 24/7 in English, Chinese, Japanese, and more.",
-            content_ko="경찰: 112 | 소방/구급: 119 | 관광 안내: 1330 (다국어). 1330은 영어, 중국어, 일본어 등 24시간 이용 가능합니다.",
-            display_order=1,
-            is_active=True,
-        ),
-    ])
+    sample_articles = []
+    for cat_idx, arts in articles_by_cat.items():
+        cat_id = cat_ids[cat_idx]
+        for art_data in arts:
+            sample_articles.append(LivingGuideArticle(
+                id=str(uuid.uuid4()),
+                category_id=cat_id,
+                title_en=art_data.get("title_en", ""),
+                title_ko=art_data.get("title_ko", ""),
+                title_ja=art_data.get("title_ja", ""),
+                title_zh_cn=art_data.get("title_zh_cn", ""),
+                content_en=art_data.get("content_en", ""),
+                content_ko=art_data.get("content_ko", ""),
+                display_order=art_data.get("display_order", 1),
+                is_active=True,
+            ))
 
     for article in sample_articles:
         session.add(article)
@@ -1783,18 +1805,42 @@ async def public_map_settings():
 
     if not setting:
         return {
+            "map_engine": "mapbox",
             "mapbox_api_key": "",
+            "google_maps_api_key": "",
             "default_center_lat": 37.5665,
             "default_center_lng": 126.978,
             "default_zoom": 12,
         }
 
     return {
+        "map_engine": setting.map_engine or "mapbox",
         "mapbox_api_key": setting.mapbox_api_key or "",
+        "google_maps_api_key": setting.google_maps_api_key or "",
         "default_center_lat": setting.default_latitude or 37.5665,
         "default_center_lng": setting.default_longitude or 126.978,
         "default_zoom": setting.default_zoom or 12,
     }
+
+
+@app.get("/api/settings/google-login-enabled")
+async def google_login_enabled():
+    """Public endpoint to check if Google login is configured."""
+    from models.map_setting import MapSetting
+
+    async with async_session() as session:
+        result = await session.execute(select(MapSetting).limit(1))
+        setting = result.scalar_one_or_none()
+
+    enabled = False
+    client_id = ""
+    if setting and setting.google_oauth_client_id:
+        enabled = True
+        client_id = setting.google_oauth_client_id
+    elif settings.GOOGLE_CLIENT_ID:
+        enabled = True
+        client_id = settings.GOOGLE_CLIENT_ID
+    return {"enabled": enabled, "client_id": client_id}
 
 
 @app.post("/api/seed")

@@ -358,12 +358,30 @@ def get_transport_routes():
 # ═══════════════════════════════════════════════
 def get_transport_tips():
     tips = [
-        ("How to Use T-money Card", "T-money 카드 사용법", "<p>T-money is a rechargeable transit card...</p>", "<p>T-money는 충전식 교통카드입니다...</p>", "tmoney", "CreditCard"),
-        ("Taxi Tips for Foreigners", "외국인을 위한 택시 팁", "<p>Korean taxis are safe and metered...</p>", "<p>한국 택시는 안전하고 미터제입니다...</p>", "taxi", "Car"),
-        ("Essential Transportation Apps", "필수 교통 앱", "<p>Download KakaoMap and Naver Map...</p>", "<p>카카오맵과 네이버지도를 설치하세요...</p>", "app", "Smartphone"),
-        ("Tourist Transit Passes", "외국인 교통 패스", "<p>Korea has several tourist transit passes...</p>", "<p>한국에는 다양한 외국인 교통 패스가 있습니다...</p>", "pass", "Ticket"),
-        ("Seoul Subway Guide", "서울 지하철 가이드", "<p>Seoul's subway system is extensive...</p>", "<p>서울 지하철은 방대한 네트워크입니다...</p>", "subway", "Train"),
-        ("Bus System Guide", "버스 시스템 가이드", "<p>Seoul buses are color-coded...</p>", "<p>서울 버스는 색상별로 구분됩니다...</p>", "bus", "Bus"),
+        ("How to Use T-money Card", "T-money 카드 사용법",
+         "<p>T-money is a rechargeable transit card available at all convenience stores for 2,500 KRW. Tap on when boarding and tap off when exiting. Works on subway, bus, and some taxis. Recharge at convenience stores or subway machines. Saves 100 KRW per ride vs cash. Free transfers between bus and subway within 30 minutes.</p>",
+         "<p>T-money는 편의점에서 2,500원에 구매 가능한 충전식 교통카드입니다. 승차 시 태그하고 하차 시 다시 태그하세요. 지하철, 버스, 일부 택시에서 사용 가능합니다. 편의점이나 지하철역 기계에서 충전하세요. 현금 대비 100원 절약. 30분 이내 버스-지하철 무료 환승.</p>",
+         "tmoney", "CreditCard"),
+        ("Taxi Tips for Foreigners", "외국인을 위한 택시 팁",
+         "<p>Korean taxis are safe, metered, and affordable. Regular taxis (orange/silver) start at 4,800 KRW. Use KakaoT app for booking - shows fare estimates and provides translation. Screenshot your destination in Korean. Late night surcharge (20%) from midnight to 4 AM. International taxis at airports have English-speaking drivers.</p>",
+         "<p>한국 택시는 안전하고 미터제이며 저렴합니다. 일반택시(주황/은색) 기본요금 4,800원. 카카오T 앱으로 호출하면 예상 요금 확인과 번역 기능을 이용할 수 있습니다. 목적지를 한국어로 캡처해 보여주세요. 심야 할증(20%) 자정~오전 4시.</p>",
+         "taxi", "Car"),
+        ("Essential Transportation Apps", "필수 교통 앱",
+         "<p>Must-have apps: KakaoMap (best for bus/subway routes), Naver Map (detailed walking directions), KakaoT (taxi booking), Subway Korea (offline subway map). All are available in English. Google Maps works but is less accurate for public transit in Korea. Papago is great for translation when communicating with drivers.</p>",
+         "<p>필수 앱: 카카오맵 (버스/지하철 최적), 네이버지도 (상세 도보 안내), 카카오T (택시 호출), Subway Korea (오프라인 지하철). 모두 영어 지원. 구글맵은 한국 대중교통에서는 덜 정확합니다. 파파고는 기사님과 소통할 때 유용합니다.</p>",
+         "app", "Smartphone"),
+        ("Tourist Transit Passes", "외국인 교통 패스",
+         "<p>Korea Tour Card: Combines T-money + tourist discounts. KORAIL Pass: Unlimited KTX rides (foreigners only) - 1-day 67,600 KRW, 3-day 106,900 KRW. Discover Seoul Pass: 24/48/72h pass for attractions + transit. M-Pass: 1-20 day transit pass with 20 rides per day. Buy at airports, major subway stations, or online.</p>",
+         "<p>코리아투어카드: T-money + 관광 할인 결합. 코레일패스: KTX 무제한 탑승(외국인 전용) - 1일 67,600원, 3일 106,900원. 디스커버서울패스: 24/48/72시간 관광지+교통 패스. M-Pass: 1-20일 교통패스, 하루 20회. 공항, 주요 지하철역, 온라인 구매.</p>",
+         "pass", "Ticket"),
+        ("Seoul Subway Guide", "서울 지하철 가이드",
+         "<p>Seoul Metro has 23 lines running 5:30 AM to midnight. Signs in Korean, English, Chinese, Japanese. Key lines: Line 2 (Gangnam, Hongdae circle route), Line 4 (Myeongdong), Line 9 (Gimpo Airport), AREX (Incheon Airport). Base fare 1,250 KRW (T-money). Avoid rush hour 8-9 AM and 6-7 PM. Priority seats are strictly for elderly/disabled/pregnant.</p>",
+         "<p>서울 지하철은 23개 노선, 오전 5:30~자정 운행. 한/영/중/일 안내. 주요 노선: 2호선(강남/홍대 순환), 4호선(명동), 9호선(김포공항), 공항철도(인천공항). 기본요금 1,250원(T-money). 출퇴근 시간(8-9시, 18-19시) 피하세요. 노약자석은 반드시 양보.</p>",
+         "subway", "Train"),
+        ("Bus System Guide", "버스 시스템 가이드",
+         "<p>Seoul buses are color-coded: Blue (trunk routes across city), Green (neighborhood feeders), Red (express to suburbs), Yellow (downtown circular). Board at front, exit at rear. Tap T-money both times. Base fare 1,200 KRW. Night buses (N-prefix) run midnight to 5 AM. Real-time arrival info at bus stops. USB charging available on many buses.</p>",
+         "<p>서울 버스 색상 구분: 파란색(간선), 초록색(지선), 빨간색(광역 급행), 노란색(도심 순환). 앞문 승차, 뒷문 하차. T-money 두 번 태그. 기본요금 1,200원. 심야버스(N 접두사) 자정~오전 5시. 정류장에서 실시간 도착 정보 확인. 많은 버스에 USB 충전 가능.</p>",
+         "bus", "Bus"),
     ]
     result = []
     for title_en, title_ko, content_en, content_ko, cat, icon in tips:
@@ -390,14 +408,14 @@ _cat_ids = {}
 
 def get_living_guide_categories():
     cats = [
-        ("Transportation", "교통", "🚗"),
-        ("Food Culture", "음식 문화", "🍽"),
-        ("Shopping", "쇼핑", "🛍"),
-        ("Emergency", "긴급 상황", "🏥"),
-        ("Communication", "통신", "📱"),
-        ("Currency Exchange", "환전", "💱"),
-        ("Culture & Etiquette", "문화·에티켓", "🎌"),
-        ("Weather & Clothing", "날씨·옷차림", "☀️"),
+        ("Transportation", "교통", "transportation"),
+        ("Food & Dining", "음식 문화", "food_culture"),
+        ("Shopping", "쇼핑", "shopping"),
+        ("Emergency", "긴급 상황", "emergency"),
+        ("Communication", "통신", "telecom"),
+        ("Money & Currency", "환전", "currency"),
+        ("Culture & Etiquette", "문화·에티켓", "etiquette"),
+        ("Weather & Clothing", "날씨·옷차림", "weather"),
     ]
     result = []
     for name_en, name_ko, icon in cats:
@@ -424,7 +442,7 @@ def get_living_guide_articles():
             ("Taxi Guide for Visitors", "방문객을 위한 택시 가이드", "<p>Korean taxis are safe, clean, and metered. Regular taxis (silver/white) start at 4,800 KRW. International taxis are available at airports with English-speaking drivers. Use KakaoT app to call a taxi easily.</p>", "<p>한국 택시는 안전하고 깨끗하며 미터제입니다. 일반택시(은색/흰색) 기본요금은 4,800원입니다. 공항에서는 영어 가능한 국제택시를 이용할 수 있습니다. 카카오T 앱으로 쉽게 호출하세요.</p>"),
             ("Airport to Gangnam Transportation", "공항에서 강남까지 교통", "<p>From Incheon Airport: Airport Limousine Bus 6006 (70 min, 16,000 KRW) or Airport Railroad + Subway (90 min, 4,750 KRW). From Gimpo Airport: Subway Line 9 Express (55 min, 1,550 KRW).</p>", "<p>인천공항에서: 공항리무진 6006번 (70분, 16,000원) 또는 공항철도+지하철 (90분, 4,750원). 김포공항에서: 9호선 급행 (55분, 1,550원).</p>"),
         ],
-        "Food Culture": [
+        "Food & Dining": [
             ("Korean Dining Etiquette", "한국 식사 예절", "<p>In Korea, the eldest person starts eating first. Use both hands when receiving items. Don't blow your nose at the table. Tipping is not customary. Many restaurants provide free side dishes (banchan).</p>", "<p>한국에서는 어른이 먼저 수저를 드셔야 합니다. 물건을 받을 때 두 손을 사용하세요. 식탁에서 코를 풀지 마세요. 팁 문화가 없습니다. 많은 식당에서 무료 반찬을 제공합니다.</p>"),
             ("Popular Korean Foods to Try", "꼭 먹어봐야 할 한국 음식", "<p>Must-try Korean dishes: Bibimbap (mixed rice), Korean BBQ (Galbi, Samgyeopsal), Kimchi Jjigae (kimchi stew), Tteokbokki (spicy rice cakes), Japchae (glass noodles), and Hotteok (sweet pancake).</p>", "<p>꼭 먹어봐야 할 한국 음식: 비빔밥, 한국 BBQ (갈비, 삼겹살), 김치찌개, 떡볶이, 잡채, 호떡.</p>"),
             ("How to Order Food in Korea", "한국에서 음식 주문하는 법", "<p>Many restaurants have picture menus or kiosks with English. Use KakaoMap to find restaurants and see menus. At BBQ restaurants, staff will help you grill. Water and banchan are typically free and self-service.</p>", "<p>많은 식당에 사진 메뉴판이나 영어 키오스크가 있습니다. 카카오맵으로 식당을 찾고 메뉴를 확인하세요. BBQ 식당에서는 직원이 고기 굽는 것을 도와줍니다. 물과 반찬은 보통 무료 셀프서비스입니다.</p>"),
@@ -444,7 +462,7 @@ def get_living_guide_articles():
             ("Free Wi-Fi in Seoul", "서울 무료 와이파이", "<p>Seoul offers free public Wi-Fi ('Seoul WiFi' or 'Korea Free WiFi') at subway stations, tourist spots, and public areas. Most cafes and restaurants also offer free Wi-Fi. Speed is generally very fast.</p>", "<p>서울에는 지하철역, 관광지, 공공장소에서 무료 공공 와이파이('서울 와이파이' 또는 'Korea Free WiFi')를 제공합니다. 대부분의 카페와 식당에서도 무료 와이파이를 제공합니다.</p>"),
             ("Essential Korean Apps", "필수 한국 앱", "<p>Must-have apps: KakaoMap (navigation), KakaoT (taxi), Naver Map, Papago (translation), T-money (transit), Coupang (delivery). Most are available in English.</p>", "<p>필수 앱: 카카오맵 (길찾기), 카카오T (택시), 네이버지도, 파파고 (번역), T-money (교통), 쿠팡 (배달). 대부분 영어를 지원합니다.</p>"),
         ],
-        "Currency Exchange": [
+        "Money & Currency": [
             ("Best Places to Exchange Money", "최적의 환전 장소", "<p>Best rates at licensed money changers in Myeongdong and Itaewon. Avoid airport exchanges (worst rates). Banks offer decent rates but charge fees. ATMs at convenience stores accept international cards.</p>", "<p>명동과 이태원의 공인 환전소에서 가장 좋은 환율을 받을 수 있습니다. 공항 환전은 피하세요 (가장 나쁜 환율). 은행은 적당한 환율이지만 수수료가 있습니다. 편의점 ATM에서 해외 카드를 사용할 수 있습니다.</p>"),
             ("Credit Cards & Mobile Payment", "신용카드·모바일 결제", "<p>Credit cards (Visa, Mastercard) are accepted almost everywhere in Seoul. Samsung Pay and Apple Pay work in many stores. Cash is still useful for small street vendors and traditional markets.</p>", "<p>신용카드(비자, 마스터카드)는 서울 거의 모든 곳에서 사용 가능합니다. 삼성페이, 애플페이도 많은 매장에서 사용됩니다. 노점이나 전통시장에서는 현금이 유용합니다.</p>"),
             ("Understanding Korean Won", "한국 원화 이해하기", "<p>Korean Won (KRW): Coins (10, 50, 100, 500 won), Bills (1,000, 5,000, 10,000, 50,000 won). Roughly: 1 USD ≈ 1,300 KRW. Most prices include tax. Tipping is not expected.</p>", "<p>한국 원(KRW): 동전(10, 50, 100, 500원), 지폐(1,000, 5,000, 10,000, 50,000원). 대략 1달러 ≈ 1,300원. 대부분 가격에 세금이 포함되어 있습니다. 팁은 불필요합니다.</p>"),

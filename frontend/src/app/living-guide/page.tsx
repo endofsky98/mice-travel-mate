@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { BookOpen, Bus, Utensils, ShoppingBag, CreditCard, Phone, AlertTriangle, Heart } from 'lucide-react';
+import { BookOpen, Bus, Utensils, ShoppingBag, CreditCard, Phone, AlertTriangle, Heart, CloudSun } from 'lucide-react';
 import { useLanguage } from '@/hooks/useLanguage';
 import api from '@/lib/api';
 import Card from '@/components/ui/Card';
@@ -17,6 +17,15 @@ const CATEGORY_ICONS: Record<string, any> = {
   telecom: Phone,
   emergency: AlertTriangle,
   etiquette: Heart,
+  weather: CloudSun,
+  // Fallbacks for alternative icon names from seed data
+  bus: Bus,
+  utensils: Utensils,
+  'shopping-bag': ShoppingBag,
+  'currency-exchange': CreditCard,
+  wifi: Phone,
+  'alert-circle': AlertTriangle,
+  'hand-shake': Heart,
 };
 
 export default function LivingGuidePage() {
@@ -66,7 +75,7 @@ export default function LivingGuidePage() {
       </h1>
 
       {/* Categories */}
-      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 gap-3 mb-8">
+      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-8 gap-3 mb-8">
         {categories.map((cat) => {
           const Icon = CATEGORY_ICONS[cat.icon || ''] || BookOpen;
           const isSelected = selectedCat === cat.id;

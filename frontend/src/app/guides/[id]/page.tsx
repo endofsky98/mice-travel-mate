@@ -14,6 +14,7 @@ import Card from '@/components/ui/Card';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import StarRating from '@/components/ui/StarRating';
 import ReviewSection from '@/components/ui/ReviewSection';
+import MapView from '@/components/map/MapView';
 import { Guide } from '@/types';
 import { cn, generatePlaceholderGradient, formatCurrency, getInitials } from '@/lib/utils';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, isToday } from 'date-fns';
@@ -90,6 +91,35 @@ export default function GuideDetailPage() {
   const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
   const startDay = getDay(monthStart);
   const availableDates = new Set(guide.availability || []);
+
+  // Approximate coordinates for common Korean regions
+  const regionCoords: Record<string, { lat: number; lng: number }> = {
+    seoul: { lat: 37.5665, lng: 126.978 },
+    busan: { lat: 35.1796, lng: 129.0756 },
+    incheon: { lat: 37.4563, lng: 126.7052 },
+    daegu: { lat: 35.8714, lng: 128.6014 },
+    daejeon: { lat: 36.3504, lng: 127.3845 },
+    gwangju: { lat: 35.1595, lng: 126.8526 },
+    ulsan: { lat: 35.5384, lng: 129.3114 },
+    sejong: { lat: 36.48, lng: 127.0 },
+    gyeonggi: { lat: 37.4138, lng: 127.5183 },
+    gangwon: { lat: 37.8228, lng: 128.1555 },
+    chungbuk: { lat: 36.6358, lng: 127.4913 },
+    chungnam: { lat: 36.5184, lng: 126.8 },
+    jeonbuk: { lat: 35.8203, lng: 127.1089 },
+    jeonnam: { lat: 34.8161, lng: 126.4629 },
+    gyeongbuk: { lat: 36.4919, lng: 128.8889 },
+    gyeongnam: { lat: 35.4606, lng: 128.2132 },
+    jeju: { lat: 33.4996, lng: 126.5312 },
+  };
+
+  const regionMarkers = (guide.regions || [])
+    .map((region) => {
+      const key = region.toLowerCase().replace(/[\s-]/g, '');
+      const coords = regionCoords[key];
+      return coords ? { id: region, lat: coords.lat, lng: coords.lng, title: region } : null;
+    })
+    .filter((m): m is { id: string; lat: number; lng: number; title: string } => m !== null);
 
   const proficiencyColors: Record<string, string> = {
     native: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
@@ -252,6 +282,14 @@ export default function GuideDetailPage() {
           </div>
         </Card>
       </div>
+
+      {/* Activity Regions Map */}
+      {regionMarkers.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">{t('guide.activity_regions') || 'Activity Regions'}</h2>
+          <MapView markers={regionMarkers} t={t} className="h-64" />
+        </div>
+      )}
 
       {/* Reviews */}
       <ReviewSection targetType="guide" targetId={String(id)} t={t} isLoggedIn={isLoggedIn} />

@@ -79,6 +79,11 @@ export default function CourseDetailPage() {
     .filter((s) => s.lat && s.lng)
     .map((s) => ({ id: s.id, lat: s.lat!, lng: s.lng!, title: lt(s.name) }));
 
+  // Build polyline from spot coordinates in order
+  const polyline = spots
+    .filter((s) => s.lat && s.lng)
+    .map((s) => ({ lat: s.lat!, lng: s.lng! }));
+
   return (
     <div className="page-container max-w-4xl pb-20 md:pb-8">
       <button
@@ -145,6 +150,12 @@ export default function CourseDetailPage() {
           <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">{t('course.difficulty')}</p>
           <p className="font-semibold text-gray-900 dark:text-gray-100">{course.difficulty}</p>
         </div>
+        {course.total_distance_km && (
+          <div className="p-3 rounded-xl bg-gray-50 dark:bg-dark-card text-center">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">{t('course.total_distance') || 'Total Distance'}</p>
+            <p className="font-semibold text-gray-900 dark:text-gray-100">{course.total_distance_km.toFixed(1)} km</p>
+          </div>
+        )}
         {course.transport_cost && (
           <div className="p-3 rounded-xl bg-gray-50 dark:bg-dark-card text-center">
             <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">{t('course.transport_cost')}</p>
@@ -225,7 +236,7 @@ export default function CourseDetailPage() {
       {markers.length > 0 && (
         <div className="mb-8">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">{t('common.view_on_map')}</h2>
-          <MapView markers={markers} t={t} className="h-64" />
+          <MapView markers={markers} polyline={polyline} t={t} className="h-64" />
         </div>
       )}
 

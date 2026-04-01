@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { User } from '@/types';
-import { isAuthenticated, getCurrentUser, logout as authLogout, login as authLogin, register as authRegister } from '@/lib/auth';
+import { isAuthenticated, getCurrentUser, logout as authLogout, login as authLogin, register as authRegister, socialLogin as authSocialLogin } from '@/lib/auth';
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
@@ -37,6 +37,13 @@ export function useAuth() {
     setIsLoggedIn(true);
   }, []);
 
+  const socialLogin = useCallback(async (provider: string, idToken: string, name?: string) => {
+    await authSocialLogin(provider, idToken, name);
+    const currentUser = await getCurrentUser();
+    setUser(currentUser);
+    setIsLoggedIn(true);
+  }, []);
+
   const logout = useCallback(async () => {
     await authLogout();
     setUser(null);
@@ -49,5 +56,5 @@ export function useAuth() {
     setIsLoggedIn(!!currentUser);
   }, []);
 
-  return { user, isLoggedIn, isLoading, login, register, logout, refreshUser };
+  return { user, isLoggedIn, isLoading, login, register, socialLogin, logout, refreshUser };
 }
