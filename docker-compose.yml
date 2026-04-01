@@ -43,6 +43,7 @@ services:
     environment:
       - PORT=3008
       - HOSTNAME=0.0.0.0
+      - INTERNAL_API_URL=http://backend:8007
     expose:
       - "3008"
     depends_on:
